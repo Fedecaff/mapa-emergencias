@@ -204,15 +204,7 @@ body {
     border-color: var(--secondary-color);
 }
 
-#radiusSlider {
-    width: 100%;
-    margin: 0.5rem 0;
-}
 
-#radiusValue {
-    font-weight: 500;
-    color: var(--secondary-color);
-}
 
 /* Panel de ubicación */
 .location-panel {

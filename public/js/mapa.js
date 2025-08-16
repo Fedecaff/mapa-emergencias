@@ -99,15 +99,7 @@ class MapManager {
         // Filtros de categorías
         this.bindCategoryFilters();
         
-        // Slider de radio
-        const radiusSlider = document.getElementById('radiusSlider');
-        const radiusValue = document.getElementById('radiusValue');
-        
-        if (radiusSlider && radiusValue) {
-            radiusSlider.addEventListener('input', (e) => {
-                radiusValue.textContent = `${e.target.value} km`;
-            });
-        }
+
         
         // Eventos de autenticación
         window.addEventListener('userLogin', () => {
@@ -489,11 +481,10 @@ class MapManager {
             }
             
             // Cargar puntos cercanos (sin limpiar marcadores de búsqueda)
-            const radius = document.getElementById('radiusSlider').value;
             this.loadPoints({
                 latitud: position.lat,
                 longitud: position.lng,
-                radio: radius
+                radio: 5 // Radio fijo de 5km
             });
             
             Notifications.success(`Ubicación centrada (precisión: ±${Math.round(position.accuracy)}m)`);
