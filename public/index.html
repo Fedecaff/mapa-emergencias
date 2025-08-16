@@ -272,10 +272,33 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-history"></i> Historial de Cambios</h2>
-                <span class="close" id="closeHistoryModal">&times;</span>
+                <button class="close-btn" id="closeHistoryModal">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="historyContent">
+                <!-- Filtros -->
+                <div class="history-filters">
+                    <div class="form-group">
+                        <label for="historyTableFilter">Filtrar por tabla:</label>
+                        <select id="historyTableFilter">
+                            <option value="">Todas las tablas</option>
+                            <option value="puntos">Puntos</option>
+                            <option value="categorias">Categorías</option>
+                            <option value="usuarios">Usuarios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="historyActionFilter">Filtrar por acción:</label>
+                        <select id="historyActionFilter">
+                            <option value="">Todas las acciones</option>
+                            <option value="crear">Creación</option>
+                            <option value="actualizar">Actualización</option>
+                            <option value="eliminar">Eliminación</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Lista del historial -->
+                <div id="historyList" class="history-list">
                     <p>Cargando historial...</p>
                 </div>
             </div>

@@ -162,9 +162,9 @@ class BaseDeDatos {
                 icono: 'fa-tint',
                 color: '#007bff',
                 campos_personalizados: JSON.stringify({
-                    'tipo_conexion': 'select',
+                    'tipo_conexion': 'text',
                     'caudal': 'text',
-                    'estado': 'select',
+                    'estado': 'text',
                     'presion': 'text'
                 })
             },
@@ -185,7 +185,7 @@ class BaseDeDatos {
                 icono: 'fa-graduation-cap',
                 color: '#28a745',
                 campos_personalizados: JSON.stringify({
-                    'nivel_educativo': 'select',
+                    'nivel_educativo': 'text',
                     'turnos': 'text',
                     'capacidad': 'text'
                 })
@@ -197,7 +197,7 @@ class BaseDeDatos {
                 color: '#ffc107',
                 campos_personalizados: JSON.stringify({
                     'especialidades': 'text',
-                    'emergencias': 'select',
+                    'emergencias': 'text',
                     'horarios': 'text'
                 })
             }
