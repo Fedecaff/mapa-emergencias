@@ -24,3 +24,5 @@ router.put('/:id', usuariosController.actualizar);
 router.delete('/:id', usuariosController.eliminar);
 
 export default router;
+
+

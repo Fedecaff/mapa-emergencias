@@ -116,3 +116,5 @@ Si tienes problemas, revisa:
 2. Los logs del backend
 3. La consola del navegador
 4. La pestaña Network en las herramientas de desarrollador
+
+

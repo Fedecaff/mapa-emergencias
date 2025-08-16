@@ -1,7 +1,9 @@
 // Configuración de la aplicación
 const CONFIG = {
-    // URL de la API - usar servidor local por ahora
-    API_URL: 'http://localhost:8080/api',
+    // URL de la API - detectar automáticamente el entorno
+    API_URL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:8080/api' 
+        : `${window.location.protocol}//${window.location.host}/api`,
     
     // Configuración del mapa
     MAP_CONFIG: {

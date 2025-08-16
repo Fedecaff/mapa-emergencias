@@ -19,3 +19,5 @@ router.get('/:tabla/:registro_id', historialController.obtenerHistorialRegistro)
 export default router;
 
 
+
+

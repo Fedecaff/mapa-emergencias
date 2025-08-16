@@ -240,3 +240,5 @@ class CategoriasController {
 export default new CategoriasController();
 
 
+
+
