@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺️ Mapa de Emergencias - Catamarca</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-map-marked-alt"></i>
+                <h1>Mapa de Emergencias</h1>
+            </div>
+            
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="userName"></span>
+                <button id="logoutBtn" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+            
+            <div class="auth-buttons" id="authButtons">
+                <button id="loginBtn" class="btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Panel lateral -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Panel de búsqueda -->
+            <div class="search-panel">
+                <h3><i class="fas fa-search"></i> Búsqueda</h3>
+                <div class="search-input">
+                    <input type="text" id="searchInput" placeholder="Buscar puntos...">
+                    <button id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de filtros -->
+            <div class="filters-panel">
+                <h3><i class="fas fa-filter"></i> Filtros</h3>
+                <div class="filter-group">
+                    <label>Categorías:</label>
+                    <div id="categoryFilters" class="category-filters">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>Radio de búsqueda:</label>
+                    <input type="range" id="radiusSlider" min="1" max="50" value="5">
+                    <span id="radiusValue">5 km</span>
+                </div>
+            </div>
+
+            <!-- Panel de ubicación -->
+            <div class="location-panel">
+                <h3><i class="fas fa-location-arrow"></i> Mi Ubicación</h3>
+                <button id="centerLocationBtn" class="btn-location">
+                    <i class="fas fa-crosshairs"></i> Centrar en mi ubicación
+                </button>
+                <div id="locationInfo" class="location-info">
+                    <!-- Información de ubicación -->
+                </div>
+            </div>
+
+            <!-- Panel de administración (solo para admins) -->
+            <div class="admin-panel" id="adminPanel" style="display: none;">
+                <h3><i class="fas fa-cog"></i> Administración</h3>
+                <button id="addPointBtn" class="btn-admin">
+                    <i class="fas fa-plus"></i> Agregar Punto
+                </button>
+                <button id="createUserBtn" class="btn-admin">
+                    <i class="fas fa-user-plus"></i> Crear Usuario
+                </button>
+                <button id="viewHistoryBtn" class="btn-admin">
+                    <i class="fas fa-history"></i> Ver Historial
+                </button>
+            </div>
+        </aside>
+
+        <!-- Mapa principal -->
+        <main class="map-container">
+            <div id="map"></div>
+            
+            <!-- Controles del mapa -->
+            <div class="map-controls">
+                <button id="fullscreenBtn" class="map-control-btn" title="Pantalla completa">
+                    <i class="fas fa-expand"></i>
+                </button>
+                <button id="resetViewBtn" class="map-control-btn" title="Vista inicial">
+                    <i class="fas fa-home"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
+                <button class="close-btn" id="closeLoginModal">&times;</button>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Iniciar Sesión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de agregar punto -->
+    <div id="addPointModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Agregar Nuevo Punto</h2>
+                <button class="close-btn" id="closeAddPointModal">&times;</button>
+            </div>
+            <form id="addPointForm" class="point-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pointName">Nombre:</label>
+                        <input type="text" id="pointName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pointCategory">Categoría:</label>
+                        <select id="pointCategory" name="categoria_id" required>
+                            <!-- Se llena dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pointDescription">Descripción:</label>
+                    <textarea id="pointDescription" name="descripcion" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="pointLat">Latitud:</label>
+                        <input type="number" id="pointLat" name="latitud" step="any" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pointLng">Longitud:</label>
+                        <input type="number" id="pointLng" name="longitud" step="any" required>
+                    </div>
+                </div>
+                
+                <div id="customFields" class="custom-fields">
+                    <!-- Campos personalizados por categoría -->
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelAddPoint" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">Agregar Punto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de editar punto -->
+    <div id="editPointModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Punto</h2>
+                <button class="close-btn" id="closeEditPointModal">&times;</button>
+            </div>
+            <form id="editPointForm" class="point-form">
+                <input type="hidden" id="editPointId" name="id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPointName">Nombre:</label>
+                        <input type="text" id="editPointName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPointCategory">Categoría:</label>
+                        <select id="editPointCategory" name="categoria_id" required>
+                            <!-- Se llena dinámicamente -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPointDescription">Descripción:</label>
+                    <textarea id="editPointDescription" name="descripcion" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editPointLat">Latitud:</label>
+                        <input type="number" id="editPointLat" name="latitud" step="any" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPointLng">Longitud:</label>
+                        <input type="number" id="editPointLng" name="longitud" step="any" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPointStatus">Estado:</label>
+                    <select id="editPointStatus" name="estado" required>
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                        <option value="mantenimiento">En Mantenimiento</option>
+                    </select>
+                </div>
+                
+                <div id="editCustomFields" class="custom-fields">
+                    <!-- Campos personalizados por categoría -->
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="cancelEditPoint" class="btn-secondary">Cancelar</button>
+                    <button type="submit" class="btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de detalles del punto -->
+    <div id="pointDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="pointDetailsTitle"><i class="fas fa-info-circle"></i> Detalles del Punto</h2>
+                <button class="close-btn" id="closePointDetailsModal">&times;</button>
+            </div>
+            <div id="pointDetailsContent" class="point-details">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="modal-actions" id="pointDetailsActions">
+                <!-- Botones de acción -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Historial -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-history"></i> Historial de Cambios</h2>
+                <span class="close" id="closeHistoryModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="historyContent">
+                    <p>Cargando historial...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Crear Usuario (Solo Admin) -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h2>
+                <span class="close" id="closeCreateUserModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label for="newUserName">Nombre completo:</label>
+                        <input type="text" id="newUserName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newUserEmail">Email:</label>
+                        <input type="email" id="newUserEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newUserPassword">Contraseña:</label>
+                        <input type="password" id="newUserPassword" name="password" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label for="newUserRole">Rol:</label>
+                        <select id="newUserRole" name="rol" required>
+                            <option value="">Seleccionar rol</option>
+                            <option value="usuario">Usuario</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Crear Usuario
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="cancelCreateUser">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Cargando...</p>
+        </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utilidades.js"></script>
+    <script src="js/autenticacion.js"></script>
+    <script src="js/mapa.js"></script>
+    <script src="js/administracion.js"></script>
+    <script src="js/usuarios.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>
