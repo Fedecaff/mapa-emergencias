@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+// Importar base de datos
+import baseDeDatos from '../modelos/baseDeDatos.js';
+
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
 import rutasPuntos from '../rutas/puntos.js';
@@ -53,10 +56,26 @@ app.use('*', (req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
-// Iniciar servidor
-app.listen(PUERTO, () => {
-    console.log(`🚀 Servidor iniciado en puerto ${PUERTO}`);
-    console.log(`📱 Aplicación disponible en: http://localhost:${PUERTO}`);
-});
+// Inicializar base de datos y servidor
+async function iniciarServidor() {
+    try {
+        // Inicializar base de datos
+        console.log('🗄️ Inicializando base de datos...');
+        await baseDeDatos.inicializarTablas();
+        await baseDeDatos.insertarDatosIniciales();
+        console.log('✅ Base de datos inicializada correctamente');
+        
+        // Iniciar servidor
+        app.listen(PUERTO, () => {
+            console.log(`🚀 Servidor iniciado en puerto ${PUERTO}`);
+            console.log(`📱 Aplicación disponible en: http://localhost:${PUERTO}`);
+        });
+    } catch (error) {
+        console.error('❌ Error inicializando servidor:', error);
+        process.exit(1);
+    }
+}
+
+iniciarServidor();
 
 export default app;
