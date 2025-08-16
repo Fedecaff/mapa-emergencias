@@ -152,28 +152,8 @@ class AdminManager {
         
         let inputHtml = '';
         
-        switch (fieldType) {
-            case 'text':
-                inputHtml = `<input type="text" id="${fieldId}" name="${fieldName}" placeholder="Ingresa ${fieldLabel.toLowerCase()}">`;
-                break;
-            case 'number':
-                inputHtml = `<input type="number" id="${fieldId}" name="${fieldName}" placeholder="Ingresa ${fieldLabel.toLowerCase()}">`;
-                break;
-            case 'select':
-                inputHtml = this.createSelectField(fieldId, fieldName);
-                break;
-            case 'boolean':
-                inputHtml = `
-                    <select id="${fieldId}" name="${fieldName}">
-                        <option value="">Seleccionar</option>
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                    </select>
-                `;
-                break;
-            default:
-                inputHtml = `<input type="text" id="${fieldId}" name="${fieldName}" placeholder="Ingresa ${fieldLabel.toLowerCase()}">`;
-        }
+        // Todos los campos ahora son de texto libre
+        inputHtml = `<input type="text" id="${fieldId}" name="${fieldName}" placeholder="Ingresa ${fieldLabel.toLowerCase()}">`;
         
         return `
             <div class="custom-field">
