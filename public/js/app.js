@@ -99,6 +99,46 @@ class App {
             }
         }, 250));
         
+        // Configurar toggle de sidebar en móvil
+        this.setupMobileSidebar();
+    }
+    
+    setupMobileSidebar() {
+        const toggleBtn = document.getElementById('toggleSidebarBtn');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (!toggleBtn || !sidebar) return;
+        
+        // Mostrar botón solo en móvil
+        const showToggleButton = () => {
+            if (window.innerWidth <= 768) {
+                toggleBtn.style.display = 'flex';
+            } else {
+                toggleBtn.style.display = 'none';
+                sidebar.classList.remove('collapsed');
+            }
+        };
+        
+        // Mostrar/ocultar sidebar
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            const icon = toggleBtn.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.className = 'fas fa-bars';
+                toggleBtn.title = 'Mostrar controles';
+            } else {
+                icon.className = 'fas fa-times';
+                toggleBtn.title = 'Ocultar controles';
+            }
+        });
+        
+        // Configurar inicialmente
+        showToggleButton();
+        
+        // Actualizar en resize
+        window.addEventListener('resize', showToggleButton);
+    }
+        
         // Evento de visibilidad de página
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
