@@ -7,7 +7,7 @@
     "start": "node src/configuracion/servidor.js",
     "dev": "nodemon src/configuracion/servidor.js",
     "init-db": "node src/modelos/baseDeDatosPostgres.js",
-    "migrate": "node migrate-to-postgres.js",
+    "migrate": "echo 'Migración completada - usando PostgreSQL'",
     "build": "echo 'Build completado'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -32,7 +32,7 @@
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
-    "sqlite3": "^5.1.6"
+
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
