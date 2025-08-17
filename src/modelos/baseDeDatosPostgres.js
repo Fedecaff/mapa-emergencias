@@ -93,7 +93,7 @@ class BaseDeDatosPostgres {
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                password VARCHAR(255) NOT NULL,
+                contraseña VARCHAR(255) NOT NULL,
                 rol VARCHAR(50) DEFAULT 'usuario',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
@@ -225,14 +225,14 @@ class BaseDeDatosPostgres {
         const passwordHash = await bcrypt.hash('admin123', 10);
         
         await this.ejecutar(
-            'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
+            'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4)',
             ['Administrador', 'federico.gomez.sc@gmail.com', passwordHash, 'admin']
         );
 
         // Insertar usuario admin adicional
         const adminPasswordHash = await bcrypt.hash('admin123', 10);
         await this.ejecutar(
-            'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
+            'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4)',
             ['Admin', 'admin@test.com', adminPasswordHash, 'admin']
         );
 

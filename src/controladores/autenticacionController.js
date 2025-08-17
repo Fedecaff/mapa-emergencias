@@ -37,7 +37,7 @@ class AutenticacionController {
 
             // Verificar contraseña
             console.log('🔑 Verificando contraseña...');
-            const passwordValida = await bcrypt.compare(password, usuario.password);
+            const passwordValida = await bcrypt.compare(password, usuario.contraseña);
             if (!passwordValida) {
                 console.log('❌ Contraseña incorrecta');
                 return res.status(401).json({
@@ -107,7 +107,7 @@ class AutenticacionController {
 
             // Insertar nuevo usuario
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (email, password, nombre, rol) VALUES ($1, $2, $3, $4)',
+                'INSERT INTO usuarios (email, contraseña, nombre, rol) VALUES ($1, $2, $3, $4)',
                 [email, passwordHash, nombre, rol]
             );
 
