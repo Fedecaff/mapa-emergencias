@@ -134,7 +134,7 @@ class AutenticacionController {
             
             // Buscar usuario en base de datos
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, email, nombre, rol FROM usuarios WHERE id = ?',
+                'SELECT id, email, nombre, rol FROM usuarios WHERE id = $1',
                 [decoded.id]
             );
 
@@ -161,7 +161,7 @@ class AutenticacionController {
     async obtenerPerfil(req, res) {
         try {
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, email, nombre, rol, fecha_creacion FROM usuarios WHERE id = ?',
+                'SELECT id, email, nombre, rol, fecha_creacion FROM usuarios WHERE id = $1',
                 [req.usuario.id]
             );
 
