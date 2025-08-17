@@ -8,34 +8,44 @@ class AutenticacionController {
     // Login de usuario
     async login(req, res) {
         try {
+            console.log('🔐 Intentando login con:', { email: req.body.email });
             const { email, password } = req.body;
 
             // Validar campos requeridos
             if (!email || !password) {
+                console.log('❌ Campos faltantes');
                 return res.status(400).json({
                     error: 'Email y contraseña son requeridos'
                 });
             }
 
             // Buscar usuario por email
+            console.log('🔍 Buscando usuario en la base de datos...');
             const usuario = await baseDeDatos.obtenerUno(
                 'SELECT * FROM usuarios WHERE email = $1',
                 [email]
             );
 
             if (!usuario) {
+                console.log('❌ Usuario no encontrado:', email);
                 return res.status(401).json({
                     error: 'Credenciales inválidas'
                 });
             }
+            
+            console.log('✅ Usuario encontrado:', usuario.email);
 
             // Verificar contraseña
+            console.log('🔑 Verificando contraseña...');
             const passwordValida = await bcrypt.compare(password, usuario.password);
             if (!passwordValida) {
+                console.log('❌ Contraseña incorrecta');
                 return res.status(401).json({
                     error: 'Credenciales inválidas'
                 });
             }
+            
+            console.log('✅ Contraseña válida');
 
             // Generar token JWT
             const token = jwt.sign(
@@ -61,7 +71,7 @@ class AutenticacionController {
             });
 
         } catch (error) {
-            console.error('Error en login:', error);
+            console.error('❌ Error en login:', error);
             res.status(500).json({
                 error: 'Error interno del servidor'
             });
