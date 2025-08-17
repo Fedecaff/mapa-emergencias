@@ -215,7 +215,7 @@ class PuntosController {
                     latitud || puntoExistente.latitud,
                     longitud || puntoExistente.longitud,
                     categoria_id || puntoExistente.categoria_id,
-                    JSON.stringify(datos_personalizados || typeof puntoExistente.datos_personalizados === 'string' ? JSON.parse(puntoExistente.datos_personalizados || '{}') : (puntoExistente.datos_personalizados || '{}' || {})),
+                    JSON.stringify(datos_personalizados || puntoExistente.datos_personalizados || {}),
                     estado || puntoExistente.estado,
                     id
                 ]
