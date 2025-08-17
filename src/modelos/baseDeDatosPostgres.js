@@ -157,10 +157,10 @@ class BaseDeDatosPostgres {
     async insertarDatosIniciales() {
         console.log('📝 Insertando datos iniciales en PostgreSQL...');
 
-        // Verificar si ya existen datos
-        const categoriasExistentes = await this.obtenerUno('SELECT COUNT(*) as count FROM categorias');
-        if (parseInt(categoriasExistentes.count) > 0) {
-            console.log('ℹ️ Los datos iniciales ya existen, saltando inserción...');
+        // Verificar si ya existen usuarios
+        const usuariosExistentes = await this.obtenerUno('SELECT COUNT(*) as count FROM usuarios');
+        if (parseInt(usuariosExistentes.count) > 0) {
+            console.log('ℹ️ Los usuarios ya existen, saltando inserción...');
             return;
         }
 
