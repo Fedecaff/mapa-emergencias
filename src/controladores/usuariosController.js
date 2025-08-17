@@ -18,7 +18,7 @@ const usuariosController = {
 
             // Verificar si el email ya existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
-                'SELECT id FROM usuarios WHERE email = ?',
+                'SELECT id FROM usuarios WHERE email = $1',
                 [email]
             );
 
@@ -31,13 +31,13 @@ const usuariosController = {
 
             // Insertar usuario
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
+                'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($2, $3, $4, $5)',
                 [nombre, email, passwordHash, rol]
             );
 
             // Obtener el usuario creado (sin contraseña)
             const nuevoUsuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = ?',
+                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $6',
                 [resultado.lastID]
             );
 
@@ -73,7 +73,7 @@ const usuariosController = {
             const { id } = req.params;
 
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = ?',
+                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $7',
                 [id]
             );
 
@@ -96,7 +96,7 @@ const usuariosController = {
 
             // Verificar si el usuario existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
-                'SELECT id FROM usuarios WHERE id = ?',
+                'SELECT id FROM usuarios WHERE id = $8',
                 [id]
             );
 
@@ -107,7 +107,7 @@ const usuariosController = {
             // Verificar si el email ya existe en otro usuario
             if (email) {
                 const emailExistente = await baseDeDatos.obtenerUno(
-                    'SELECT id FROM usuarios WHERE email = ? AND id != ?',
+                    'SELECT id FROM usuarios WHERE email = $9 AND id != $10',
                     [email, id]
                 );
 
@@ -121,17 +121,17 @@ const usuariosController = {
             const valores = [];
 
             if (nombre !== undefined) {
-                campos.push('nombre = ?');
+                campos.push('nombre = $11');
                 valores.push(nombre);
             }
 
             if (email !== undefined) {
-                campos.push('email = ?');
+                campos.push('email = $12');
                 valores.push(email);
             }
 
             if (rol !== undefined) {
-                campos.push('rol = ?');
+                campos.push('rol = $13');
                 valores.push(rol);
             }
 
@@ -142,13 +142,13 @@ const usuariosController = {
             valores.push(id);
 
             await baseDeDatos.ejecutar(
-                `UPDATE usuarios SET ${campos.join(', ')} WHERE id = ?`,
+                `UPDATE usuarios SET ${campos.join(', ')} WHERE id = $14`,
                 valores
             );
 
             // Obtener usuario actualizado
             const usuarioActualizado = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = ?',
+                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $15',
                 [id]
             );
 
@@ -171,7 +171,7 @@ const usuariosController = {
 
             // Verificar si el usuario existe
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, email FROM usuarios WHERE id = ?',
+                'SELECT id, email FROM usuarios WHERE id = $16',
                 [id]
             );
 
@@ -190,7 +190,7 @@ const usuariosController = {
                 }
             }
 
-            await baseDeDatos.ejecutar('DELETE FROM usuarios WHERE id = ?', [id]);
+            await baseDeDatos.ejecutar('DELETE FROM usuarios WHERE id = $17', [id]);
 
             console.log(`✅ Usuario eliminado: ${usuario.email} (ID: ${id})`);
 

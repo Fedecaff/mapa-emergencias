@@ -16,7 +16,7 @@ class PuntosController {
 
             // Filtro por categoría
             if (categoria_id) {
-                sql += ' AND p.categoria_id = ?';
+                sql += ' AND p.categoria_id = $1';
                 parametros.push(categoria_id);
             }
 
@@ -24,11 +24,11 @@ class PuntosController {
             if (latitud && longitud && radio) {
                 sql += ` AND (
                     6371 * acos(
-                        cos(radians(?)) * cos(radians(p.latitud)) * 
-                        cos(radians(p.longitud) - radians(?)) + 
-                        sin(radians(?)) * sin(radians(p.latitud))
+                        cos(radians($2)) * cos(radians(p.latitud)) * 
+                        cos(radians(p.longitud) - radians($3)) + 
+                        sin(radians($4)) * sin(radians(p.latitud))
                     )
-                ) <= ?`;
+                ) <= $5`;
                 parametros.push(parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(radio));
             }
 
@@ -39,7 +39,7 @@ class PuntosController {
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' $6 JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
@@ -60,7 +60,7 @@ class PuntosController {
                 SELECT p.*, c.nombre as categoria_nombre, c.icono, c.color 
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
-                WHERE p.id = ? AND p.estado = 'activo'
+                WHERE p.id = $7 AND p.estado = 'activo'
             `, [id]);
 
             if (!punto) {
@@ -72,7 +72,7 @@ class PuntosController {
             res.json({
                 punto: {
                     ...punto,
-                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' $8 JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }
             });
 
@@ -105,7 +105,7 @@ class PuntosController {
 
             // Verificar que la categoría existe
             const categoria = await baseDeDatos.obtenerUno(
-                'SELECT id FROM categorias WHERE id = ?',
+                'SELECT id FROM categorias WHERE id = $9',
                 [categoria_id]
             );
 
@@ -117,7 +117,7 @@ class PuntosController {
 
             // Insertar nuevo punto
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO puntos (nombre, descripcion, latitud, longitud, categoria_id, datos_personalizados) VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO puntos (nombre, descripcion, latitud, longitud, categoria_id, datos_personalizados) VALUES ($10, $11, $12, $13, $14, $15)',
                 [nombre, descripcion, latitud, longitud, categoria_id, JSON.stringify(datos_personalizados || {})]
             );
 
@@ -129,14 +129,14 @@ class PuntosController {
                 SELECT p.*, c.nombre as categoria_nombre, c.icono, c.color 
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
-                WHERE p.id = ?
+                WHERE p.id = $16
             `, [resultado.id]);
 
             res.status(201).json({
                 mensaje: 'Punto creado exitosamente',
                 punto: {
                     ...puntoCreado,
-                    datos_personalizados: typeof puntoCreado.datos_personalizados || '{}' === 'string' ? JSON.parse(puntoCreado.datos_personalizados || '{}') : (puntoCreado.datos_personalizados || '{}' || {})
+                    datos_personalizados: typeof puntoCreado.datos_personalizados || '{}' === 'string' $17 JSON.parse(puntoCreado.datos_personalizados || '{}') : (puntoCreado.datos_personalizados || '{}' || {})
                 }
             });
 
@@ -158,7 +158,7 @@ class PuntosController {
 
             // Verificar si el punto existe
             const puntoExistente = await baseDeDatos.obtenerUno(
-                'SELECT * FROM puntos WHERE id = ?',
+                'SELECT * FROM puntos WHERE id = $18',
                 [id]
             );
 
@@ -186,7 +186,7 @@ class PuntosController {
             // Verificar que la categoría existe si se cambia
             if (categoria_id && categoria_id !== puntoExistente.categoria_id) {
                 const categoria = await baseDeDatos.obtenerUno(
-                    'SELECT id FROM categorias WHERE id = ?',
+                    'SELECT id FROM categorias WHERE id = $19',
                     [categoria_id]
                 );
 
@@ -200,22 +200,22 @@ class PuntosController {
             // Actualizar punto
             await baseDeDatos.ejecutar(
                 `UPDATE puntos SET 
-                    nombre = ?, 
-                    descripcion = ?, 
-                    latitud = ?, 
-                    longitud = ?, 
-                    categoria_id = ?, 
-                    datos_personalizados = ?,
-                    estado = ?,
+                    nombre = $20, 
+                    descripcion = $21, 
+                    latitud = $22, 
+                    longitud = $23, 
+                    categoria_id = $24, 
+                    datos_personalizados = $25,
+                    estado = $26,
                     fecha_actualizacion = CURRENT_TIMESTAMP
-                WHERE id = ?`,
+                WHERE id = $27`,
                 [
                     nombre || puntoExistente.nombre,
-                    descripcion !== undefined ? descripcion : puntoExistente.descripcion,
+                    descripcion !== undefined $28 descripcion : puntoExistente.descripcion,
                     latitud || puntoExistente.latitud,
                     longitud || puntoExistente.longitud,
                     categoria_id || puntoExistente.categoria_id,
-                    JSON.stringify(datos_personalizados || typeof puntoExistente.datos_personalizados || '{}' === 'string' ? JSON.parse(puntoExistente.datos_personalizados || '{}') : (puntoExistente.datos_personalizados || '{}' || {})),
+                    JSON.stringify(datos_personalizados || typeof puntoExistente.datos_personalizados || '{}' === 'string' $29 JSON.parse(puntoExistente.datos_personalizados || '{}') : (puntoExistente.datos_personalizados || '{}' || {})),
                     estado || puntoExistente.estado,
                     id
                 ]
@@ -243,7 +243,7 @@ class PuntosController {
 
             // Verificar si el punto existe
             const punto = await baseDeDatos.obtenerUno(
-                'SELECT * FROM puntos WHERE id = ?',
+                'SELECT * FROM puntos WHERE id = $30',
                 [id]
             );
 
@@ -258,7 +258,7 @@ class PuntosController {
 
             // Eliminar punto (soft delete)
             await baseDeDatos.ejecutar(
-                'UPDATE puntos SET estado = "eliminado", fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = ?',
+                'UPDATE puntos SET estado = "eliminado", fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = $31',
                 [id]
             );
 
@@ -290,14 +290,14 @@ class PuntosController {
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
                 WHERE p.estado = 'activo' 
-                AND (p.nombre LIKE ? OR p.descripcion LIKE ?)
+                AND (p.nombre LIKE $32 OR p.descripcion LIKE $33)
                 ORDER BY p.nombre
             `, [`%${q}%`, `%${q}%`]);
 
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' $34 JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
@@ -323,25 +323,25 @@ class PuntosController {
             const puntos = await baseDeDatos.obtenerTodos(`
                 SELECT p.*, c.nombre as categoria_nombre, c.icono, c.color,
                 (6371 * acos(
-                    cos(radians(?)) * cos(radians(p.latitud)) * 
-                    cos(radians(p.longitud) - radians(?)) + 
-                    sin(radians(?)) * sin(radians(p.latitud))
+                    cos(radians($35)) * cos(radians(p.latitud)) * 
+                    cos(radians(p.longitud) - radians($36)) + 
+                    sin(radians($37)) * sin(radians(p.latitud))
                 )) as distancia
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
                 WHERE p.estado = 'activo'
                 AND (6371 * acos(
-                    cos(radians(?)) * cos(radians(p.latitud)) * 
-                    cos(radians(p.longitud) - radians(?)) + 
-                    sin(radians(?)) * sin(radians(p.latitud))
-                )) <= ?
+                    cos(radians($38)) * cos(radians(p.latitud)) * 
+                    cos(radians(p.longitud) - radians($39)) + 
+                    sin(radians($40)) * sin(radians(p.latitud))
+                )) <= $41
                 ORDER BY distancia
             `, [parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(radio)]);
 
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' $42 JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
@@ -357,13 +357,13 @@ class PuntosController {
     async registrarCambio(usuarioId, tabla, registroId, accion, datosAnteriores, datosNuevos) {
         try {
             await baseDeDatos.ejecutar(
-                'INSERT INTO historial_cambios (tabla, registro_id, accion, datos_anteriores, datos_nuevos, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO historial_cambios (tabla, registro_id, accion, datos_anteriores, datos_nuevos, usuario_id) VALUES ($43, $44, $45, $46, $47, $48)',
                 [
                     tabla,
                     registroId,
                     accion,
-                    datosAnteriores ? JSON.stringify(datosAnteriores) : null,
-                    datosNuevos ? JSON.stringify(datosNuevos) : null,
+                    datosAnteriores $49 JSON.stringify(datosAnteriores) : null,
+                    datosNuevos $50 JSON.stringify(datosNuevos) : null,
                     usuarioId
                 ]
             );

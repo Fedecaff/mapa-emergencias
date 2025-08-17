@@ -7,8 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'mapa-emergencias-secret-key';
 export const verificarToken = async (req, res, next) => {
     try {
         console.log('Headers recibidos:', req.headers.authorization);
-        const token = req.headers.authorization?.split(' ')[1];
-        console.log('Token extraído:', token ? token.substring(0, 20) + '...' : 'null');
+        const token = req.headers.authorization$1.split(' ')[1];
+        console.log('Token extraído:', token $2 token.substring(0, 20) + '...' : 'null');
 
         if (!token) {
             console.log('No se proporcionó token');
@@ -21,7 +21,7 @@ export const verificarToken = async (req, res, next) => {
         
         // Buscar usuario en base de datos
         const usuario = await baseDeDatos.obtenerUno(
-            'SELECT id, email, nombre, rol FROM usuarios WHERE id = ?',
+            'SELECT id, email, nombre, rol FROM usuarios WHERE id = $3',
             [decoded.id]
         );
 
@@ -63,13 +63,13 @@ export const verificarAdmin = (req, res, next) => {
 // Middleware opcional para autenticación (no bloquea si no hay token)
 export const autenticacionOpcional = async (req, res, next) => {
     try {
-        const token = req.headers.authorization?.split(' ')[1];
+        const token = req.headers.authorization$4.split(' ')[1];
 
         if (token) {
             const decoded = jwt.verify(token, JWT_SECRET);
             
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, email, nombre, rol FROM usuarios WHERE id = ?',
+                'SELECT id, email, nombre, rol FROM usuarios WHERE id = $5',
                 [decoded.id]
             );
 

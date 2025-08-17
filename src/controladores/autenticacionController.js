@@ -19,7 +19,7 @@ class AutenticacionController {
 
             // Buscar usuario por email
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT * FROM usuarios WHERE email = ?',
+                'SELECT * FROM usuarios WHERE email = $1',
                 [email]
             );
 
@@ -82,7 +82,7 @@ class AutenticacionController {
 
             // Verificar si el usuario ya existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
-                'SELECT id FROM usuarios WHERE email = ?',
+                'SELECT id FROM usuarios WHERE email = $1',
                 [email]
             );
 
@@ -97,7 +97,7 @@ class AutenticacionController {
 
             // Insertar nuevo usuario
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (email, password, nombre, rol) VALUES (?, ?, ?, ?)',
+                'INSERT INTO usuarios (email, password, nombre, rol) VALUES ($1, $2, $3, $4)',
                 [email, passwordHash, nombre, rol]
             );
 

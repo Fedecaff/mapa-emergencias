@@ -12,7 +12,7 @@ class CategoriasController {
                 categorias: categorias.map(cat => ({
                     ...cat,
                     campos_personalizados: typeof cat.campos_personalizados === 'string' 
-                        ? JSON.parse(cat.campos_personalizados || '{}') 
+                        $1 JSON.parse(cat.campos_personalizados || '{}') 
                         : (cat.campos_personalizados || {})
                 }))
             });
@@ -31,7 +31,7 @@ class CategoriasController {
             const { id } = req.params;
 
             const categoria = await baseDeDatos.obtenerUno(
-                'SELECT * FROM categorias WHERE id = ?',
+                'SELECT * FROM categorias WHERE id = $2',
                 [id]
             );
 
@@ -45,7 +45,7 @@ class CategoriasController {
                 categoria: {
                     ...categoria,
                     campos_personalizados: typeof categoria.campos_personalizados === 'string' 
-                        ? JSON.parse(categoria.campos_personalizados || '{}') 
+                        $3 JSON.parse(categoria.campos_personalizados || '{}') 
                         : (categoria.campos_personalizados || {})
                 }
             });
@@ -72,7 +72,7 @@ class CategoriasController {
 
             // Verificar si la categoría ya existe
             const categoriaExistente = await baseDeDatos.obtenerUno(
-                'SELECT id FROM categorias WHERE nombre = ?',
+                'SELECT id FROM categorias WHERE nombre = $4',
                 [nombre]
             );
 
@@ -84,7 +84,7 @@ class CategoriasController {
 
             // Insertar nueva categoría
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO categorias (nombre, descripcion, icono, color, campos_personalizados) VALUES (?, ?, ?, ?, ?)',
+                'INSERT INTO categorias (nombre, descripcion, icono, color, campos_personalizados) VALUES ($5, $6, $7, $8, $9)',
                 [nombre, descripcion, icono, color, JSON.stringify(campos_personalizados || {})]
             );
 
@@ -119,7 +119,7 @@ class CategoriasController {
 
             // Verificar si la categoría existe
             const categoriaExistente = await baseDeDatos.obtenerUno(
-                'SELECT * FROM categorias WHERE id = ?',
+                'SELECT * FROM categorias WHERE id = $10',
                 [id]
             );
 
@@ -132,7 +132,7 @@ class CategoriasController {
             // Verificar si el nuevo nombre ya existe en otra categoría
             if (nombre && nombre !== categoriaExistente.nombre) {
                 const nombreExistente = await baseDeDatos.obtenerUno(
-                    'SELECT id FROM categorias WHERE nombre = ? AND id != ?',
+                    'SELECT id FROM categorias WHERE nombre = $11 AND id != $12',
                     [nombre, id]
                 );
 
@@ -145,14 +145,14 @@ class CategoriasController {
 
             // Actualizar categoría
             await baseDeDatos.ejecutar(
-                'UPDATE categorias SET nombre = ?, descripcion = ?, icono = ?, color = ?, campos_personalizados = ? WHERE id = ?',
+                'UPDATE categorias SET nombre = $13, descripcion = $14, icono = $15, color = $16, campos_personalizados = $17 WHERE id = $18',
                 [
                     nombre || categoriaExistente.nombre,
-                    descripcion !== undefined ? descripcion : categoriaExistente.descripcion,
+                    descripcion !== undefined $19 descripcion : categoriaExistente.descripcion,
                     icono || categoriaExistente.icono,
                     color || categoriaExistente.color,
                     JSON.stringify(campos_personalizados || (typeof categoriaExistente.campos_personalizados === 'string' 
-                        ? JSON.parse(categoriaExistente.campos_personalizados || '{}') 
+                        $20 JSON.parse(categoriaExistente.campos_personalizados || '{}') 
                         : (categoriaExistente.campos_personalizados || {}))),
                     id
                 ]
@@ -180,7 +180,7 @@ class CategoriasController {
 
             // Verificar si la categoría existe
             const categoria = await baseDeDatos.obtenerUno(
-                'SELECT * FROM categorias WHERE id = ?',
+                'SELECT * FROM categorias WHERE id = $21',
                 [id]
             );
 
@@ -192,7 +192,7 @@ class CategoriasController {
 
             // Verificar si hay puntos asociados
             const puntosAsociados = await baseDeDatos.obtenerUno(
-                'SELECT COUNT(*) as count FROM puntos WHERE categoria_id = ?',
+                'SELECT COUNT(*) as count FROM puntos WHERE categoria_id = $22',
                 [id]
             );
 
@@ -207,7 +207,7 @@ class CategoriasController {
 
             // Eliminar categoría
             await baseDeDatos.ejecutar(
-                'DELETE FROM categorias WHERE id = ?',
+                'DELETE FROM categorias WHERE id = $23',
                 [id]
             );
 
@@ -227,13 +227,13 @@ class CategoriasController {
     async registrarCambio(usuarioId, tabla, registroId, accion, datosAnteriores, datosNuevos) {
         try {
             await baseDeDatos.ejecutar(
-                'INSERT INTO historial_cambios (tabla, registro_id, accion, datos_anteriores, datos_nuevos, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO historial_cambios (tabla, registro_id, accion, datos_anteriores, datos_nuevos, usuario_id) VALUES ($24, $25, $26, $27, $28, $29)',
                 [
                     tabla,
                     registroId,
                     accion,
-                    datosAnteriores ? JSON.stringify(datosAnteriores) : null,
-                    datosNuevos ? JSON.stringify(datosNuevos) : null,
+                    datosAnteriores $30 JSON.stringify(datosAnteriores) : null,
+                    datosNuevos $31 JSON.stringify(datosNuevos) : null,
                     usuarioId
                 ]
             );
