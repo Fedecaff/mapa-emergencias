@@ -87,9 +87,12 @@ class BaseDeDatosPostgres {
     async inicializarTablas() {
         console.log('📋 Inicializando tablas en PostgreSQL...');
         
+        // Eliminar tabla usuarios si existe para recrearla con el esquema correcto
+        await this.ejecutar(`DROP TABLE IF EXISTS usuarios CASCADE`);
+        
         // Tabla usuarios
         await this.ejecutar(`
-            CREATE TABLE IF NOT EXISTS usuarios (
+            CREATE TABLE usuarios (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
@@ -99,9 +102,13 @@ class BaseDeDatosPostgres {
             )
         `);
 
+        // Eliminar tablas si existen
+        await this.ejecutar(`DROP TABLE IF EXISTS puntos CASCADE`);
+        await this.ejecutar(`DROP TABLE IF EXISTS categorias CASCADE`);
+        
         // Tabla categorias
         await this.ejecutar(`
-            CREATE TABLE IF NOT EXISTS categorias (
+            CREATE TABLE categorias (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 descripcion TEXT,
@@ -115,7 +122,7 @@ class BaseDeDatosPostgres {
 
         // Tabla puntos
         await this.ejecutar(`
-            CREATE TABLE IF NOT EXISTS puntos (
+            CREATE TABLE puntos (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 descripcion TEXT,
@@ -129,9 +136,12 @@ class BaseDeDatosPostgres {
             )
         `);
 
+        // Eliminar tabla historial si existe
+        await this.ejecutar(`DROP TABLE IF EXISTS historial_cambios CASCADE`);
+        
         // Tabla historial de cambios
         await this.ejecutar(`
-            CREATE TABLE IF NOT EXISTS historial_cambios (
+            CREATE TABLE historial_cambios (
                 id SERIAL PRIMARY KEY,
                 tabla VARCHAR(100) NOT NULL,
                 registro_id INTEGER NOT NULL,
