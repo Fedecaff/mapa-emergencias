@@ -11,7 +11,9 @@ class CategoriasController {
             res.json({
                 categorias: categorias.map(cat => ({
                     ...cat,
-                    campos_personalizados: JSON.parse(cat.campos_personalizados || '{}')
+                    campos_personalizados: typeof cat.campos_personalizados === 'string' 
+                        ? typeof cat.campos_personalizados || '{}' === 'string' ? JSON.parse(cat.campos_personalizados || '{}') : (cat.campos_personalizados || '{}' || {}) 
+                        : (cat.campos_personalizados || {})
                 }))
             });
 
@@ -42,7 +44,9 @@ class CategoriasController {
             res.json({
                 categoria: {
                     ...categoria,
-                    campos_personalizados: JSON.parse(categoria.campos_personalizados || '{}')
+                    campos_personalizados: typeof categoria.campos_personalizados === 'string' 
+                        ? typeof categoria.campos_personalizados || '{}' === 'string' ? JSON.parse(categoria.campos_personalizados || '{}') : (categoria.campos_personalizados || '{}' || {}) 
+                        : (categoria.campos_personalizados || {})
                 }
             });
 
@@ -147,7 +151,9 @@ class CategoriasController {
                     descripcion !== undefined ? descripcion : categoriaExistente.descripcion,
                     icono || categoriaExistente.icono,
                     color || categoriaExistente.color,
-                    JSON.stringify(campos_personalizados || JSON.parse(categoriaExistente.campos_personalizados || '{}')),
+                    JSON.stringify(campos_personalizados || (typeof categoriaExistente.campos_personalizados === 'string' 
+                        ? typeof categoriaExistente.campos_personalizados || '{}' === 'string' ? JSON.parse(categoriaExistente.campos_personalizados || '{}') : (categoriaExistente.campos_personalizados || '{}' || {}) 
+                        : (categoriaExistente.campos_personalizados || {}))),
                     id
                 ]
             );

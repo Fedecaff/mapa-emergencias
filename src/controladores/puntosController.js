@@ -39,7 +39,7 @@ class PuntosController {
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: JSON.parse(punto.datos_personalizados || '{}')
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
@@ -72,7 +72,7 @@ class PuntosController {
             res.json({
                 punto: {
                     ...punto,
-                    datos_personalizados: JSON.parse(punto.datos_personalizados || '{}')
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }
             });
 
@@ -136,7 +136,7 @@ class PuntosController {
                 mensaje: 'Punto creado exitosamente',
                 punto: {
                     ...puntoCreado,
-                    datos_personalizados: JSON.parse(puntoCreado.datos_personalizados || '{}')
+                    datos_personalizados: typeof puntoCreado.datos_personalizados || '{}' === 'string' ? JSON.parse(puntoCreado.datos_personalizados || '{}') : (puntoCreado.datos_personalizados || '{}' || {})
                 }
             });
 
@@ -215,7 +215,7 @@ class PuntosController {
                     latitud || puntoExistente.latitud,
                     longitud || puntoExistente.longitud,
                     categoria_id || puntoExistente.categoria_id,
-                    JSON.stringify(datos_personalizados || JSON.parse(puntoExistente.datos_personalizados || '{}')),
+                    JSON.stringify(datos_personalizados || typeof puntoExistente.datos_personalizados || '{}' === 'string' ? JSON.parse(puntoExistente.datos_personalizados || '{}') : (puntoExistente.datos_personalizados || '{}' || {})),
                     estado || puntoExistente.estado,
                     id
                 ]
@@ -297,7 +297,7 @@ class PuntosController {
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: JSON.parse(punto.datos_personalizados || '{}')
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
@@ -341,7 +341,7 @@ class PuntosController {
             res.json({
                 puntos: puntos.map(punto => ({
                     ...punto,
-                    datos_personalizados: JSON.parse(punto.datos_personalizados || '{}')
+                    datos_personalizados: typeof punto.datos_personalizados || '{}' === 'string' ? JSON.parse(punto.datos_personalizados || '{}') : (punto.datos_personalizados || '{}' || {})
                 }))
             });
 
