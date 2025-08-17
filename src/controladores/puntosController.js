@@ -122,7 +122,7 @@ class PuntosController {
             );
 
             // Registrar en historial
-            await puntosController.registrarCambio(req.usuario.id, 'puntos', resultado.id, 'crear', null, req.body);
+            await this.registrarCambio(req.usuario.id, 'puntos', resultado.id, 'crear', null, req.body);
 
             // Obtener el punto creado con información de categoría
             const puntoCreado = await baseDeDatos.obtenerUno(`

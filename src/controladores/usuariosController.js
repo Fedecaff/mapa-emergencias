@@ -31,17 +31,17 @@ const usuariosController = {
 
             // Insertar usuario
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($2, $3, $4, $5)',
+                'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4) RETURNING id',
                 [nombre, email, passwordHash, rol]
             );
 
             // Obtener el usuario creado (sin contraseña)
             const nuevoUsuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $6',
-                [resultado.lastID]
+                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $1',
+                [resultado.rows[0].id]
             );
 
-            console.log(`✅ Usuario creado: ${email} (ID: ${resultado.lastID})`);
+            console.log(`✅ Usuario creado: ${email} (ID: ${resultado.rows[0].id})`);
 
             res.status(201).json({
                 mensaje: 'Usuario creado exitosamente',
@@ -73,7 +73,7 @@ const usuariosController = {
             const { id } = req.params;
 
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $7',
+                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $1',
                 [id]
             );
 
@@ -96,7 +96,7 @@ const usuariosController = {
 
             // Verificar si el usuario existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
-                'SELECT id FROM usuarios WHERE id = $8',
+                'SELECT id FROM usuarios WHERE id = $1',
                 [id]
             );
 
