@@ -117,12 +117,12 @@ class PuntosController {
 
             // Insertar nuevo punto
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO puntos (nombre, descripcion, latitud, longitud, categoria_id, datos_personalizados) VALUES ($1, $2, $3, $4, $5, $6)',
+                'INSERT INTO puntos (nombre, descripcion, latitud, longitud, categoria_id, datos_personalizados) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
                 [nombre, descripcion, latitud, longitud, categoria_id, JSON.stringify(datos_personalizados || {})]
             );
 
             // Registrar en historial
-            await this.registrarCambio(req.usuario.id, 'puntos', resultado.id, 'crear', null, req.body);
+            await puntosController.registrarCambio(req.usuario.id, 'puntos', resultado.rows[0].id, 'crear', null, req.body);
 
             // Obtener el punto creado con información de categoría
             const puntoCreado = await baseDeDatos.obtenerUno(`
@@ -130,7 +130,7 @@ class PuntosController {
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
                 WHERE p.id = $1
-            `, [resultado.id]);
+            `, [resultado.rows[0].id]);
 
             res.status(201).json({
                 mensaje: 'Punto creado exitosamente',
