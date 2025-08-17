@@ -16,31 +16,31 @@ class HistorialController {
 
             // Filtros opcionales
             if (tabla) {
-                sql += ' AND h.tabla = $1';
+                sql += ` AND h.tabla = $${parametros.length + 1}`;
                 parametros.push(tabla);
             }
 
             if (registro_id) {
-                sql += ' AND h.registro_id = $2';
+                sql += ` AND h.registro_id = $${parametros.length + 1}`;
                 parametros.push(registro_id);
             }
 
             if (accion) {
-                sql += ' AND h.accion = $3';
+                sql += ` AND h.accion = $${parametros.length + 1}`;
                 parametros.push(accion);
             }
 
             if (fecha_desde) {
-                sql += ' AND h.fecha_cambio >= $4';
+                sql += ` AND h.fecha_cambio >= $${parametros.length + 1}`;
                 parametros.push(fecha_desde);
             }
 
             if (fecha_hasta) {
-                sql += ' AND h.fecha_cambio <= $5';
+                sql += ` AND h.fecha_cambio <= $${parametros.length + 1}`;
                 parametros.push(fecha_hasta);
             }
 
-            sql += ' ORDER BY h.fecha_cambio DESC LIMIT $6 OFFSET $7';
+            sql += ` ORDER BY h.fecha_cambio DESC LIMIT $${parametros.length + 1} OFFSET $${parametros.length + 2}`;
             parametros.push(parseInt(limit), parseInt(offset));
 
             const historial = await baseDeDatos.obtenerTodos(sql, parametros);
@@ -48,8 +48,8 @@ class HistorialController {
             res.json({
                 historial: historial.map(registro => ({
                     ...registro,
-                    datos_anteriores: registro.datos_anteriores $8 JSON.parse(registro.datos_anteriores) : null,
-                    datos_nuevos: registro.datos_nuevos $9 JSON.parse(registro.datos_nuevos) : null
+                    datos_anteriores: registro.datos_anteriores ? JSON.parse(registro.datos_anteriores) : null,
+                    datos_nuevos: registro.datos_nuevos ? JSON.parse(registro.datos_nuevos) : null
                 }))
             });
 
@@ -70,15 +70,15 @@ class HistorialController {
                 SELECT h.*, u.nombre as usuario_nombre, u.email as usuario_email
                 FROM historial_cambios h
                 LEFT JOIN usuarios u ON h.usuario_id = u.id
-                WHERE h.tabla = $10 AND h.registro_id = $11
+                WHERE h.tabla = $1 AND h.registro_id = $2
                 ORDER BY h.fecha_cambio DESC
             `, [tabla, registro_id]);
 
             res.json({
                 historial: historial.map(registro => ({
                     ...registro,
-                    datos_anteriores: registro.datos_anteriores $12 JSON.parse(registro.datos_anteriores) : null,
-                    datos_nuevos: registro.datos_nuevos $13 JSON.parse(registro.datos_nuevos) : null
+                    datos_anteriores: registro.datos_anteriores ? JSON.parse(registro.datos_anteriores) : null,
+                    datos_nuevos: registro.datos_nuevos ? JSON.parse(registro.datos_nuevos) : null
                 }))
             });
 
@@ -99,12 +99,12 @@ class HistorialController {
             let parametros = [];
 
             if (fecha_desde) {
-                whereClause += ' AND fecha_cambio >= $14';
+                whereClause += ' AND fecha_cambio >= $1';
                 parametros.push(fecha_desde);
             }
 
             if (fecha_hasta) {
-                whereClause += ' AND fecha_cambio <= $15';
+                whereClause += ' AND fecha_cambio <= $2';
                 parametros.push(fecha_hasta);
             }
 
