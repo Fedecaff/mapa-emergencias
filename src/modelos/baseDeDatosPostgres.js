@@ -10,20 +10,31 @@ class BaseDeDatosPostgres {
 
     async conectar() {
         try {
-            // Configuración para desarrollo local y producción
+            // Configuración para Railway PostgreSQL
             const config = {
-                host: process.env.DB_HOST || 'localhost',
-                port: process.env.DB_PORT || 5432,
-                database: process.env.DB_NAME || 'mapa_emergencias',
-                user: process.env.DB_USER || 'postgres',
-                password: process.env.DB_PASSWORD || 'password',
+                host: process.env.PGHOST || process.env.DB_HOST || 'localhost',
+                port: process.env.PGPORT || process.env.DB_PORT || 5432,
+                database: process.env.PGDATABASE || process.env.DB_NAME || 'mapa_emergencias',
+                user: process.env.PGUSER || process.env.DB_USER || 'postgres',
+                password: process.env.PGPASSWORD || process.env.DB_PASSWORD || 'password',
                 ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
                 max: 20, // Máximo número de conexiones
                 idleTimeoutMillis: 30000,
                 connectionTimeoutMillis: 2000,
             };
-
-            this.pool = new Pool(config);
+            
+            // Si tenemos DATABASE_URL, usarla (Railway la proporciona)
+            if (process.env.DATABASE_URL) {
+                this.pool = new Pool({
+                    connectionString: process.env.DATABASE_URL,
+                    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+                    max: 20,
+                    idleTimeoutMillis: 30000,
+                    connectionTimeoutMillis: 2000,
+                });
+            } else {
+                this.pool = new Pool(config);
+            }
             
             // Probar conexión
             const client = await this.pool.connect();
