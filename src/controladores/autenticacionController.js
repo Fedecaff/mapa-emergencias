@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import baseDeDatos from '../modelos/baseDeDatos.js';
+import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'mapa-emergencias-secret-key';
 

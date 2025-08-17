@@ -1,4 +1,4 @@
-import baseDeDatos from '../modelos/baseDeDatos.js';
+import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 
 class PuntosController {
     // Obtener todos los puntos (con filtros opcionales)

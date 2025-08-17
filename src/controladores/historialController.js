@@ -1,4 +1,4 @@
-import baseDeDatos from '../modelos/baseDeDatos.js';
+import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 
 class HistorialController {
     // Obtener historial de cambios (solo administradores)

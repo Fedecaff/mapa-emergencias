@@ -1,4 +1,4 @@
-import baseDeDatos from '../modelos/baseDeDatos.js';
+import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 
 class CategoriasController {
     // Obtener todas las categorías
