@@ -124,9 +124,9 @@ bombero/
 -- Tabla de usuarios
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
     nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    contraseña VARCHAR(255) NOT NULL,
     rol VARCHAR(50) DEFAULT 'usuario',
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -155,23 +155,25 @@ CREATE TABLE puntos (
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla de historial
-CREATE TABLE historial (
+-- Tabla de historial de cambios
+CREATE TABLE historial_cambios (
     id SERIAL PRIMARY KEY,
+    tabla VARCHAR(100) NOT NULL,
+    registro_id INTEGER NOT NULL,
     accion VARCHAR(50) NOT NULL,
-    tabla VARCHAR(50) NOT NULL,
-    registro_id INTEGER,
     datos_anteriores JSONB,
     datos_nuevos JSONB,
     usuario_id INTEGER REFERENCES usuarios(id),
-    fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 ### **Datos Iniciales**
 - **Categorías:** Hidrantes, Comisarías, Escuelas, Hospitales
-- **Usuario Admin:** admin@test.com / admin123
-- **Puntos de ejemplo** en Catamarca
+- **Usuarios Admin:** 
+  - federico.gomez.sc@gmail.com / admin123
+  - admin@test.com / admin123
+- **Puntos:** Se crean manualmente según necesidades
 
 ---
 
@@ -222,8 +224,8 @@ PUERTO=8080
 - **Escalabilidad:** Automática según demanda
 
 ### **URLs de Producción**
-- **Frontend:** https://mapa-emergencias-catamarca.up.railway.app
-- **API:** https://mapa-emergencias-catamarca.up.railway.app/api
+- **Frontend:** https://web-production-a73f.up.railway.app
+- **API:** https://web-production-a73f.up.railway.app/api
 - **Base de Datos:** PostgreSQL en Railway
 
 ---
@@ -236,10 +238,12 @@ PUERTO=8080
 - **Mobile:** 320px - 767px
 
 ### **Características Mobile**
-- **Touch-friendly** interfaces
-- **Gestos** de zoom y pan
-- **Botones** optimizados para touch
-- **Navegación** simplificada
+- **Sidebar colapsable** para optimizar espacio
+- **Botones táctiles** optimizados para touch
+- **Mapa más grande** en pantallas pequeñas
+- **Marcadores más grandes** para mejor visibilidad
+- **Formularios responsive** adaptados a móviles
+- **Navegación simplificada** con controles accesibles
 
 ---
 
@@ -326,19 +330,27 @@ npm run migrate    # Migrar datos
 
 ## 🚨 **RESOLUCIÓN DE PROBLEMAS**
 
-### **Errores Comunes**
+### **Errores Comunes y Soluciones**
 
-1. **Error de búsqueda:**
-   - **Causa:** Referencia a elementos eliminados
-   - **Solución:** Código actualizado con radio fijo
+1. **Error de búsqueda por proximidad:**
+   - **Causa:** Placeholders SQL incorrectos
+   - **Solución:** Placeholders dinámicos implementados
 
-2. **Error de conexión:**
+2. **Error de creación/edición de puntos:**
+   - **Causa:** Referencias incorrectas a métodos
+   - **Solución:** Referencias corregidas en controladores
+
+3. **Error de conexión a base de datos:**
    - **Causa:** Variables de entorno incorrectas
-   - **Solución:** Verificar configuración Railway
+   - **Solución:** Configuración Railway verificada
 
-3. **Error de autenticación:**
+4. **Error de autenticación:**
    - **Causa:** Token expirado o inválido
-   - **Solución:** Re-login automático
+   - **Solución:** Re-login automático implementado
+
+5. **Pérdida de datos:**
+   - **Causa:** Recreación de tablas durante migración
+   - **Solución:** Base de datos PostgreSQL persistente
 
 ### **Debugging**
 - **Console logs** en frontend
@@ -379,4 +391,12 @@ El sistema "Mapa de Emergencias Catamarca" representa una solución completa y r
 
 La migración exitosa a PostgreSQL y el despliegue en Railway garantizan la persistencia de datos y la disponibilidad del servicio, mientras que las mejoras continuas en la interfaz de usuario y la funcionalidad mobile aseguran una experiencia óptima para todos los usuarios.
 
-**Estado del Proyecto:** ✅ **PRODUCCIÓN - FUNCIONANDO**
+**Estado del Proyecto:** ✅ **PRODUCCIÓN - FUNCIONANDO Y OPTIMIZADO**
+
+### **Últimas Mejoras Implementadas**
+- ✅ **Migración completa a PostgreSQL** con persistencia de datos
+- ✅ **Corrección de errores** en controladores y placeholders SQL
+- ✅ **Optimización móvil** con sidebar colapsable y controles táctiles
+- ✅ **Búsqueda por proximidad** funcionando correctamente
+- ✅ **Sistema de historial** operativo
+- ✅ **Gestión completa de usuarios** y puntos de emergencia
