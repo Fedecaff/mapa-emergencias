@@ -137,7 +137,6 @@ class App {
         
         // Actualizar en resize
         window.addEventListener('resize', showToggleButton);
-    }
         
         // Evento de visibilidad de página
         document.addEventListener('visibilitychange', () => {
