@@ -8,7 +8,7 @@
     "dev": "nodemon src/configuracion/servidor.js",
     "init-db": "node src/modelos/baseDeDatosPostgres.js",
     "migrate": "node migrate-to-postgres.js",
-    "build": "echo 'Build completado - Frontend listo para producción'",
+    "build": "echo 'Build completado'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

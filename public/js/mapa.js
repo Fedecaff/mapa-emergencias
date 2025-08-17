@@ -425,11 +425,10 @@ class MapManager {
                 .bindPopup(`<b>Búsqueda:</b> ${location.display_name}`);
             
             // Cargar puntos cercanos a la ubicación encontrada
-            const radius = document.getElementById('radiusSlider').value;
             this.loadPoints({
                 latitud: lat,
                 longitud: lon,
-                radio: radius
+                radio: 5 // Radio fijo de 5km
             });
             
             Notifications.success(`Ubicación encontrada: ${location.display_name}`);
