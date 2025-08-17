@@ -158,7 +158,7 @@ class PuntosController {
 
             // Verificar si el punto existe
             const puntoExistente = await baseDeDatos.obtenerUno(
-                'SELECT * FROM puntos WHERE id = $8',
+                'SELECT * FROM puntos WHERE id = $1',
                 [id]
             );
 
@@ -186,7 +186,7 @@ class PuntosController {
             // Verificar que la categoría existe si se cambia
             if (categoria_id && categoria_id !== puntoExistente.categoria_id) {
                 const categoria = await baseDeDatos.obtenerUno(
-                    'SELECT id FROM categorias WHERE id = $8',
+                    'SELECT id FROM categorias WHERE id = $1',
                     [categoria_id]
                 );
 
@@ -243,7 +243,7 @@ class PuntosController {
 
             // Verificar si el punto existe
             const punto = await baseDeDatos.obtenerUno(
-                'SELECT * FROM puntos WHERE id = $8',
+                'SELECT * FROM puntos WHERE id = $1',
                 [id]
             );
 
@@ -258,7 +258,7 @@ class PuntosController {
 
             // Eliminar punto (soft delete)
             await baseDeDatos.ejecutar(
-                'UPDATE puntos SET estado = "eliminado", fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = $8',
+                'UPDATE puntos SET estado = \'eliminado\', fecha_actualizacion = CURRENT_TIMESTAMP WHERE id = $1',
                 [id]
             );
 
