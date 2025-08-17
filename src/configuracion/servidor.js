@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -5,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Importar base de datos
-import baseDeDatos from '../modelos/baseDeDatos.js';
+import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
