@@ -323,20 +323,20 @@ class PuntosController {
             const puntos = await baseDeDatos.obtenerTodos(`
                 SELECT p.*, c.nombre as categoria_nombre, c.icono, c.color,
                 (6371 * acos(
-                    cos(radians($35)) * cos(radians(p.latitud)) * 
-                    cos(radians(p.longitud) - radians($36)) + 
-                    sin(radians($37)) * sin(radians(p.latitud))
+                    cos(radians($1)) * cos(radians(p.latitud)) * 
+                    cos(radians(p.longitud) - radians($2)) + 
+                    sin(radians($1)) * sin(radians(p.latitud))
                 )) as distancia
                 FROM puntos p 
                 JOIN categorias c ON p.categoria_id = c.id 
                 WHERE p.estado = 'activo'
                 AND (6371 * acos(
-                    cos(radians($38)) * cos(radians(p.latitud)) * 
-                    cos(radians(p.longitud) - radians($39)) + 
-                    sin(radians($40)) * sin(radians(p.latitud))
-                )) <= $41
+                    cos(radians($3)) * cos(radians(p.latitud)) * 
+                    cos(radians(p.longitud) - radians($4)) + 
+                    sin(radians($3)) * sin(radians(p.latitud))
+                )) <= $5
                 ORDER BY distancia
-            `, [parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(radio)]);
+            `, [parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(longitud), parseFloat(radio)]);
 
             res.json({
                 puntos: puntos.map(punto => ({
@@ -362,8 +362,8 @@ class PuntosController {
                     tabla,
                     registroId,
                     accion,
-                    datosAnteriores JSON.stringify(datosAnteriores) : null,
-                    datosNuevos JSON.stringify(datosNuevos) : null,
+                    datosAnteriores ? JSON.stringify(datosAnteriores) : null,
+                    datosNuevos ? JSON.stringify(datosNuevos) : null,
                     usuarioId
                 ]
             );
