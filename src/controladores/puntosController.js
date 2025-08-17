@@ -22,13 +22,14 @@ class PuntosController {
 
             // Filtro por proximidad (radio en km)
             if (latitud && longitud && radio) {
+                const paramIndex = parametros.length + 1;
                 sql += ` AND (
                     6371 * acos(
-                        cos(radians($2)) * cos(radians(p.latitud)) * 
-                        cos(radians(p.longitud) - radians($3)) + 
-                        sin(radians($4)) * sin(radians(p.latitud))
+                        cos(radians($${paramIndex})) * cos(radians(p.latitud)) * 
+                        cos(radians(p.longitud) - radians($${paramIndex + 1})) + 
+                        sin(radians($${paramIndex + 2})) * sin(radians(p.latitud))
                     )
-                ) <= $5`;
+                ) <= $${paramIndex + 3}`;
                 parametros.push(parseFloat(latitud), parseFloat(longitud), parseFloat(latitud), parseFloat(radio));
             }
 
