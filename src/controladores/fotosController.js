@@ -11,13 +11,9 @@ class FotosController {
     // Subir foto para un punto
     async subirFoto(req, res) {
         try {
-            console.log('📸 Iniciando subida de foto...');
-            console.log('👤 Usuario:', req.usuario);
-            console.log('📁 Archivo recibido:', req.file ? 'Sí' : 'No');
             
             // Verificar que el usuario sea administrador
             if (req.usuario.rol !== 'admin') {
-                console.log('❌ Usuario no es admin:', req.usuario.rol);
                 return res.status(403).json({
                     error: 'Solo los administradores pueden subir fotos'
                 });
@@ -82,10 +78,6 @@ class FotosController {
             }
 
             // Subir imagen a Cloudinary
-            console.log('☁️ Subiendo imagen a Cloudinary...');
-            console.log('📁 Ruta del archivo:', req.file.path);
-            console.log('📏 Tamaño del archivo:', req.file.size);
-            console.log('📋 Tipo MIME:', req.file.mimetype);
             
             let result;
             try {
@@ -97,11 +89,7 @@ class FotosController {
                         { width: 200, height: 200, crop: 'fill' }   // Miniatura
                     ]
                 });
-                
-                console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
-                console.log('🆔 Public ID:', result.public_id);
             } catch (cloudinaryError) {
-                console.error('❌ Error subiendo a Cloudinary:', cloudinaryError);
                 throw new Error(`Error subiendo a Cloudinary: ${cloudinaryError.message}`);
             }
             
@@ -109,7 +97,7 @@ class FotosController {
             try {
                 fs.unlinkSync(req.file.path);
             } catch (cleanupError) {
-                console.error('Error limpiando archivo temporal:', cleanupError);
+                // Ignorar error de limpieza
             }
             
             // Generar nombre único para el archivo
@@ -213,9 +201,7 @@ class FotosController {
             if (foto.public_id) {
                 try {
                     await cloudinary.uploader.destroy(foto.public_id);
-                    console.log('🗑️ Imagen eliminada de Cloudinary:', foto.public_id);
                 } catch (cloudinaryError) {
-                    console.error('Error eliminando de Cloudinary:', cloudinaryError);
                     // Continuar aunque falle la eliminación de Cloudinary
                 }
             }
