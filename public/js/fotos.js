@@ -88,29 +88,34 @@ class FotosManager {
             return;
         }
 
-        const fotosHTML = this.fotos.map(foto => `
-            <div class="foto-item" data-foto-id="${foto.id}">
-                <div class="foto-preview">
-                    <img src="${foto.ruta_archivo}" alt="Foto del punto" 
-                         onclick="window.fotosManager.mostrarFotoCompleta('${foto.ruta_archivo}')">
-                    <div class="foto-overlay">
-                        <button class="btn-ver-foto" data-foto-url="${foto.ruta_archivo}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                                                 ${window.auth.currentUser?.rol === 'admin' ? `
-                             <button class="btn-eliminar-foto" data-foto-id="${foto.id}">
-                                 <i class="fas fa-trash"></i>
-                             </button>
-                         ` : ''}
+        const fotosHTML = this.fotos.map(foto => {
+            // Escapar la data URL para el HTML
+            const escapedUrl = foto.ruta_archivo.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            
+            return `
+                <div class="foto-item" data-foto-id="${foto.id}">
+                    <div class="foto-preview">
+                        <img src="${foto.ruta_archivo}" alt="Foto del punto" 
+                             onclick="window.fotosManager.mostrarFotoCompleta('${escapedUrl}')">
+                        <div class="foto-overlay">
+                            <button class="btn-ver-foto" data-foto-url="${escapedUrl}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            ${window.auth.currentUser?.rol === 'admin' ? `
+                                <button class="btn-eliminar-foto" data-foto-id="${foto.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="foto-info">
+                        <p class="foto-descripcion">${foto.descripcion || 'Sin descripción'}</p>
+                        <small class="foto-fecha">${new Date(foto.fecha_subida).toLocaleDateString()}</small>
+                        ${foto.usuario_nombre ? `<small class="foto-usuario">Por: ${foto.usuario_nombre}</small>` : ''}
                     </div>
                 </div>
-                <div class="foto-info">
-                    <p class="foto-descripcion">${foto.descripcion || 'Sin descripción'}</p>
-                    <small class="foto-fecha">${new Date(foto.fecha_subida).toLocaleDateString()}</small>
-                    ${foto.usuario_nombre ? `<small class="foto-usuario">Por: ${foto.usuario_nombre}</small>` : ''}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         contenedorFotos.innerHTML = fotosHTML;
     }
