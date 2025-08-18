@@ -14,6 +14,7 @@ import rutasPuntos from '../rutas/puntos.js';
 import rutasCategorias from '../rutas/categorias.js';
 import rutasHistorial from '../rutas/historial.js';
 import rutasUsuarios from '../rutas/usuarios.js';
+import rutasFotos from '../rutas/fotos.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,7 @@ app.use('/api/puntos', rutasPuntos);
 app.use('/api/categorias', rutasCategorias);
 app.use('/api/historial', rutasHistorial);
 app.use('/api/usuarios', rutasUsuarios);
+app.use('/api/fotos', rutasFotos);
 
 // Ruta principal
 app.get('/', (req, res) => {

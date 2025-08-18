@@ -92,10 +92,10 @@ class BaseDeDatosPostgres {
             SELECT COUNT(*) as count 
             FROM information_schema.tables 
             WHERE table_schema = 'public' 
-            AND table_name IN ('usuarios', 'categorias', 'puntos', 'historial_cambios')
+            AND table_name IN ('usuarios', 'categorias', 'puntos', 'historial_cambios', 'fotos_puntos')
         `);
         
-        if (parseInt(tablasExistentes.count) === 4) {
+        if (parseInt(tablasExistentes.count) === 5) {
             console.log('ℹ️ Las tablas ya existen, saltando creación...');
             return;
         }
@@ -158,12 +158,30 @@ class BaseDeDatosPostgres {
             )
         `);
 
+        // Tabla fotos de puntos
+        await this.ejecutar(`
+            CREATE TABLE IF NOT EXISTS fotos_puntos (
+                id SERIAL PRIMARY KEY,
+                punto_id INTEGER NOT NULL REFERENCES puntos(id) ON DELETE CASCADE,
+                nombre_archivo VARCHAR(255) NOT NULL,
+                ruta_archivo VARCHAR(500) NOT NULL,
+                ruta_miniatura VARCHAR(500),
+                descripcion TEXT,
+                tamaño_bytes INTEGER,
+                tipo_mime VARCHAR(100),
+                usuario_id INTEGER REFERENCES usuarios(id),
+                fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Índices para mejor rendimiento
         await this.ejecutar(`
             CREATE INDEX IF NOT EXISTS idx_puntos_categoria ON puntos(categoria_id);
             CREATE INDEX IF NOT EXISTS idx_puntos_estado ON puntos(estado);
             CREATE INDEX IF NOT EXISTS idx_historial_tabla ON historial_cambios(tabla);
             CREATE INDEX IF NOT EXISTS idx_historial_fecha ON historial_cambios(fecha_cambio);
+            CREATE INDEX IF NOT EXISTS idx_fotos_punto ON fotos_puntos(punto_id);
+            CREATE INDEX IF NOT EXISTS idx_fotos_usuario ON fotos_puntos(usuario_id);
         `);
 
         console.log('✅ Tablas inicializadas correctamente en PostgreSQL');
