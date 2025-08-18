@@ -84,30 +84,29 @@ class FotosController {
             // Subir imagen a Cloudinary
             console.log('☁️ Subiendo imagen a Cloudinary...');
             
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'mapa-emergencias',
+                public_id: `punto_${punto_id}_${Date.now()}`,
+                transformation: [
+                    { width: 800, height: 600, crop: 'limit' }, // Versión principal
+                    { width: 200, height: 200, crop: 'fill' }   // Miniatura
+                ]
+            });
+            
+            console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
+            
+            // Limpiar archivo temporal
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
-                    folder: 'mapa-emergencias',
-                    public_id: `punto_${punto_id}_${Date.now()}`,
-                    transformation: [
-                        { width: 800, height: 600, crop: 'limit' }, // Versión principal
-                        { width: 200, height: 200, crop: 'fill' }   // Miniatura
-                    ]
-                });
-                
-                console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
-                
-                // Limpiar archivo temporal
-                try {
-                    fs.unlinkSync(req.file.path);
-                } catch (cleanupError) {
-                    console.error('Error limpiando archivo temporal:', cleanupError);
-                }
-                
-                // Generar nombre único para el archivo
-                const extension = path.extname(req.file.originalname);
-                const nombreArchivo = `foto_${punto_id}_${Date.now()}${extension}`;
-                const rutaArchivo = result.secure_url; // URL de Cloudinary
-                const publicId = result.public_id; // Para eliminar después
+                fs.unlinkSync(req.file.path);
+            } catch (cleanupError) {
+                console.error('Error limpiando archivo temporal:', cleanupError);
+            }
+            
+            // Generar nombre único para el archivo
+            const extension = path.extname(req.file.originalname);
+            const nombreArchivo = `foto_${punto_id}_${Date.now()}${extension}`;
+            const rutaArchivo = result.secure_url; // URL de Cloudinary
+            const publicId = result.public_id; // Para eliminar después
 
             // Insertar registro en la base de datos
             const resultado = await baseDeDatos.ejecutar(
