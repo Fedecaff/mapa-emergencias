@@ -839,7 +839,8 @@ class MapManager {
     onUserLogout() {
         // Limpiar marcadores temporales y resetear estado
         this.stopAddingPoint();
-        this.loadPoints();
+        // NO cargar puntos cuando el usuario hace logout
+        console.log('🚫 Usuario hizo logout - no cargando puntos');
     }
     
     async handleEditPoint() {
