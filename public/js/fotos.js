@@ -94,11 +94,11 @@ class FotosManager {
                         <button class="btn-ver-foto" data-foto-url="${foto.ruta_archivo}">
                             <i class="fas fa-eye"></i>
                         </button>
-                        ${window.Auth.currentUser?.rol === 'admin' ? `
-                            <button class="btn-eliminar-foto" data-foto-id="${foto.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        ` : ''}
+                                                 ${window.auth.currentUser?.rol === 'admin' ? `
+                             <button class="btn-eliminar-foto" data-foto-id="${foto.id}">
+                                 <i class="fas fa-trash"></i>
+                             </button>
+                         ` : ''}
                     </div>
                 </div>
                 <div class="foto-info">
@@ -118,7 +118,7 @@ class FotosManager {
             return;
         }
 
-        if (window.Auth.currentUser?.rol !== 'admin') {
+        if (window.auth.currentUser?.rol !== 'admin') {
             Notifications.error('Solo los administradores pueden subir fotos');
             return;
         }
@@ -147,7 +147,7 @@ class FotosManager {
             const response = await fetch(`${API.API_URL}/fotos/subir`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${window.Auth.token}`
+                    'Authorization': `Bearer ${window.auth.token}`
                 },
                 body: formData
             });
