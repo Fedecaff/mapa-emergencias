@@ -122,7 +122,7 @@ class FotosController {
                 VALUES ($1, $2, $3, $4, $5)`,
                 ['fotos_puntos', resultado.rows[0].id, 'crear', JSON.stringify({
                     punto_id,
-                    nombre_archivo,
+                    nombre_archivo: nombreArchivo,
                     descripcion
                 }), req.usuario.id]
             );

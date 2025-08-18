@@ -72,6 +72,13 @@ class Modal {
         const modal = document.getElementById(modalId);
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
+        
+        // Agregar evento para cerrar al hacer clic fuera
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.hide(modalId);
+            }
+        });
     }
     
     static hide(modalId) {

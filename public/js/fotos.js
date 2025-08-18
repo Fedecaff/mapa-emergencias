@@ -40,6 +40,11 @@ class FotosManager {
                     this.cerrarModales();
                 }
             }
+            
+            // Cerrar al hacer clic fuera del contenido del modal
+            if (e.target.classList.contains('modal')) {
+                this.cerrarModales();
+            }
         });
 
         // Evento para subir foto
