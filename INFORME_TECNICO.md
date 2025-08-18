@@ -49,25 +49,29 @@ bombero/
 │   │   ├── autenticacion.js        # Sistema de login/logout
 │   │   ├── administracion.js       # Panel de administración
 │   │   ├── usuarios.js             # Gestión de usuarios
+│   │   ├── fotos.js                # Gestión de fotos
 │   │   ├── utilidades.js           # Funciones auxiliares
 │   │   └── config.js               # Configuración de API
 │   └── index.html                  # Página principal
 ├── src/
 │   ├── configuracion/
-│   │   └── servidor.js             # Configuración del servidor Express
+│   │   ├── servidor.js             # Configuración del servidor Express
+│   │   └── cloudinary.js           # Configuración de Cloudinary
 │   ├── controladores/
 │   │   ├── puntosController.js     # Lógica de puntos de emergencia
 │   │   ├── categoriasController.js # Lógica de categorías
 │   │   ├── autenticacionController.js # Lógica de autenticación
-│   │   └── usuariosController.js   # Lógica de usuarios
+│   │   ├── usuariosController.js   # Lógica de usuarios
+│   │   └── fotosController.js      # Lógica de gestión de fotos
 │   ├── modelos/
-│   │   ├── baseDeDatos.js          # Base de datos SQLite (legacy)
-│   │   └── baseDeDatosPostgres.js  # Base de datos PostgreSQL (actual)
+│   │   ├── baseDeDatosPostgres.js  # Base de datos PostgreSQL (actual)
+│   │   └── actualizarTablaFotos.js # Script de actualización de BD
 │   ├── rutas/
 │   │   ├── puntos.js               # Rutas API para puntos
 │   │   ├── categorias.js           # Rutas API para categorías
 │   │   ├── autenticacion.js        # Rutas API para autenticación
-│   │   └── usuarios.js             # Rutas API para usuarios
+│   │   ├── usuarios.js             # Rutas API para usuarios
+│   │   └── fotos.js                # Rutas API para gestión de fotos
 │   └── middleware/
 │       └── autenticacion.js        # Middleware de autenticación
 ├── package.json                     # Dependencias y scripts
@@ -98,6 +102,23 @@ bombero/
   - Zoom y navegación interactiva
 
 ### **3. Gestión de Puntos de Emergencia**
+- **CRUD completo:** Crear, Leer, Actualizar, Eliminar
+- **Categorías:** Hidrantes, Comisarías, Escuelas, Hospitales
+- **Campos personalizados:** Cada categoría tiene campos específicos
+- **Validación:** Coordenadas, campos obligatorios
+- **Historial:** Registro de todos los cambios
+
+### **4. Sistema de Gestión de Fotos** ⭐ **NUEVO**
+- **Subida de fotos:** Desde galería del dispositivo móvil
+- **Almacenamiento:** Cloudinary (servicio profesional en la nube)
+- **Optimización móvil:** Fotos se ven perfectamente en PC y móvil
+- **Límites de seguridad:** 5 fotos máximo por punto, 5MB por foto
+- **Formatos soportados:** JPG, PNG, HEIC
+- **Control de acceso:** Solo administradores pueden subir/eliminar
+- **Historial completo:** Registro de todas las acciones de fotos
+- **UX mejorada:** Cerrar modales al hacer clic fuera
+- **Vista previa:** Antes de subir la foto
+- **Eliminación segura:** Se elimina de Cloudinary y base de datos
 - **Categorías:** Hidrantes, Comisarías, Escuelas, Hospitales
 - **Operaciones:** Crear, Editar, Eliminar, Visualizar
 - **Campos personalizados** por categoría (texto libre)
@@ -166,6 +187,21 @@ CREATE TABLE historial_cambios (
     usuario_id INTEGER REFERENCES usuarios(id),
     fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Tabla de fotos de puntos ⭐ NUEVA
+CREATE TABLE fotos_puntos (
+    id SERIAL PRIMARY KEY,
+    punto_id INTEGER NOT NULL REFERENCES puntos(id) ON DELETE CASCADE,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    ruta_archivo TEXT NOT NULL,
+    ruta_miniatura TEXT,
+    descripcion TEXT,
+    tamaño_bytes INTEGER,
+    tipo_mime VARCHAR(100),
+    usuario_id INTEGER REFERENCES usuarios(id),
+    public_id VARCHAR(255),
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ### **Datos Iniciales**
@@ -206,6 +242,11 @@ JWT_SECRET=tu_secreto_jwt
 
 # Servidor
 PUERTO=8080
+
+# Cloudinary (Gestión de Fotos) ⭐ NUEVO
+CLOUDINARY_CLOUD_NAME=tu_cloud_name
+CLOUDINARY_API_KEY=tu_api_key
+CLOUDINARY_API_SECRET=tu_api_secret
 ```
 
 ---
@@ -244,6 +285,12 @@ PUERTO=8080
 - **Marcadores más grandes** para mejor visibilidad
 - **Formularios responsive** adaptados a móviles
 - **Navegación simplificada** con controles accesibles
+- **Sistema de fotos móvil** ⭐ **NUEVO**
+  - Subida desde galería del dispositivo
+  - Vista previa antes de subir
+  - Optimización automática de imágenes
+  - Interfaz táctil para gestión de fotos
+  - Modales que se cierran al tocar fuera
 
 ---
 
@@ -287,6 +334,8 @@ Usuario → Dirección → Nominatim API → Coordenadas → Filtrar Puntos
 - **pg:** Cliente PostgreSQL para Node.js
 - **JWT:** Autenticación stateless
 - **bcrypt:** Hash de contraseñas
+- **Cloudinary:** ⭐ **NUEVO** Gestión de imágenes en la nube
+- **Multer:** ⭐ **NUEVO** Manejo de subida de archivos
 
 ### **DevOps**
 - **Git:** Control de versiones
@@ -352,6 +401,18 @@ npm run migrate    # Migrar datos
    - **Causa:** Recreación de tablas durante migración
    - **Solución:** Base de datos PostgreSQL persistente
 
+6. **Error de subida de fotos (Cloudinary):** ⭐ **NUEVO**
+   - **Causa:** Variables de scope incorrectas en JavaScript
+   - **Solución:** Declaración correcta de variables `result`, `nombreArchivo`, `rutaArchivo`
+
+7. **Error de columna `public_id` no existe:** ⭐ **NUEVO**
+   - **Causa:** Tabla `fotos_puntos` sin columna para Cloudinary
+   - **Solución:** Script automático de actualización de base de datos
+
+8. **Error 404 en carga de fotos:** ⭐ **NUEVO**
+   - **Causa:** Referencias a rutas antiguas de archivos locales
+   - **Solución:** Migración completa a URLs de Cloudinary
+
 ### **Debugging**
 - **Console logs** en frontend
 - **Railway logs** en backend
@@ -400,3 +461,10 @@ La migración exitosa a PostgreSQL y el despliegue en Railway garantizan la pers
 - ✅ **Búsqueda por proximidad** funcionando correctamente
 - ✅ **Sistema de historial** operativo
 - ✅ **Gestión completa de usuarios** y puntos de emergencia
+- ✅ **Sistema de gestión de fotos** ⭐ **NUEVO**
+  - Integración con Cloudinary para almacenamiento profesional
+  - Subida desde galería móvil con optimización automática
+  - Límites de seguridad (5 fotos por punto, 5MB por foto)
+  - Control de acceso solo para administradores
+  - Historial completo de acciones de fotos
+  - UX mejorada con cierre de modales al hacer clic fuera
