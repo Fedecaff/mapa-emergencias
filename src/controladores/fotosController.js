@@ -87,8 +87,9 @@ class FotosController {
             console.log('📏 Tamaño del archivo:', req.file.size);
             console.log('📋 Tipo MIME:', req.file.mimetype);
             
+            let result;
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
+                result = await cloudinary.uploader.upload(req.file.path, {
                     folder: 'mapa-emergencias',
                     public_id: `punto_${punto_id}_${Date.now()}`,
                     transformation: [
