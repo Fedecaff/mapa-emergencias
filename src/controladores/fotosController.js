@@ -133,7 +133,7 @@ class FotosController {
                     id: resultado.rows[0].id,
                     punto_id,
                     nombre_archivo: nombreArchivo,
-                    ruta_archivo,
+                    ruta_archivo: rutaArchivo,
                     descripcion,
                     fecha_subida: new Date()
                 }
