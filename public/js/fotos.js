@@ -144,7 +144,7 @@ class FotosManager {
         try {
             Loading.show();
             
-            const response = await fetch(`${API.API_URL}/fotos/subir`, {
+            const response = await fetch(`${API_BASE_URL}/fotos/subir`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${window.auth.token}`
