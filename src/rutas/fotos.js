@@ -2,14 +2,16 @@ import express from 'express';
 import multer from 'multer';
 import fotosController from '../controladores/fotosController.js';
 import { verificarToken, verificarAdmin } from '../middleware/autenticacion.js';
-import path from 'path'; // Added missing import for path
+import path from 'path';
+import os from 'os';
 
 const router = express.Router();
 
 // Configuración de multer para subida de archivos
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'temp/') // Directorio temporal
+        // Usar directorio temporal del sistema
+        cb(null, os.tmpdir());
     },
     filename: function (req, file, cb) {
         // Generar nombre único temporal

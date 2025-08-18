@@ -32,10 +32,13 @@ class FotosManager {
             }
         });
 
-        // Evento para cerrar modales
+        // Evento para cerrar modales de fotos
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('btn-cerrar')) {
-                this.cerrarModales();
+            if (e.target.classList.contains('btn-cerrar')) {
+                const modal = e.target.closest('.modal');
+                if (modal && ['modalFotos', 'modalSubirFoto', 'modalFotoCompleta'].includes(modal.id)) {
+                    this.cerrarModales();
+                }
             }
         });
 
@@ -248,9 +251,13 @@ class FotosManager {
     }
 
     cerrarModales() {
-        const modales = document.querySelectorAll('.modal');
-        modales.forEach(modal => {
-            modal.style.display = 'none';
+        // Solo cerrar los modales específicos de fotos
+        const modalesFotos = ['modalFotos', 'modalSubirFoto', 'modalFotoCompleta'];
+        modalesFotos.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
         });
     }
 
