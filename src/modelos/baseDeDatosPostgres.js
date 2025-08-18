@@ -87,12 +87,24 @@ class BaseDeDatosPostgres {
     async inicializarTablas() {
         console.log('📋 Inicializando tablas en PostgreSQL...');
         
-        // Eliminar tabla usuarios si existe para recrearla con el esquema correcto
-        await this.ejecutar(`DROP TABLE IF EXISTS usuarios CASCADE`);
+        // Verificar si las tablas ya existen
+        const tablasExistentes = await this.obtenerUno(`
+            SELECT COUNT(*) as count 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name IN ('usuarios', 'categorias', 'puntos', 'historial_cambios')
+        `);
+        
+        if (parseInt(tablasExistentes.count) === 4) {
+            console.log('ℹ️ Las tablas ya existen, saltando creación...');
+            return;
+        }
+        
+        console.log('🔄 Creando tablas...');
         
         // Tabla usuarios
         await this.ejecutar(`
-            CREATE TABLE usuarios (
+            CREATE TABLE IF NOT EXISTS usuarios (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
@@ -102,13 +114,9 @@ class BaseDeDatosPostgres {
             )
         `);
 
-        // Eliminar tablas si existen
-        await this.ejecutar(`DROP TABLE IF EXISTS puntos CASCADE`);
-        await this.ejecutar(`DROP TABLE IF EXISTS categorias CASCADE`);
-        
         // Tabla categorias
         await this.ejecutar(`
-            CREATE TABLE categorias (
+            CREATE TABLE IF NOT EXISTS categorias (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 descripcion TEXT,
@@ -122,7 +130,7 @@ class BaseDeDatosPostgres {
 
         // Tabla puntos
         await this.ejecutar(`
-            CREATE TABLE puntos (
+            CREATE TABLE IF NOT EXISTS puntos (
                 id SERIAL PRIMARY KEY,
                 nombre VARCHAR(255) NOT NULL,
                 descripcion TEXT,
@@ -135,13 +143,10 @@ class BaseDeDatosPostgres {
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
-
-        // Eliminar tabla historial si existe
-        await this.ejecutar(`DROP TABLE IF EXISTS historial_cambios CASCADE`);
         
         // Tabla historial de cambios
         await this.ejecutar(`
-            CREATE TABLE historial_cambios (
+            CREATE TABLE IF NOT EXISTS historial_cambios (
                 id SERIAL PRIMARY KEY,
                 tabla VARCHAR(100) NOT NULL,
                 registro_id INTEGER NOT NULL,
