@@ -9,7 +9,7 @@ class AutenticacionController {
     async login(req, res) {
         try {
             console.log('🔐 Intentando login con:', { email: req.body.email });
-            const { email, password } = req.body;
+            const { email, password, rememberMe } = req.body;
 
             // Validar campos requeridos
             if (!email || !password) {
@@ -47,7 +47,8 @@ class AutenticacionController {
             
             console.log('✅ Contraseña válida');
 
-            // Generar token JWT
+            // Generar token JWT con duración extendida si se selecciona "Mantener sesión"
+            const expiresIn = rememberMe ? '30d' : '24h';
             const token = jwt.sign(
                 {
                     id: usuario.id,
@@ -55,7 +56,7 @@ class AutenticacionController {
                     rol: usuario.rol
                 },
                 JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn }
             );
 
             // Enviar respuesta

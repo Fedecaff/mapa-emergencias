@@ -1053,3 +1053,64 @@ body {
 #historyModal .modal-body {
     padding: 0;
 }
+
+/* Estilos para checkbox personalizado */
+.checkbox-group {
+    margin-bottom: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--dark-gray);
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    height: 18px;
+    width: 18px;
+    background-color: var(--white);
+    border: 2px solid var(--secondary-color);
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    position: relative;
+    transition: var(--transition);
+}
+
+.checkbox-label:hover input ~ .checkmark {
+    background-color: #f0f8ff;
+}
+
+.checkbox-label input:checked ~ .checkmark {
+    background-color: var(--secondary-color);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-label input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-label .checkmark:after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}

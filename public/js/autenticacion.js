@@ -190,18 +190,10 @@ class Auth {
         }
         
         try {
-            const response = await API.post('/autenticacion/verificar-token', {
-                token: this.token
-            });
-            
-            if (response.valid) {
-                return true;
-            } else {
-                this.logout();
-                return false;
-            }
+            const response = await API.get('/autenticacion/perfil');
+            return true;
         } catch (error) {
-            // Solo hacer logout si el error no es 401 (token inválido)
+            // Solo hacer logout si el token es inválido (401)
             if (error.message && error.message.includes('Token inválido')) {
                 this.logout();
             }
