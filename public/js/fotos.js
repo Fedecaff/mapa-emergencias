@@ -67,7 +67,7 @@ class FotosManager {
             this.mostrarModal('modalFotos');
         } catch (error) {
             console.error('Error cargando fotos:', error);
-            mostrarNotificacion('Error cargando fotos', 'error');
+            Notifications.error('Error cargando fotos');
         }
     }
 
@@ -114,12 +114,12 @@ class FotosManager {
 
     mostrarModalSubirFoto() {
         if (!this.currentPuntoId) {
-            mostrarNotificacion('Selecciona un punto primero', 'error');
+            Notifications.error('Selecciona un punto primero');
             return;
         }
 
         if (window.Auth.currentUser?.rol !== 'admin') {
-            mostrarNotificacion('Solo los administradores pueden subir fotos', 'error');
+            Notifications.error('Solo los administradores pueden subir fotos');
             return;
         }
 
@@ -133,7 +133,7 @@ class FotosManager {
         const inputDescripcion = document.getElementById('inputDescripcion');
 
         if (!inputFoto.files[0]) {
-            mostrarNotificacion('Selecciona una foto', 'error');
+            Notifications.error('Selecciona una foto');
             return;
         }
 
@@ -142,7 +142,7 @@ class FotosManager {
         formData.append('descripcion', inputDescripcion.value || '');
 
         try {
-            mostrarLoading('Subiendo foto...');
+            Loading.show();
             
             const response = await fetch(`${API.API_URL}/fotos/subir`, {
                 method: 'POST',
@@ -158,8 +158,8 @@ class FotosManager {
                 throw new Error(data.error || 'Error subiendo foto');
             }
 
-            ocultarLoading();
-            mostrarNotificacion('Foto subida exitosamente', 'success');
+            Loading.hide();
+            Notifications.success('Foto subida exitosamente');
             
             // Recargar fotos
             await this.mostrarModalFotos(this.currentPuntoId);
@@ -168,9 +168,9 @@ class FotosManager {
             this.cerrarModales();
             
         } catch (error) {
-            ocultarLoading();
+            Loading.hide();
             console.error('Error subiendo foto:', error);
-            mostrarNotificacion(error.message, 'error');
+            Notifications.error(error.message);
         }
     }
 
@@ -180,20 +180,20 @@ class FotosManager {
         }
 
         try {
-            mostrarLoading('Eliminando foto...');
+            Loading.show();
             
             await API.delete(`/fotos/${fotoId}`);
             
-            ocultarLoading();
-            mostrarNotificacion('Foto eliminada exitosamente', 'success');
+            Loading.hide();
+            Notifications.success('Foto eliminada exitosamente');
             
             // Recargar fotos
             await this.mostrarModalFotos(this.currentPuntoId);
             
         } catch (error) {
-            ocultarLoading();
+            Loading.hide();
             console.error('Error eliminando foto:', error);
-            mostrarNotificacion('Error eliminando foto', 'error');
+            Notifications.error('Error eliminando foto');
         }
     }
 
@@ -210,14 +210,14 @@ class FotosManager {
         // Validar tipo de archivo
         const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/heic'];
         if (!tiposPermitidos.includes(file.type)) {
-            mostrarNotificacion('Tipo de archivo no permitido. Solo JPG, PNG y HEIC', 'error');
+            Notifications.error('Tipo de archivo no permitido. Solo JPG, PNG y HEIC');
             return;
         }
 
         // Validar tamaño (5MB)
         const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
-            mostrarNotificacion('El archivo es demasiado grande. Máximo 5MB', 'error');
+            Notifications.error('El archivo es demasiado grande. Máximo 5MB');
             return;
         }
 
