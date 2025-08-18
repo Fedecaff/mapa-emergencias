@@ -334,6 +334,9 @@ class MapManager {
     }
     
     clearMarkers() {
+        console.log('🗑️ clearMarkers() ejecutado');
+        console.log('📊 Marcadores a limpiar:', this.markers.length);
+        
         this.markers.forEach(marker => {
             this.map.removeLayer(marker);
         });
@@ -341,13 +344,17 @@ class MapManager {
         
         // También limpiar marcadores de búsqueda y usuario
         if (this.searchMarker) {
+            console.log('🔍 Limpiando searchMarker en clearMarkers()');
             this.map.removeLayer(this.searchMarker);
             this.searchMarker = null;
         }
         if (this.userMarker) {
+            console.log('👤 Limpiando userMarker en clearMarkers()');
             this.map.removeLayer(this.userMarker);
             this.userMarker = null;
         }
+        
+        console.log('✅ clearMarkers() completado');
     }
     
     clearPointMarkers() {
@@ -359,28 +366,34 @@ class MapManager {
     }
 
     clearAllMarkers() {
+        console.log('🗑️ Iniciando limpieza de marcadores...');
+        console.log('📊 Marcadores antes de limpiar:', this.markers.length);
+        
         // Limpiar todos los marcadores (puntos, usuario y búsqueda)
         this.clearMarkers();
         
         // Limpiar marcador de búsqueda
         if (this.searchMarker) {
+            console.log('🔍 Limpiando marcador de búsqueda');
             this.map.removeLayer(this.searchMarker);
             this.searchMarker = null;
         }
         
         // Limpiar marcador del usuario
         if (this.userMarker) {
+            console.log('👤 Limpiando marcador del usuario');
             this.map.removeLayer(this.userMarker);
             this.userMarker = null;
         }
         
         // Limpiar marcador temporal
         if (this.tempMarker) {
+            console.log('⏰ Limpiando marcador temporal');
             this.map.removeLayer(this.tempMarker);
             this.tempMarker = null;
         }
         
-        console.log('🗑️ Todos los marcadores limpiados del mapa');
+        console.log('✅ Limpieza de marcadores completada');
     }
     
     filterMarkers() {

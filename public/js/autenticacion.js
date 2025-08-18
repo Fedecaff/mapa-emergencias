@@ -132,6 +132,8 @@ class Auth {
     }
     
     logout() {
+        console.log('🔐 Iniciando logout...');
+        
         this.token = null;
         this.currentUser = null;
         
@@ -139,9 +141,14 @@ class Auth {
         Storage.remove('token');
         Storage.remove('user');
         
+        console.log('🗑️ localStorage limpiado');
+        
         // Limpiar puntos del mapa cuando el usuario cierre sesión
         if (window.mapManager) {
+            console.log('🗺️ Limpiando marcadores del mapa...');
             window.mapManager.clearAllMarkers();
+        } else {
+            console.log('❌ mapManager no disponible');
         }
         
         // Actualizar UI
@@ -151,6 +158,7 @@ class Auth {
         window.dispatchEvent(new CustomEvent('userLogout'));
         
         Notifications.info('Sesión cerrada');
+        console.log('✅ Logout completado');
     }
     
     updateUI() {
