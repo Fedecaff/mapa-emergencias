@@ -313,6 +313,9 @@ class MapManager {
                 <button class="popup-btn" onclick="mapManager.showPointDetails(${point.id})">
                     <i class="fas fa-info-circle"></i> Ver detalles
                 </button>
+                <button class="btn-ver-fotos" data-punto-id="${point.id}">
+                    <i class="fas fa-camera"></i> Ver Fotos
+                </button>
         `;
         
         // Botones de administración (solo para admins)
