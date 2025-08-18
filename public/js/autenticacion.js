@@ -14,9 +14,23 @@ class Auth {
         
         if (this.token && this.currentUser) {
             this.updateUI();
+            // Cargar puntos automáticamente si ya hay sesión activa
+            this.loadPointsIfAuthenticated();
         }
         
         this.bindEvents();
+    }
+    
+    loadPointsIfAuthenticated() {
+        // Esperar a que el mapa esté disponible
+        if (window.mapManager) {
+            window.mapManager.loadPoints();
+        } else {
+            // Si el mapa no está disponible, esperar un poco y reintentar
+            setTimeout(() => {
+                this.loadPointsIfAuthenticated();
+            }, 500);
+        }
     }
     
     bindEvents() {
