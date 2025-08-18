@@ -48,8 +48,8 @@ class HistorialController {
             res.json({
                 historial: historial.map(registro => ({
                     ...registro,
-                    datos_anteriores: registro.datos_anteriores ? JSON.parse(registro.datos_anteriores) : null,
-                    datos_nuevos: registro.datos_nuevos ? JSON.parse(registro.datos_nuevos) : null
+                    datos_anteriores: registro.datos_anteriores || null,
+                    datos_nuevos: registro.datos_nuevos || null
                 }))
             });
 
@@ -77,8 +77,8 @@ class HistorialController {
             res.json({
                 historial: historial.map(registro => ({
                     ...registro,
-                    datos_anteriores: registro.datos_anteriores ? JSON.parse(registro.datos_anteriores) : null,
-                    datos_nuevos: registro.datos_nuevos ? JSON.parse(registro.datos_nuevos) : null
+                    datos_anteriores: registro.datos_anteriores || null,
+                    datos_nuevos: registro.datos_nuevos || null
                 }))
             });
 
