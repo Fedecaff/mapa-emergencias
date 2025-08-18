@@ -37,9 +37,7 @@ class Auth {
         // Botón de login
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
-            loginBtn.addEventListener('click', () => {
-                Modal.show('loginModal');
-            });
+            loginBtn.addEventListener('click', this.showLoginModal.bind(this));
         }
         
         // Botón de logout
@@ -186,6 +184,9 @@ class Auth {
             if (userInfo) userInfo.style.display = 'none';
             if (authButtons) authButtons.style.display = 'block';
             if (adminPanel) adminPanel.style.display = 'none';
+            
+            // Asegurar que el botón de login tenga el event listener
+            this.ensureLoginButtonListener();
         }
     }
     
@@ -203,6 +204,23 @@ class Auth {
     
     getToken() {
         return this.token;
+    }
+    
+    // Asegurar que el botón de login tenga el event listener
+    ensureLoginButtonListener() {
+        const loginBtn = document.getElementById('loginBtn');
+        if (loginBtn) {
+            // Remover event listeners existentes para evitar duplicados
+            loginBtn.removeEventListener('click', this.showLoginModal.bind(this));
+            
+            // Agregar el event listener
+            loginBtn.addEventListener('click', this.showLoginModal.bind(this));
+        }
+    }
+    
+    // Método para mostrar el modal de login
+    showLoginModal() {
+        Modal.show('loginModal');
     }
     
     // Verificar si el token sigue siendo válido
