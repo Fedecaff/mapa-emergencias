@@ -75,20 +75,19 @@ class FotosController {
                 });
             }
 
+            // Para Railway, vamos a usar un enfoque simplificado
+            // Convertir la imagen a base64 y guardarla en la base de datos
+            const imageBuffer = fs.readFileSync(req.file.path);
+            const base64Image = imageBuffer.toString('base64');
+            const dataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+            
+            // Limpiar archivo temporal
+            fs.unlinkSync(req.file.path);
+            
             // Generar nombre único para el archivo
             const extension = path.extname(req.file.originalname);
             const nombreArchivo = `foto_${punto_id}_${Date.now()}${extension}`;
-            const rutaArchivo = `/uploads/puntos/${nombreArchivo}`;
-
-            // Crear directorio si no existe
-            const uploadDir = path.join(__dirname, '../../public/uploads/puntos');
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
-            // Mover archivo a la ubicación final
-            const rutaFinal = path.join(uploadDir, nombreArchivo);
-            fs.renameSync(req.file.path, rutaFinal);
+            const rutaArchivo = dataUrl; // Guardamos la imagen como data URL
 
             // Insertar registro en la base de datos
             const resultado = await baseDeDatos.ejecutar(
@@ -181,19 +180,8 @@ class FotosController {
                 });
             }
 
-            // Eliminar archivo físico
-            const rutaArchivo = path.join(__dirname, '../../public', foto.ruta_archivo);
-            if (fs.existsSync(rutaArchivo)) {
-                fs.unlinkSync(rutaArchivo);
-            }
-
-            // Eliminar miniatura si existe
-            if (foto.ruta_miniatura) {
-                const rutaMiniatura = path.join(__dirname, '../../public', foto.ruta_miniatura);
-                if (fs.existsSync(rutaMiniatura)) {
-                    fs.unlinkSync(rutaMiniatura);
-                }
-            }
+            // No necesitamos eliminar archivos físicos ya que usamos data URLs
+            // Las imágenes se almacenan directamente en la base de datos
 
             // Eliminar registro de la base de datos
             await baseDeDatos.ejecutar(
