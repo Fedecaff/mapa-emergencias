@@ -83,17 +83,26 @@ class FotosController {
 
             // Subir imagen a Cloudinary
             console.log('☁️ Subiendo imagen a Cloudinary...');
+            console.log('📁 Ruta del archivo:', req.file.path);
+            console.log('📏 Tamaño del archivo:', req.file.size);
+            console.log('📋 Tipo MIME:', req.file.mimetype);
             
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'mapa-emergencias',
-                public_id: `punto_${punto_id}_${Date.now()}`,
-                transformation: [
-                    { width: 800, height: 600, crop: 'limit' }, // Versión principal
-                    { width: 200, height: 200, crop: 'fill' }   // Miniatura
-                ]
-            });
-            
-            console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
+            try {
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'mapa-emergencias',
+                    public_id: `punto_${punto_id}_${Date.now()}`,
+                    transformation: [
+                        { width: 800, height: 600, crop: 'limit' }, // Versión principal
+                        { width: 200, height: 200, crop: 'fill' }   // Miniatura
+                    ]
+                });
+                
+                console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
+                console.log('🆔 Public ID:', result.public_id);
+            } catch (cloudinaryError) {
+                console.error('❌ Error subiendo a Cloudinary:', cloudinaryError);
+                throw new Error(`Error subiendo a Cloudinary: ${cloudinaryError.message}`);
+            }
             
             // Limpiar archivo temporal
             try {
