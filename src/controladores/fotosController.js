@@ -10,8 +10,13 @@ class FotosController {
     // Subir foto para un punto
     async subirFoto(req, res) {
         try {
+            console.log('📸 Iniciando subida de foto...');
+            console.log('👤 Usuario:', req.usuario);
+            console.log('📁 Archivo recibido:', req.file ? 'Sí' : 'No');
+            
             // Verificar que el usuario sea administrador
             if (req.usuario.rol !== 'admin') {
+                console.log('❌ Usuario no es admin:', req.usuario.rol);
                 return res.status(403).json({
                     error: 'Solo los administradores pueden subir fotos'
                 });
@@ -77,12 +82,33 @@ class FotosController {
 
             // Para Railway, vamos a usar un enfoque simplificado
             // Convertir la imagen a base64 y guardarla en la base de datos
-            const imageBuffer = fs.readFileSync(req.file.path);
-            const base64Image = imageBuffer.toString('base64');
-            const dataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+            let imageBuffer, base64Image, dataUrl;
+            
+            try {
+                imageBuffer = fs.readFileSync(req.file.path);
+                base64Image = imageBuffer.toString('base64');
+                dataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
+            } catch (readError) {
+                console.error('Error leyendo archivo:', readError);
+                // Intentar limpiar archivo temporal
+                try {
+                    if (fs.existsSync(req.file.path)) {
+                        fs.unlinkSync(req.file.path);
+                    }
+                } catch (cleanupError) {
+                    console.error('Error limpiando archivo temporal:', cleanupError);
+                }
+                return res.status(500).json({
+                    error: 'Error procesando la imagen'
+                });
+            }
             
             // Limpiar archivo temporal
-            fs.unlinkSync(req.file.path);
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (cleanupError) {
+                console.error('Error limpiando archivo temporal:', cleanupError);
+            }
             
             // Generar nombre único para el archivo
             const extension = path.extname(req.file.originalname);
