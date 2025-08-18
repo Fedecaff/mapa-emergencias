@@ -2,6 +2,7 @@ import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cloudinary from '../configuracion/cloudinary.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,48 +81,41 @@ class FotosController {
                 });
             }
 
-            // Para Railway, vamos a usar un enfoque simplificado
-            // Convertir la imagen a base64 y guardarla en la base de datos
-            let imageBuffer, base64Image, dataUrl;
+            // Subir imagen a Cloudinary
+            console.log('☁️ Subiendo imagen a Cloudinary...');
             
             try {
-                imageBuffer = fs.readFileSync(req.file.path);
-                base64Image = imageBuffer.toString('base64');
-                dataUrl = `data:${req.file.mimetype};base64,${base64Image}`;
-            } catch (readError) {
-                console.error('Error leyendo archivo:', readError);
-                // Intentar limpiar archivo temporal
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'mapa-emergencias',
+                    public_id: `punto_${punto_id}_${Date.now()}`,
+                    transformation: [
+                        { width: 800, height: 600, crop: 'limit' }, // Versión principal
+                        { width: 200, height: 200, crop: 'fill' }   // Miniatura
+                    ]
+                });
+                
+                console.log('✅ Imagen subida a Cloudinary:', result.secure_url);
+                
+                // Limpiar archivo temporal
                 try {
-                    if (fs.existsSync(req.file.path)) {
-                        fs.unlinkSync(req.file.path);
-                    }
+                    fs.unlinkSync(req.file.path);
                 } catch (cleanupError) {
                     console.error('Error limpiando archivo temporal:', cleanupError);
                 }
-                return res.status(500).json({
-                    error: 'Error procesando la imagen'
-                });
-            }
-            
-            // Limpiar archivo temporal
-            try {
-                fs.unlinkSync(req.file.path);
-            } catch (cleanupError) {
-                console.error('Error limpiando archivo temporal:', cleanupError);
-            }
-            
-            // Generar nombre único para el archivo
-            const extension = path.extname(req.file.originalname);
-            const nombreArchivo = `foto_${punto_id}_${Date.now()}${extension}`;
-            const rutaArchivo = dataUrl; // Guardamos la imagen como data URL
+                
+                // Generar nombre único para el archivo
+                const extension = path.extname(req.file.originalname);
+                const nombreArchivo = `foto_${punto_id}_${Date.now()}${extension}`;
+                const rutaArchivo = result.secure_url; // URL de Cloudinary
+                const publicId = result.public_id; // Para eliminar después
 
             // Insertar registro en la base de datos
             const resultado = await baseDeDatos.ejecutar(
                 `INSERT INTO fotos_puntos 
-                (punto_id, nombre_archivo, ruta_archivo, descripcion, tamaño_bytes, tipo_mime, usuario_id) 
-                VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                (punto_id, nombre_archivo, ruta_archivo, descripcion, tamaño_bytes, tipo_mime, usuario_id, public_id) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
                 RETURNING id`,
-                [punto_id, nombreArchivo, rutaArchivo, descripcion || null, req.file.size, req.file.mimetype, req.usuario.id]
+                [punto_id, nombreArchivo, rutaArchivo, descripcion || null, req.file.size, req.file.mimetype, req.usuario.id, publicId]
             );
 
             // Registrar en historial
@@ -206,8 +200,16 @@ class FotosController {
                 });
             }
 
-            // No necesitamos eliminar archivos físicos ya que usamos data URLs
-            // Las imágenes se almacenan directamente en la base de datos
+            // Eliminar imagen de Cloudinary si tiene public_id
+            if (foto.public_id) {
+                try {
+                    await cloudinary.uploader.destroy(foto.public_id);
+                    console.log('🗑️ Imagen eliminada de Cloudinary:', foto.public_id);
+                } catch (cloudinaryError) {
+                    console.error('Error eliminando de Cloudinary:', cloudinaryError);
+                    // Continuar aunque falle la eliminación de Cloudinary
+                }
+            }
 
             // Eliminar registro de la base de datos
             await baseDeDatos.ejecutar(

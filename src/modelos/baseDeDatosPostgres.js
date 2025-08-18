@@ -170,6 +170,7 @@ class BaseDeDatosPostgres {
                 tamaño_bytes INTEGER,
                 tipo_mime VARCHAR(100),
                 usuario_id INTEGER REFERENCES usuarios(id),
+                public_id VARCHAR(255),
                 fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
