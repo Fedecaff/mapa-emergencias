@@ -361,6 +361,26 @@ class MapManager {
     clearAllMarkers() {
         // Limpiar todos los marcadores (puntos, usuario y búsqueda)
         this.clearMarkers();
+        
+        // Limpiar marcador de búsqueda
+        if (this.searchMarker) {
+            this.map.removeLayer(this.searchMarker);
+            this.searchMarker = null;
+        }
+        
+        // Limpiar marcador del usuario
+        if (this.userMarker) {
+            this.map.removeLayer(this.userMarker);
+            this.userMarker = null;
+        }
+        
+        // Limpiar marcador temporal
+        if (this.tempMarker) {
+            this.map.removeLayer(this.tempMarker);
+            this.tempMarker = null;
+        }
+        
+        console.log('🗑️ Todos los marcadores limpiados del mapa');
     }
     
     filterMarkers() {
