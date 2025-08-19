@@ -345,10 +345,14 @@
                     </div>
                     <div class="form-group">
                         <label for="newUserPhone">Teléfono:</label>
-                        <input type="tel" id="newUserPhone" name="telefono" required 
-                               placeholder="+54 9 3834 123456" 
-                               pattern="^\+54\s9\s\d{4}\s\d{6}$">
-                        <small>Formato: +54 9 3834 123456</small>
+                        <div class="phone-input-group">
+                            <span class="phone-prefix">+54 9</span>
+                            <input type="tel" id="newUserPhone" name="telefono" required 
+                                   placeholder="3834 123456" 
+                                   pattern="^\d{4}\s\d{6}$"
+                                   maxlength="11">
+                        </div>
+                        <small>Formato: 3834 123456 (solo números)</small>
                     </div>
                     <div class="form-group">
                         <label for="newUserPassword">Contraseña:</label>

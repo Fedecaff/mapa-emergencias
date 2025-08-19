@@ -394,6 +394,35 @@ body {
     box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
 }
 
+/* Grupo de teléfono */
+.phone-input-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.phone-prefix {
+    background: var(--light-gray);
+    padding: 0.75rem;
+    border-right: 1px solid #ddd;
+    color: var(--dark-gray);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.phone-input-group input {
+    border: none;
+    border-radius: 0;
+    flex: 1;
+}
+
+.phone-input-group input:focus {
+    box-shadow: none;
+    border-color: var(--secondary-color);
+}
+
 .form-actions {
     padding: 1.5rem;
     border-top: 1px solid #ddd;

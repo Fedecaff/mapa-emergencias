@@ -60,7 +60,7 @@ class UsuariosManager {
         const userData = {
             nombre: formData.get('nombre').trim(),
             email: formData.get('email').trim(),
-            telefono: formData.get('telefono').trim(),
+            telefono: '+54 9 ' + formData.get('telefono').trim(),
             password: formData.get('password'),
             rol: formData.get('rol')
         };
