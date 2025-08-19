@@ -10,6 +10,7 @@ class AlertasManager {
 
     init() {
         this.bindEvents();
+        this.bindLogoutEvent();
         console.log('🚨 AlertasManager inicializado');
     }
 
@@ -72,6 +73,14 @@ class AlertasManager {
                 }
             });
         }
+    }
+
+    bindLogoutEvent() {
+        // Escuchar evento de logout para limpiar alertas
+        window.addEventListener('userLogout', () => {
+            console.log('🚨 Evento de logout detectado, limpiando alertas...');
+            this.limpiarAlertas();
+        });
     }
 
     iniciarProcesoEmergencia() {
@@ -437,6 +446,37 @@ class AlertasManager {
         }
         
         console.log('✅ Formulario cancelado');
+    }
+
+    // Método para limpiar alertas cuando el usuario hace logout
+    limpiarAlertas() {
+        console.log('🚨 Limpiando alertas de emergencia...');
+        
+        // Remover marcador temporal si existe
+        if (this.emergencyMarker) {
+            if (window.mapManager && window.mapManager.map) {
+                window.mapManager.map.removeLayer(this.emergencyMarker);
+            }
+            this.emergencyMarker = null;
+        }
+        
+        // Limpiar todos los marcadores de emergencia del mapa
+        if (window.mapManager && window.mapManager.map) {
+            window.mapManager.map.eachLayer((layer) => {
+                if (layer._icon && layer._icon.className && 
+                    layer._icon.className.includes('emergency-marker')) {
+                    console.log('🚨 Removiendo marcador de emergencia:', layer);
+                    window.mapManager.map.removeLayer(layer);
+                }
+            });
+        }
+        
+        // Limpiar estado
+        this.isSelectingLocation = false;
+        this.selectedLocation = null;
+        this.confirmacionStep = 0;
+        
+        console.log('✅ Alertas de emergencia limpiadas');
     }
 }
 
