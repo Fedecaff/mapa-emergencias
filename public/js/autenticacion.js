@@ -257,9 +257,9 @@ class Auth {
             document.getElementById('adminPanel').style.display = 'block';
         }
         
-        // Mostrar panel de perfil solo para operadores (no administrador)
+        // Mostrar panel de disponibilidad solo para operadores (no administrador)
         if (user.rol === 'operador') {
-            document.getElementById('profilePanel').style.display = 'block';
+            document.getElementById('availabilityPanel').style.display = 'block';
             // Configurar estado inicial de disponibilidad
             this.configurarDisponibilidad(user.disponible);
         }
@@ -290,7 +290,7 @@ class Auth {
         document.getElementById('userInfo').style.display = 'none';
         document.getElementById('authButtons').style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('profilePanel').style.display = 'none';
+        document.getElementById('availabilityPanel').style.display = 'none';
         
         // Limpiar nombre de usuario
         document.getElementById('userName').textContent = '';
@@ -299,27 +299,31 @@ class Auth {
     }
 
     configurarDisponibilidad(disponible) {
-        const btnDisponible = document.getElementById('btnDisponible');
-        const btnNoDisponible = document.getElementById('btnNoDisponible');
+        const checkbox = document.getElementById('availabilityCheckbox');
+        const status = document.getElementById('availabilityStatus');
         
-        if (btnDisponible && btnNoDisponible) {
+        if (checkbox && status) {
             // Configurar estado inicial
+            checkbox.checked = disponible;
+            this.actualizarEstadoDisponibilidad(disponible);
+            
+            // Agregar event listener
+            checkbox.addEventListener('change', (e) => {
+                this.cambiarDisponibilidad(e.target.checked);
+            });
+        }
+    }
+
+    actualizarEstadoDisponibilidad(disponible) {
+        const status = document.getElementById('availabilityStatus');
+        if (status) {
             if (disponible) {
-                btnDisponible.classList.add('active');
-                btnNoDisponible.classList.remove('active');
+                status.className = 'availability-status available';
+                status.innerHTML = '<i class="fas fa-circle"></i><span>Estado: Disponible</span>';
             } else {
-                btnDisponible.classList.remove('active');
-                btnNoDisponible.classList.add('active');
+                status.className = 'availability-status unavailable';
+                status.innerHTML = '<i class="fas fa-circle"></i><span>Estado: No disponible</span>';
             }
-            
-            // Agregar event listeners
-            btnDisponible.addEventListener('click', () => {
-                this.cambiarDisponibilidad(true);
-            });
-            
-            btnNoDisponible.addEventListener('click', () => {
-                this.cambiarDisponibilidad(false);
-            });
         }
     }
 
@@ -342,7 +346,7 @@ class Auth {
                 }
                 
                 // Actualizar la UI
-                this.configurarDisponibilidad(disponible);
+                this.actualizarEstadoDisponibilidad(disponible);
                 
                 // Mostrar notificación
                 if (window.Notifications) {

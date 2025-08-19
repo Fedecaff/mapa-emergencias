@@ -204,7 +204,94 @@ body {
     border-color: var(--secondary-color);
 }
 
+/* Panel de disponibilidad */
+.availability-panel {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
 
+.availability-toggle {
+    margin-bottom: 1rem;
+}
+
+.availability-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.availability-checkbox:hover {
+    background: var(--light-gray);
+}
+
+.availability-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--dark-gray);
+    border-radius: 4px;
+    position: relative;
+    transition: var(--transition);
+}
+
+.availability-checkbox input[type="checkbox"]:checked + .checkmark {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.availability-checkbox input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--white);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.availability-text {
+    font-weight: 500;
+    color: var(--dark-gray);
+}
+
+.availability-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.availability-status.available {
+    background: #d5f4e6;
+    color: var(--success-color);
+}
+
+.availability-status.available i {
+    color: var(--success-color);
+}
+
+.availability-status.unavailable {
+    background: #fadbd8;
+    color: var(--accent-color);
+}
+
+.availability-status.unavailable i {
+    color: var(--accent-color);
+}
 
 /* Panel de ubicación */
 .location-panel {
