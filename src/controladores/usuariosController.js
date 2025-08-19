@@ -13,9 +13,9 @@ const usuariosController = {
             }
 
             // Validar formato de teléfono argentino
-            const telefonoRegex = /^\+54\s9\s\d{3}\s\d{3}-\d{4}$/;
+            const telefonoRegex = /^\+54\s9\s\d{4}\s\d{6}$/;
             if (!telefonoRegex.test(telefono)) {
-                return res.status(400).json({ error: 'Formato de teléfono inválido. Use: +54 9 XXX XXX-XXXX' });
+                return res.status(400).json({ error: 'Formato de teléfono inválido. Use: +54 9 XXXX XXXXXX' });
             }
 
             if (password.length < 6) {
