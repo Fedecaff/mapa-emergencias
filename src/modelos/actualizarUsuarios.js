@@ -33,30 +33,23 @@ async function actualizarUsuarios() {
             ADD COLUMN IF NOT EXISTS disponible BOOLEAN DEFAULT true
         `);
 
-                       // Limpiar alertas de emergencia primero (por las restricciones de clave foránea)
-               console.log('🗑️ Limpiando alertas de emergencia...');
-               await baseDeDatos.ejecutar('DELETE FROM alertas_emergencia');
-               
-               // Limpiar historial de cambios
-               console.log('🗑️ Limpiando historial de cambios...');
-               await baseDeDatos.ejecutar('DELETE FROM historial_cambios');
-               
-               // Limpiar fotos de puntos
-               console.log('🗑️ Limpiando fotos de puntos...');
-               await baseDeDatos.ejecutar('DELETE FROM fotos_puntos');
+        // Verificar si el usuario Federico ya existe
+        const federicoExiste = await baseDeDatos.obtenerUno(`
+            SELECT id FROM usuarios WHERE email = 'federico.gomez.sc@gmail.com'
+        `);
         
-        // Limpiar todos los usuarios existentes
-        console.log('🗑️ Limpiando usuarios existentes...');
-        await baseDeDatos.ejecutar('DELETE FROM usuarios');
-        
-        // Crear usuario Federico con teléfono
-        console.log('👤 Creando usuario Federico...');
-        const passwordHash = await bcrypt.hash('admin123', 10);
-        
-        await baseDeDatos.ejecutar(`
-            INSERT INTO usuarios (nombre, email, contraseña, telefono, rol)
-            VALUES ($1, $2, $3, $4, $5)
-        `, ['Federico G.', 'federico.gomez.sc@gmail.com', passwordHash, '+54 9 383 427-6843', 'admin']);
+        if (!federicoExiste) {
+            // Solo crear usuario Federico si no existe
+            console.log('👤 Creando usuario Federico...');
+            const passwordHash = await bcrypt.hash('admin123', 10);
+            
+            await baseDeDatos.ejecutar(`
+                INSERT INTO usuarios (nombre, email, contraseña, telefono, rol)
+                VALUES ($1, $2, $3, $4, $5)
+            `, ['Federico G.', 'federico.gomez.sc@gmail.com', passwordHash, '+54 9 383 427-6843', 'admin']);
+        } else {
+            console.log('ℹ️ Usuario Federico ya existe, saltando creación...');
+        }
         
         console.log('✅ Usuarios actualizados correctamente');
         
