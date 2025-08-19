@@ -81,8 +81,14 @@ const alertasController = {
 
         } catch (error) {
             console.error('❌ Error creando alerta:', error);
+            console.error('📊 Datos que causaron el error:', {
+                tipo, prioridad, titulo, descripcion, latitud, longitud,
+                direccion, personas_afectadas, riesgos_especificos,
+                concurrencia_solicitada, usuario_id: req.usuario.id
+            });
             res.status(500).json({
-                error: 'Error interno del servidor'
+                error: 'Error interno del servidor',
+                details: error.message
             });
         }
     },
