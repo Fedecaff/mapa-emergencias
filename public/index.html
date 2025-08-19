@@ -32,6 +32,9 @@
             
             <div class="user-info" id="userInfo" style="display: none;">
                 <span id="userName"></span>
+                <button id="emergencyBtn" class="btn-emergency">
+                    <i class="fas fa-fire"></i> EMERGENCIA
+                </button>
                 <button id="logoutBtn" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i> Salir
                 </button>
@@ -425,6 +428,127 @@
         </div>
     </div>
 
+    <!-- Modal de Confirmación de Emergencia -->
+    <div id="modalConfirmacionEmergencia" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle"></i> Confirmar Alerta de Emergencia</h2>
+                <button class="close-btn btn-cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="emergency-warning">
+                    <i class="fas fa-fire" style="color: #e74c3c; font-size: 48px;"></i>
+                    <h3>¿Estás seguro de que quieres crear una alerta de emergencia?</h3>
+                    <p>Esta acción enviará una notificación a todos los bomberos disponibles.</p>
+                </div>
+                <div class="form-actions">
+                    <button id="confirmarEmergenciaBtn" class="btn btn-danger">
+                        <i class="fas fa-fire"></i> SÍ, CREAR ALERTA
+                    </button>
+                    <button class="btn btn-secondary btn-cerrar">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Formulario de Emergencia -->
+    <div id="modalFormularioEmergencia" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-fire"></i> Alerta de Emergencia</h2>
+                <button class="close-btn btn-cerrar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formEmergencia" class="emergency-form">
+                    <div class="form-group">
+                        <label for="emergencyType">Tipo de Emergencia:</label>
+                        <select id="emergencyType" name="tipo" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="incendio_estructural">Incendio Estructural</option>
+                            <option value="incendio_forestal">Incendio Forestal</option>
+                            <option value="accidente_vehicular">Accidente Vehicular</option>
+                            <option value="rescate">Rescate</option>
+                            <option value="fuga_gas">Fuga de Gas</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyPriority">Prioridad:</label>
+                        <select id="emergencyPriority" name="prioridad" required>
+                            <option value="alta">Alta - Inmediata</option>
+                            <option value="media" selected>Media - En 15 min</option>
+                            <option value="baja">Baja - En 30 min</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyTitle">Título de la Emergencia:</label>
+                        <input type="text" id="emergencyTitle" name="titulo" required 
+                               placeholder="Ej: Incendio en casa de la esquina">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyDescription">Descripción:</label>
+                        <textarea id="emergencyDescription" name="descripcion" rows="3" 
+                                  placeholder="Describe la situación de emergencia..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyLocation">Ubicación en el Mapa:</label>
+                        <div class="location-selector">
+                            <p>Haz clic en el mapa para marcar la ubicación exacta de la emergencia</p>
+                            <div class="coordinates-display">
+                                <span>Latitud: <span id="emergencyLat">-</span></span>
+                                <span>Longitud: <span id="emergencyLng">-</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyAddress">Dirección (opcional):</label>
+                        <input type="text" id="emergencyAddress" name="direccion" 
+                               placeholder="Dirección específica">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyPeople">Personas Afectadas:</label>
+                        <input type="number" id="emergencyPeople" name="personas_afectadas" 
+                               min="0" value="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyRisks">Riesgos Específicos:</label>
+                        <textarea id="emergencyRisks" name="riesgos_especificos" rows="2" 
+                                  placeholder="Ej: Gas, químicos, personas atrapadas..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="emergencyConcurrence">Concurrencia Solicitada:</label>
+                        <select id="emergencyConcurrence" name="concurrencia_solicitada">
+                            <option value="1">1 Bombero</option>
+                            <option value="2">2 Bomberos</option>
+                            <option value="3">3 Bomberos</option>
+                            <option value="4">4 Bomberos</option>
+                            <option value="5">5+ Bomberos</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-fire"></i> ENVIAR ALERTA
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-cerrar">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-spinner">
@@ -445,6 +569,7 @@
     <script src="js/administracion.js"></script>
     <script src="js/usuarios.js"></script>
     <script src="js/fotos.js"></script>
+    <script src="js/alertas.js"></script>
     <script src="js/app.js"></script>
 
 </body>
