@@ -84,14 +84,14 @@ class AlertasManager {
         // Cerrar modal de confirmación
         Modal.hide('modalConfirmacionEmergencia');
         
-        // Mostrar formulario
-        Modal.show('modalFormularioEmergencia');
-        
-        // Activar modo de selección de ubicación
-        this.activarSeleccionUbicacion();
-        
         // Limpiar formulario
         this.limpiarFormulario();
+        
+        // Activar modo de selección de ubicación primero
+        this.activarSeleccionUbicacion();
+        
+        // Mostrar instrucciones
+        Notifications.info('Primero selecciona la ubicación en el mapa, luego llena la información');
     }
 
     activarSeleccionUbicacion() {
@@ -126,7 +126,10 @@ class AlertasManager {
             window.mapManager.map.getContainer().style.cursor = '';
         }
         
-        Notifications.success('Ubicación marcada correctamente');
+        Notifications.success('Ubicación marcada correctamente. Ahora puedes llenar la información.');
+        
+        // Mostrar el formulario después de seleccionar ubicación
+        Modal.show('modalFormularioEmergencia');
     }
 
     agregarMarcadorEmergencia(latlng) {
@@ -147,6 +150,93 @@ class AlertasManager {
         this.emergencyMarker = L.marker(latlng, { icon: emergencyIcon })
             .addTo(window.mapManager.map)
             .bindPopup('<b>Ubicación de Emergencia</b><br>Marcada para alerta');
+    }
+
+    // Método para crear marcador de alerta activa con información completa
+    crearMarcadorAlertaActiva(alerta) {
+        const emergencyIcon = L.divIcon({
+            className: 'emergency-marker-active',
+            html: `<i class="fas fa-fire" style="color: #e74c3c; font-size: 24px;"></i>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        });
+        
+        // Crear contenido del popup con toda la información
+        const popupContent = this.crearPopupAlerta(alerta);
+        
+        const marker = L.marker([alerta.latitud, alerta.longitud], { icon: emergencyIcon })
+            .addTo(window.mapManager.map)
+            .bindPopup(popupContent, { maxWidth: 400 });
+        
+        return marker;
+    }
+
+    crearPopupAlerta(alerta) {
+        const prioridadColor = {
+            'alta': '#e74c3c',
+            'media': '#f39c12',
+            'baja': '#27ae60'
+        };
+
+        const tipoIconos = {
+            'incendio_estructural': 'fa-building',
+            'incendio_forestal': 'fa-tree',
+            'accidente_vehicular': 'fa-car',
+            'rescate': 'fa-life-ring',
+            'fuga_gas': 'fa-fire',
+            'otro': 'fa-exclamation-triangle'
+        };
+
+        const icono = tipoIconos[alerta.tipo] || 'fa-exclamation-triangle';
+        const color = prioridadColor[alerta.prioridad] || '#e74c3c';
+
+        let html = `
+            <div class="emergency-popup">
+                <div class="emergency-header" style="background: ${color}; color: white; padding: 10px; margin: -10px -10px 10px -10px; border-radius: 5px 5px 0 0;">
+                    <h3 style="margin: 0; font-size: 16px;">
+                        <i class="fas ${icono}"></i> ${alerta.titulo}
+                    </h3>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">
+                        Prioridad: ${alerta.prioridad.toUpperCase()} | ${new Date(alerta.fecha_creacion).toLocaleString()}
+                    </p>
+                </div>
+                
+                <div class="emergency-details">
+                    <p><strong>Tipo:</strong> ${this.traducirTipo(alerta.tipo)}</p>
+                    ${alerta.descripcion ? `<p><strong>Descripción:</strong> ${alerta.descripcion}</p>` : ''}
+                    ${alerta.direccion ? `<p><strong>Dirección:</strong> ${alerta.direccion}</p>` : ''}
+                    ${alerta.personas_afectadas > 0 ? `<p><strong>Personas afectadas:</strong> ${alerta.personas_afectadas}</p>` : ''}
+                    ${alerta.riesgos_especificos ? `<p><strong>Riesgos:</strong> ${alerta.riesgos_especificos}</p>` : ''}
+                    <p><strong>Concurrencia solicitada:</strong> ${alerta.concurrencia_solicitada} bomberos</p>
+                    <p><strong>Reportado por:</strong> ${alerta.usuario_nombre}</p>
+                </div>
+                
+                <div class="emergency-actions" style="margin-top: 15px; text-align: center;">
+                    <button class="btn-ver-fotos-emergencia" data-alerta-id="${alerta.id}" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                        <i class="fas fa-camera"></i> Ver Fotos
+                    </button>
+                    ${window.auth.isAdmin() ? `
+                        <button class="btn-cambiar-estado" data-alerta-id="${alerta.id}" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-edit"></i> Cambiar Estado
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    traducirTipo(tipo) {
+        const traducciones = {
+            'incendio_estructural': 'Incendio Estructural',
+            'incendio_forestal': 'Incendio Forestal',
+            'accidente_vehicular': 'Accidente Vehicular',
+            'rescate': 'Rescate',
+            'fuga_gas': 'Fuga de Gas',
+            'otro': 'Otro'
+        };
+        return traducciones[tipo] || tipo;
     }
 
     limpiarFormulario() {
@@ -197,6 +287,16 @@ class AlertasManager {
             const response = await API.post('/alertas/crear', alertaData);
             
             console.log('✅ Alerta enviada:', response);
+            
+            // Remover marcador temporal
+            if (this.emergencyMarker) {
+                window.mapManager.map.removeLayer(this.emergencyMarker);
+                this.emergencyMarker = null;
+            }
+            
+            // Crear marcador de alerta activa con información completa
+            const alertaActiva = response.alerta;
+            this.crearMarcadorAlertaActiva(alertaActiva);
             
             // Mostrar confirmación
             Notifications.success('¡Alerta de emergencia enviada exitosamente!');
