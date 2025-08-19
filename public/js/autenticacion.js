@@ -268,6 +268,9 @@ class Auth {
         if (window.mapaManager) {
             window.mapaManager.loadPoints();
         }
+        
+        // Disparar evento de login
+        window.dispatchEvent(new CustomEvent('userLogin'));
     }
 
     onUserLogout() {

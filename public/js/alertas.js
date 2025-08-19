@@ -78,8 +78,14 @@ class AlertasManager {
     bindLogoutEvent() {
         // Escuchar evento de logout para limpiar alertas
         window.addEventListener('userLogout', () => {
-            console.log('🚨 Evento de logout detectado, limpiando alertas...');
+            console.log('🚨 Evento de logout detectado, ocultando alertas...');
             this.limpiarAlertas();
+        });
+        
+        // Escuchar evento de login para cargar alertas
+        window.addEventListener('userLogin', () => {
+            console.log('🚨 Evento de login detectado, cargando alertas...');
+            this.cargarYMostrarAlertas();
         });
     }
 
@@ -187,6 +193,9 @@ class AlertasManager {
             .addTo(window.mapManager.map)
             .bindPopup(popupContent, { maxWidth: 400 });
         
+        // Guardar el ID de la alerta en el marcador para poder eliminarlo después
+        marker._alertaId = alerta.id;
+        
         // Agregar event listener para cuando se abra el popup
         marker.on('popupopen', () => {
             this.bindPopupEvents(alerta);
@@ -210,6 +219,29 @@ class AlertasManager {
             btnCambiarEstado.addEventListener('click', () => {
                 this.cambiarEstadoEmergencia(alerta.id);
             });
+        }
+        
+        // Event listener para botón "Dar de Baja" (solo admin)
+        const btnDarBaja = document.querySelector('.btn-dar-baja');
+        if (btnDarBaja) {
+            btnDarBaja.addEventListener('click', () => {
+                this.confirmarDarDeBaja(alerta.id, alerta.titulo);
+            });
+        }
+    }
+
+    // Método para confirmar dar de baja
+    async confirmarDarDeBaja(alertaId, titulo) {
+        const confirmacion = confirm(`¿Estás seguro de que quieres dar de baja la alerta "${titulo}"?\n\nEsta acción no se puede deshacer.`);
+        
+        if (confirmacion) {
+            const resultado = await this.darDeBajaAlerta(alertaId);
+            if (resultado) {
+                // Cerrar el popup
+                if (window.mapManager && window.mapManager.map) {
+                    window.mapManager.map.closePopup();
+                }
+            }
         }
     }
 
@@ -275,16 +307,19 @@ class AlertasManager {
                     <p><strong>Reportado por:</strong> ${alerta.usuario_nombre}</p>
                 </div>
                 
-                <div class="emergency-actions" style="margin-top: 15px; text-align: center;">
-                    <button class="btn-ver-fotos-emergencia" data-alerta-id="${alerta.id}" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
-                        <i class="fas fa-camera"></i> Ver Fotos
-                    </button>
-                    ${window.auth.isAdmin() ? `
-                        <button class="btn-cambiar-estado" data-alerta-id="${alerta.id}" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
-                            <i class="fas fa-edit"></i> Cambiar Estado
-                        </button>
-                    ` : ''}
-                </div>
+                                 <div class="emergency-actions" style="margin-top: 15px; text-align: center;">
+                     <button class="btn-ver-fotos-emergencia" data-alerta-id="${alerta.id}" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                         <i class="fas fa-camera"></i> Ver Fotos
+                     </button>
+                     ${window.auth.isAdmin() ? `
+                         <button class="btn-cambiar-estado" data-alerta-id="${alerta.id}" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                             <i class="fas fa-edit"></i> Cambiar Estado
+                         </button>
+                         <button class="btn-dar-baja" data-alerta-id="${alerta.id}" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                             <i class="fas fa-trash"></i> Dar de Baja
+                         </button>
+                     ` : ''}
+                 </div>
             </div>
         `;
 
@@ -450,7 +485,7 @@ class AlertasManager {
 
     // Método para limpiar alertas cuando el usuario hace logout
     limpiarAlertas() {
-        console.log('🚨 Limpiando alertas de emergencia...');
+        console.log('🚨 Ocultando alertas de emergencia...');
         
         // Remover marcador temporal si existe
         if (this.emergencyMarker) {
@@ -460,12 +495,12 @@ class AlertasManager {
             this.emergencyMarker = null;
         }
         
-        // Limpiar todos los marcadores de emergencia del mapa
+        // Ocultar todos los marcadores de emergencia del mapa (no eliminarlos)
         if (window.mapManager && window.mapManager.map) {
             window.mapManager.map.eachLayer((layer) => {
                 if (layer._icon && layer._icon.className && 
                     layer._icon.className.includes('emergency-marker')) {
-                    console.log('🚨 Removiendo marcador de emergencia:', layer);
+                    console.log('🚨 Ocultando marcador de emergencia:', layer);
                     window.mapManager.map.removeLayer(layer);
                 }
             });
@@ -476,7 +511,57 @@ class AlertasManager {
         this.selectedLocation = null;
         this.confirmacionStep = 0;
         
-        console.log('✅ Alertas de emergencia limpiadas');
+        console.log('✅ Alertas de emergencia ocultadas');
+    }
+
+    // Método para cargar y mostrar alertas activas al hacer login
+    async cargarYMostrarAlertas() {
+        console.log('🚨 Cargando alertas activas...');
+        
+        try {
+            const alertas = await this.cargarAlertasActivas();
+            console.log('📊 Alertas encontradas:', alertas.length);
+            
+            // Mostrar solo alertas activas
+            alertas.forEach(alerta => {
+                if (alerta.estado === 'activa') {
+                    console.log('🚨 Mostrando alerta activa:', alerta.titulo);
+                    this.crearMarcadorAlertaActiva(alerta);
+                }
+            });
+            
+            console.log('✅ Alertas activas cargadas');
+        } catch (error) {
+            console.error('❌ Error cargando alertas:', error);
+        }
+    }
+
+    // Método para dar de baja una alerta (solo admin)
+    async darDeBajaAlerta(alertaId) {
+        try {
+            console.log('🗑️ Dando de baja alerta:', alertaId);
+            
+            const response = await API.delete(`/alertas/${alertaId}`);
+            
+            if (response.mensaje) {
+                Notifications.success('Alerta dada de baja exitosamente');
+                
+                // Remover marcador del mapa
+                if (window.mapManager && window.mapManager.map) {
+                    window.mapManager.map.eachLayer((layer) => {
+                        if (layer._alertaId === alertaId) {
+                            window.mapManager.map.removeLayer(layer);
+                        }
+                    });
+                }
+                
+                return true;
+            }
+        } catch (error) {
+            console.error('❌ Error dando de baja alerta:', error);
+            Notifications.error('Error dando de baja la alerta');
+            return false;
+        }
     }
 }
 
