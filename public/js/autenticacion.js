@@ -4,18 +4,30 @@ class Auth {
     constructor() {
         this.currentUser = null;
         this.token = null;
-        this.init();
+        // Inicializar de forma asíncrona
+        this.init().catch(error => {
+            console.error('❌ Error inicializando autenticación:', error);
+        });
     }
     
-    init() {
+    async init() {
         // Verificar si hay un token guardado
         this.token = Storage.get('token');
         this.currentUser = Storage.get('user');
         
         if (this.token && this.currentUser) {
-            this.updateUI();
-            // Cargar puntos automáticamente si ya hay sesión activa
-            this.loadPointsIfAuthenticated();
+            console.log('🔍 Token encontrado en localStorage, verificando validez...');
+            // Verificar si el token sigue siendo válido
+            const isValid = await this.verifyToken();
+            if (isValid) {
+                console.log('✅ Token válido, restaurando sesión...');
+                this.updateUI();
+                // Cargar puntos automáticamente si ya hay sesión activa
+                this.loadPointsIfAuthenticated();
+            } else {
+                console.log('❌ Token expirado o inválido, limpiando sesión...');
+                this.logout();
+            }
         }
         
         this.bindEvents();
@@ -245,11 +257,6 @@ class Auth {
 // Inicializar autenticación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     window.auth = new Auth();
-    
-    // Verificar token al cargar la página solo si existe
-    if (window.auth.token) {
-        window.auth.verifyToken();
-    }
 });
 
 // Exportar para uso global

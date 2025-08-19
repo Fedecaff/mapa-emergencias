@@ -44,6 +44,21 @@ async function verificarFotos() {
         `);
         console.log(`⚠️ Fotos sin public_id: ${fotosSinPublicId[0].count}`);
         
+        // Verificar si las URLs de Cloudinary siguen siendo válidas
+        if (fotosEjemplo.length > 0) {
+            console.log('🔍 Verificando URLs de Cloudinary...');
+            for (const foto of fotosEjemplo) {
+                if (foto.ruta_archivo && foto.ruta_archivo.includes('cloudinary')) {
+                    try {
+                        const response = await fetch(foto.ruta_archivo, { method: 'HEAD' });
+                        console.log(`  - Foto ${foto.id}: ${response.ok ? '✅ URL válida' : '❌ URL inválida'} (${response.status})`);
+                    } catch (error) {
+                        console.log(`  - Foto ${foto.id}: ❌ Error verificando URL - ${error.message}`);
+                    }
+                }
+            }
+        }
+        
     } catch (error) {
         console.error('❌ Error verificando fotos:', error);
     }
