@@ -42,7 +42,7 @@ class App {
         const required = [
             'Notifications', 'Loading', 'Modal', 'API', 
             'Geolocation', 'Storage', 'Utils', 'Auth', 
-            'MapManager', 'AdminManager'
+            'MapManager', 'AdminManager', 'alertasManager'
         ];
         
         const missing = required.filter(dep => !window[dep]);
@@ -67,6 +67,10 @@ class App {
         
         if (!window.adminManager) {
             console.error('❌ Gestor de administración no disponible');
+        }
+        
+        if (!window.alertasManager) {
+            console.error('❌ Gestor de alertas no disponible');
         }
     }
     

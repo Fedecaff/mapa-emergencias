@@ -40,7 +40,22 @@ class AlertasManager {
         }
 
         // Evento de clic en el mapa para seleccionar ubicación
-        if (window.mapManager) {
+        if (window.mapManager && window.mapManager.map) {
+            window.mapManager.map.on('click', (e) => {
+                if (this.isSelectingLocation) {
+                    this.seleccionarUbicacion(e.latlng);
+                }
+            });
+        } else {
+            // Si el mapa no está disponible, intentar más tarde
+            setTimeout(() => {
+                this.bindMapEvents();
+            }, 1000);
+        }
+    }
+
+    bindMapEvents() {
+        if (window.mapManager && window.mapManager.map) {
             window.mapManager.map.on('click', (e) => {
                 if (this.isSelectingLocation) {
                     this.seleccionarUbicacion(e.latlng);
@@ -245,5 +260,8 @@ class AlertasManager {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    window.alertasManager = new AlertasManager();
+    // Esperar un poco más para asegurar que todos los componentes estén listos
+    setTimeout(() => {
+        window.alertasManager = new AlertasManager();
+    }, 100);
 });
