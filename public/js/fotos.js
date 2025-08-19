@@ -114,7 +114,7 @@ class FotosManager {
                             <button class="btn-ver-foto" data-foto-url="${escapedUrl}">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            ${window.auth.currentUser?.rol === 'admin' ? `
+                            ${window.auth.currentUser?.rol === 'administrador' ? `
                                 <button class="btn-eliminar-foto" data-foto-id="${foto.id}">
                                     <i class="fas fa-trash"></i>
                                 </button>
@@ -139,7 +139,7 @@ class FotosManager {
             return;
         }
 
-        if (window.auth.currentUser?.rol !== 'admin') {
+        if (window.auth.currentUser?.rol !== 'administrador') {
             Notifications.error('Solo los administradores pueden subir fotos');
             return;
         }

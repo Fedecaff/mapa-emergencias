@@ -82,7 +82,7 @@ class AutenticacionController {
     // Registro de usuario (solo para administradores)
     async registro(req, res) {
         try {
-            const { email, password, nombre, rol = 'usuario' } = req.body;
+            const { email, password, nombre, rol = 'operador' } = req.body;
 
             // Validar campos requeridos
             if (!email || !password || !nombre) {

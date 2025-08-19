@@ -178,7 +178,7 @@ class Auth {
             
             // Mostrar panel de admin si es administrador
             if (adminPanel) {
-                if (this.currentUser.rol === 'admin') {
+                if (this.currentUser.rol === 'administrador') {
                     adminPanel.style.display = 'block';
                 } else {
                     adminPanel.style.display = 'none';
@@ -200,7 +200,7 @@ class Auth {
     }
     
     isAdmin() {
-        return this.isAuthenticated() && this.currentUser.rol === 'admin';
+        return this.isAuthenticated() && this.currentUser.rol === 'administrador';
     }
     
     getCurrentUser() {
@@ -252,13 +252,13 @@ class Auth {
         document.getElementById('userInfo').style.display = 'flex';
         document.getElementById('authButtons').style.display = 'none';
         
-        // Mostrar panel de administración si es admin
-        if (user.rol === 'admin') {
+        // Mostrar panel de administración si es administrador
+        if (user.rol === 'administrador') {
             document.getElementById('adminPanel').style.display = 'block';
         }
         
-        // Mostrar panel de perfil solo para usuarios normales (no admin)
-        if (user.rol === 'usuario') {
+        // Mostrar panel de perfil solo para operadores (no administrador)
+        if (user.rol === 'operador') {
             document.getElementById('profilePanel').style.display = 'block';
             // Configurar estado inicial de disponibilidad
             this.configurarDisponibilidad(user.disponible);

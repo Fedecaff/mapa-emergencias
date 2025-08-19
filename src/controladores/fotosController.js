@@ -13,7 +13,7 @@ class FotosController {
         try {
             
             // Verificar que el usuario sea administrador
-            if (req.usuario.rol !== 'admin') {
+            if (req.usuario.rol !== 'administrador') {
                 return res.status(403).json({
                     error: 'Solo los administradores pueden subir fotos'
                 });
@@ -177,7 +177,7 @@ class FotosController {
     async eliminarFoto(req, res) {
         try {
             // Verificar que el usuario sea administrador
-            if (req.usuario.rol !== 'admin') {
+            if (req.usuario.rol !== 'administrador') {
                 return res.status(403).json({
                     error: 'Solo los administradores pueden eliminar fotos'
                 });
@@ -236,7 +236,7 @@ class FotosController {
     async obtenerTodasFotos(req, res) {
         try {
             // Verificar que el usuario sea administrador
-            if (req.usuario.rol !== 'admin') {
+            if (req.usuario.rol !== 'administrador') {
                 return res.status(403).json({
                     error: 'Solo los administradores pueden ver todas las fotos'
                 });

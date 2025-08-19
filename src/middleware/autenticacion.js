@@ -51,7 +51,7 @@ export const verificarAdmin = (req, res, next) => {
         });
     }
 
-    if (req.usuario.rol !== 'admin') {
+            if (req.usuario.rol !== 'administrador') {
         return res.status(403).json({
             error: 'Acceso denegado. Se requieren permisos de administrador'
         });

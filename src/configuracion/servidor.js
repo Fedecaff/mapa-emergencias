@@ -12,6 +12,7 @@ import actualizarUsuarios from '../modelos/actualizarUsuarios.js';
 import actualizarTablaAlertas from '../modelos/actualizarTablaAlertas.js';
 import verificarFotos from '../modelos/verificarFotos.js';
 import diagnosticarBaseDeDatos from '../modelos/diagnosticoDB.js';
+import actualizarRoles from '../modelos/actualizarRoles.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -81,6 +82,7 @@ async function iniciarServidor() {
         // Ejecutar diagnóstico de base de datos
         console.log('\n🔍 Ejecutando diagnóstico de base de datos...');
         await diagnosticarBaseDeDatos();
+        await actualizarRoles();
         
         console.log('✅ Base de datos inicializada correctamente');
         

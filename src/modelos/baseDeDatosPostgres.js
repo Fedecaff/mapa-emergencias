@@ -109,7 +109,7 @@ class BaseDeDatosPostgres {
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
                 nombre VARCHAR(255) NOT NULL,
-                rol VARCHAR(50) DEFAULT 'usuario',
+                rol VARCHAR(50) DEFAULT 'operador',
                 telefono VARCHAR(20),
                 disponible BOOLEAN DEFAULT true,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

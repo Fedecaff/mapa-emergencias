@@ -5,7 +5,7 @@ const usuariosController = {
 
     async crear(req, res) {
         try {
-            const { nombre, email, password, telefono, rol = 'usuario' } = req.body;
+            const { nombre, email, password, telefono, rol = 'operador' } = req.body;
 
             // Validaciones
             if (!nombre || !email || !password || !telefono) {
@@ -107,7 +107,7 @@ const usuariosController = {
             const { disponible } = req.body;
             
             // Validar que el usuario existe y es el mismo que hace la petición
-            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'admin') {
+            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'administrador') {
                 return res.status(403).json({ error: 'No autorizado' });
             }
             
@@ -130,7 +130,7 @@ const usuariosController = {
 
     async obtenerDisponibles(req, res) {
         try {
-            const query = "SELECT id, email, nombre, telefono FROM usuarios WHERE disponible = true AND rol = 'usuario'";
+            const query = "SELECT id, email, nombre, telefono FROM usuarios WHERE disponible = true AND rol = 'operador'";
             const result = await baseDeDatos.ejecutar(query);
             
             res.json({
@@ -234,9 +234,9 @@ const usuariosController = {
             }
 
             // No permitir eliminar el último admin
-            if (usuario.rol === 'admin') {
+            if (usuario.rol === 'administrador') {
                 const adminCount = await baseDeDatos.obtenerUno(
-                    'SELECT COUNT(*) as count FROM usuarios WHERE rol = "admin"'
+                    'SELECT COUNT(*) as count FROM usuarios WHERE rol = "administrador"'
                 );
 
                 if (adminCount.count <= 1) {
