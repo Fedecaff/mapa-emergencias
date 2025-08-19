@@ -241,12 +241,23 @@ class MapManager {
                 endpoint += '?' + params.toString();
             }
             
+            console.log('🔍 Cargando puntos con filtros:', filters);
+            console.log('📡 Endpoint:', endpoint);
+            
             const response = await API.get(endpoint);
             const points = response.puntos || [];
             
+            console.log('📊 Puntos recibidos:', points.length);
+            console.log('📍 Marcadores antes de limpiar:', this.markers.length);
+            
             // Solo limpiar marcadores de puntos, no los de usuario o búsqueda
             this.clearPointMarkers();
+            
+            console.log('🗑️ Marcadores después de limpiar:', this.markers.length);
+            
             this.addMarkers(points);
+            
+            console.log('✅ Marcadores después de agregar:', this.markers.length);
             
         } catch (error) {
             console.error('Error cargando puntos:', error);
@@ -257,9 +268,12 @@ class MapManager {
     }
     
     addMarkers(points) {
+        console.log('📍 Agregando marcadores:', points.length);
         points.forEach(point => {
+            console.log('📍 Agregando punto:', point.nombre);
             this.addMarker(point);
         });
+        console.log('✅ Marcadores agregados:', this.markers.length);
     }
     
     addMarker(point) {
@@ -361,11 +375,17 @@ class MapManager {
     }
     
     clearPointMarkers() {
+        console.log('🗑️ Limpiando marcadores de puntos...');
+        console.log('📊 Marcadores a limpiar:', this.markers.length);
+        
         // Solo limpiar marcadores de puntos, mantener usuario y búsqueda
         this.markers.forEach(marker => {
+            console.log('🗑️ Removiendo marcador:', marker.pointData?.nombre || 'Sin nombre');
             this.map.removeLayer(marker);
         });
         this.markers = [];
+        
+        console.log('✅ Limpieza de marcadores de puntos completada');
     }
 
     clearAllMarkers() {
@@ -464,7 +484,7 @@ class MapManager {
             this.loadPoints({
                 latitud: lat,
                 longitud: lon,
-                radio: 5 // Radio fijo de 5km
+                radio: 7 // Radio fijo de 7km
             });
             
             Notifications.success(`Ubicación encontrada: ${location.display_name}`);
@@ -519,7 +539,7 @@ class MapManager {
             this.loadPoints({
                 latitud: position.lat,
                 longitud: position.lng,
-                radio: 5 // Radio fijo de 5km
+                radio: 7 // Radio fijo de 7km
             });
             
             Notifications.success(`Ubicación centrada (precisión: ±${Math.round(position.accuracy)}m)`);
