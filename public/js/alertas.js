@@ -30,6 +30,36 @@ class AlertasManager {
             });
         }
 
+        // Botones de cerrar modales
+        const cancelarConfirmacionBtn = document.querySelector('#modalConfirmacionEmergencia .btn-cerrar');
+        if (cancelarConfirmacionBtn) {
+            cancelarConfirmacionBtn.addEventListener('click', () => {
+                Modal.hide('modalConfirmacionEmergencia');
+            });
+        }
+
+        const cancelarFormularioBtn = document.querySelector('#modalFormularioEmergencia .btn-cerrar');
+        if (cancelarFormularioBtn) {
+            cancelarFormularioBtn.addEventListener('click', () => {
+                this.cancelarFormulario();
+            });
+        }
+
+        // Botones X de cerrar
+        const closeConfirmacionBtn = document.querySelector('#modalConfirmacionEmergencia .close-btn');
+        if (closeConfirmacionBtn) {
+            closeConfirmacionBtn.addEventListener('click', () => {
+                Modal.hide('modalConfirmacionEmergencia');
+            });
+        }
+
+        const closeFormularioBtn = document.querySelector('#modalFormularioEmergencia .close-btn');
+        if (closeFormularioBtn) {
+            closeFormularioBtn.addEventListener('click', () => {
+                this.cancelarFormulario();
+            });
+        }
+
         // Formulario de emergencia
         const formEmergencia = document.getElementById('formEmergencia');
         if (formEmergencia) {
@@ -400,6 +430,33 @@ class AlertasManager {
             console.error('Error cargando alertas:', error);
             return [];
         }
+    }
+
+    // Método para cancelar formulario
+    cancelarFormulario() {
+        console.log('❌ Cancelando formulario de emergencia...');
+        
+        // Desactivar modo de selección de ubicación
+        this.isSelectingLocation = false;
+        
+        // Remover marcador temporal si existe
+        if (this.emergencyMarker) {
+            window.mapManager.map.removeLayer(this.emergencyMarker);
+            this.emergencyMarker = null;
+        }
+        
+        // Limpiar formulario
+        this.limpiarFormulario();
+        
+        // Cerrar modal
+        Modal.hide('modalFormularioEmergencia');
+        
+        // Restaurar cursor del mapa
+        if (window.mapManager && window.mapManager.map) {
+            window.mapManager.map.getContainer().style.cursor = '';
+        }
+        
+        console.log('✅ Formulario cancelado');
     }
 }
 

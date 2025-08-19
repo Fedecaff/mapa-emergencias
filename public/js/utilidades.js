@@ -142,7 +142,13 @@ class API {
                 
                 // Manejar errores específicos
                 if (response.status === 401) {
-                    throw new Error('Token inválido');
+                    console.warn('⚠️ Token expirado, intentando renovar sesión...');
+                    // Limpiar token expirado y forzar nuevo login
+                    if (window.auth) {
+                        window.auth.logout();
+                        Notifications.warning('Sesión expirada. Por favor, inicia sesión nuevamente.');
+                    }
+                    throw new Error('Sesión expirada');
                 }
                 
                 throw new Error(errorMessage);
