@@ -21,13 +21,17 @@ async function actualizarUsuarios() {
             `);
         }
 
-        // Limpiar historial de cambios primero (por las restricciones de clave foránea)
-        console.log('🗑️ Limpiando historial de cambios...');
-        await baseDeDatos.ejecutar('DELETE FROM historial_cambios');
-        
-        // Limpiar fotos de puntos
-        console.log('🗑️ Limpiando fotos de puntos...');
-        await baseDeDatos.ejecutar('DELETE FROM fotos_puntos');
+                       // Limpiar alertas de emergencia primero (por las restricciones de clave foránea)
+               console.log('🗑️ Limpiando alertas de emergencia...');
+               await baseDeDatos.ejecutar('DELETE FROM alertas_emergencia');
+               
+               // Limpiar historial de cambios
+               console.log('🗑️ Limpiando historial de cambios...');
+               await baseDeDatos.ejecutar('DELETE FROM historial_cambios');
+               
+               // Limpiar fotos de puntos
+               console.log('🗑️ Limpiando fotos de puntos...');
+               await baseDeDatos.ejecutar('DELETE FROM fotos_puntos');
         
         // Limpiar todos los usuarios existentes
         console.log('🗑️ Limpiando usuarios existentes...');
