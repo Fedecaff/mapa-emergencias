@@ -67,10 +67,13 @@ class FotosManager {
 
     async mostrarModalFotos(puntoId) {
         this.currentPuntoId = puntoId;
+        console.log('📸 Cargando fotos para punto:', puntoId);
         
         try {
             const response = await API.get(`/fotos/punto/${puntoId}`);
+            console.log('📸 Respuesta del servidor:', response);
             this.fotos = response.fotos;
+            console.log('📸 Fotos cargadas:', this.fotos);
             this.renderizarFotos();
             this.mostrarModal('modalFotos');
         } catch (error) {
@@ -81,7 +84,12 @@ class FotosManager {
 
     renderizarFotos() {
         const contenedorFotos = document.getElementById('contenedorFotos');
-        if (!contenedorFotos) return;
+        if (!contenedorFotos) {
+            console.error('❌ Contenedor de fotos no encontrado');
+            return;
+        }
+
+        console.log('📸 Renderizando fotos:', this.fotos.length);
 
         if (this.fotos.length === 0) {
             contenedorFotos.innerHTML = `

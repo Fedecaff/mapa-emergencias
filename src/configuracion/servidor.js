@@ -10,6 +10,7 @@ import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 import actualizarTablaFotos from '../modelos/actualizarTablaFotos.js';
 import actualizarUsuarios from '../modelos/actualizarUsuarios.js';
 import actualizarTablaAlertas from '../modelos/actualizarTablaAlertas.js';
+import verificarFotos from '../modelos/verificarFotos.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -74,6 +75,7 @@ async function iniciarServidor() {
                 await actualizarTablaFotos();
                 await actualizarUsuarios();
                 await actualizarTablaAlertas();
+                await verificarFotos();
         console.log('✅ Base de datos inicializada correctamente');
         
         // Iniciar servidor
