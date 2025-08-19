@@ -5,11 +5,17 @@ const usuariosController = {
 
     async crear(req, res) {
         try {
-            const { nombre, email, password, rol = 'usuario' } = req.body;
+            const { nombre, email, password, telefono, rol = 'usuario' } = req.body;
 
             // Validaciones
-            if (!nombre || !email || !password) {
+            if (!nombre || !email || !password || !telefono) {
                 return res.status(400).json({ error: 'Todos los campos son requeridos' });
+            }
+
+            // Validar formato de teléfono argentino
+            const telefonoRegex = /^\+54\s9\s\d{3}\s\d{3}-\d{4}$/;
+            if (!telefonoRegex.test(telefono)) {
+                return res.status(400).json({ error: 'Formato de teléfono inválido. Use: +54 9 XXX XXX-XXXX' });
             }
 
             if (password.length < 6) {
@@ -26,18 +32,28 @@ const usuariosController = {
                 return res.status(400).json({ error: 'El email ya está registrado' });
             }
 
+            // Verificar si el teléfono ya existe
+            const telefonoExistente = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE telefono = $1',
+                [telefono]
+            );
+
+            if (telefonoExistente) {
+                return res.status(400).json({ error: 'El teléfono ya está registrado' });
+            }
+
             // Encriptar contraseña
             const passwordHash = await bcrypt.hash(password, 10);
 
             // Insertar usuario
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4) RETURNING id',
-                [nombre, email, passwordHash, rol]
+                'INSERT INTO usuarios (nombre, email, contraseña, telefono, rol) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+                [nombre, email, passwordHash, telefono, rol]
             );
 
             // Obtener el usuario creado (sin contraseña)
             const nuevoUsuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $1',
+                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios WHERE id = $1',
                 [resultado.rows[0].id]
             );
 
@@ -57,7 +73,7 @@ const usuariosController = {
     async listar(req, res) {
         try {
             const usuarios = await baseDeDatos.obtenerTodos(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC'
+                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC'
             );
 
             res.json({ usuarios });
@@ -73,7 +89,7 @@ const usuariosController = {
             const { id } = req.params;
 
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, rol, fecha_creacion FROM usuarios WHERE id = $1',
+                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios WHERE id = $1',
                 [id]
             );
 

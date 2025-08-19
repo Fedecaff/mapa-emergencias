@@ -109,6 +109,7 @@ class BaseDeDatosPostgres {
                 nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 contraseña VARCHAR(255) NOT NULL,
+                telefono VARCHAR(20),
                 rol VARCHAR(50) DEFAULT 'usuario',
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )

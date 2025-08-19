@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 // Importar base de datos
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
 import actualizarTablaFotos from '../modelos/actualizarTablaFotos.js';
+import actualizarUsuarios from '../modelos/actualizarUsuarios.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -68,6 +69,7 @@ async function iniciarServidor() {
         await baseDeDatos.inicializarTablas();
         await baseDeDatos.insertarDatosIniciales();
         await actualizarTablaFotos();
+        await actualizarUsuarios();
         console.log('✅ Base de datos inicializada correctamente');
         
         // Iniciar servidor
