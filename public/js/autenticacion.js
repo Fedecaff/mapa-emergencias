@@ -257,11 +257,12 @@ class Auth {
             document.getElementById('adminPanel').style.display = 'block';
         }
         
-        // Mostrar panel de perfil para todos los usuarios
-        document.getElementById('profilePanel').style.display = 'block';
-        
-        // Configurar estado inicial de disponibilidad
-        this.configurarDisponibilidad(user.disponible);
+        // Mostrar panel de perfil solo para usuarios normales (no admin)
+        if (user.rol === 'usuario') {
+            document.getElementById('profilePanel').style.display = 'block';
+            // Configurar estado inicial de disponibilidad
+            this.configurarDisponibilidad(user.disponible);
+        }
         
         // Cargar puntos en el mapa
         if (window.mapaManager) {
