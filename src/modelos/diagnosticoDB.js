@@ -1,6 +1,6 @@
 import baseDeDatos from './baseDeDatosPostgres.js';
 
-// Script de diagnóstico para verificar persistencia de datos
+// Script de diagnóstico para verificar persistencia de datos - PRUEBA FINAL
 async function diagnosticarBaseDeDatos() {
     console.log('🔍 Iniciando diagnóstico de base de datos...');
     
