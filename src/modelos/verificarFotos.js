@@ -59,6 +59,30 @@ async function verificarFotos() {
             }
         }
         
+        // Verificar si hay fotos duplicadas o con problemas
+        const fotosDuplicadas = await baseDeDatos.obtenerTodos(`
+            SELECT punto_id, COUNT(*) as cantidad
+            FROM fotos_puntos
+            GROUP BY punto_id
+            HAVING COUNT(*) > 1
+        `);
+        console.log(`📊 Puntos con múltiples fotos: ${fotosDuplicadas.length}`);
+        
+        // Verificar la integridad de la tabla
+        const tablaIntegridad = await baseDeDatos.obtenerUno(`
+            SELECT 
+                COUNT(*) as total_fotos,
+                COUNT(CASE WHEN ruta_archivo IS NOT NULL AND ruta_archivo != '' THEN 1 END) as fotos_con_url,
+                COUNT(CASE WHEN public_id IS NOT NULL AND public_id != '' THEN 1 END) as fotos_con_public_id,
+                COUNT(CASE WHEN punto_id IS NOT NULL THEN 1 END) as fotos_con_punto
+            FROM fotos_puntos
+        `);
+        console.log('📊 Integridad de la tabla fotos_puntos:');
+        console.log(`  - Total fotos: ${tablaIntegridad.total_fotos}`);
+        console.log(`  - Con URL: ${tablaIntegridad.fotos_con_url}`);
+        console.log(`  - Con public_id: ${tablaIntegridad.fotos_con_public_id}`);
+        console.log(`  - Con punto_id: ${tablaIntegridad.fotos_con_punto}`);
+        
     } catch (error) {
         console.error('❌ Error verificando fotos:', error);
     }

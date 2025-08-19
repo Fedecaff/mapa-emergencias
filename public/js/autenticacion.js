@@ -16,18 +16,11 @@ class Auth {
         this.currentUser = Storage.get('user');
         
         if (this.token && this.currentUser) {
-            console.log('🔍 Token encontrado en localStorage, verificando validez...');
-            // Verificar si el token sigue siendo válido
-            const isValid = await this.verifyToken();
-            if (isValid) {
-                console.log('✅ Token válido, restaurando sesión...');
-                this.updateUI();
-                // Cargar puntos automáticamente si ya hay sesión activa
-                this.loadPointsIfAuthenticated();
-            } else {
-                console.log('❌ Token expirado o inválido, limpiando sesión...');
-                this.logout();
-            }
+            console.log('🔍 Token encontrado en localStorage, restaurando sesión...');
+            // Restaurar sesión automáticamente sin verificar token
+            this.updateUI();
+            // Cargar puntos automáticamente si ya hay sesión activa
+            this.loadPointsIfAuthenticated();
         }
         
         this.bindEvents();
@@ -235,7 +228,7 @@ class Auth {
         Modal.show('loginModal');
     }
     
-    // Verificar si el token sigue siendo válido
+    // Verificar si el token sigue siendo válido (solo para uso interno)
     async verifyToken() {
         if (!this.token) {
             return false;
@@ -245,10 +238,8 @@ class Auth {
             const response = await API.get('/autenticacion/perfil');
             return true;
         } catch (error) {
-            // Solo hacer logout si el token es inválido (401)
-            if (error.message && error.message.includes('Token inválido')) {
-                this.logout();
-            }
+            // No hacer logout automáticamente, solo retornar false
+            console.warn('⚠️ Token puede estar expirado, pero manteniendo sesión local');
             return false;
         }
     }

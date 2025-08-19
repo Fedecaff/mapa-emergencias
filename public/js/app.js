@@ -42,7 +42,7 @@ class App {
         const required = [
             'Notifications', 'Loading', 'Modal', 'API', 
             'Geolocation', 'Storage', 'Utils', 'Auth', 
-            'MapManager', 'AdminManager', 'alertasManager'
+            'MapManager', 'AdminManager'
         ];
         
         const missing = required.filter(dep => !window[dep]);
@@ -50,6 +50,11 @@ class App {
         if (missing.length > 0) {
             console.error('❌ Dependencias faltantes:', missing);
             throw new Error(`Dependencias faltantes: ${missing.join(', ')}`);
+        }
+        
+        // Verificar alertasManager por separado ya que se inicializa después
+        if (!window.alertasManager) {
+            console.warn('⚠️ AlertasManager no disponible aún, se inicializará después');
         }
     }
     
