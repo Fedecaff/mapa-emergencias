@@ -176,6 +176,27 @@ class BaseDeDatosPostgres {
             )
         `);
 
+        // Tabla alertas de emergencia
+        await this.ejecutar(`
+            CREATE TABLE IF NOT EXISTS alertas_emergencia (
+                id SERIAL PRIMARY KEY,
+                tipo VARCHAR(50) NOT NULL,
+                prioridad VARCHAR(20) NOT NULL DEFAULT 'media',
+                titulo VARCHAR(255) NOT NULL,
+                descripcion TEXT,
+                latitud DECIMAL(10, 8) NOT NULL,
+                longitud DECIMAL(11, 8) NOT NULL,
+                direccion TEXT,
+                personas_afectadas INTEGER DEFAULT 0,
+                riesgos_especificos TEXT,
+                concurrencia_solicitada INTEGER DEFAULT 1,
+                estado VARCHAR(20) DEFAULT 'activa',
+                usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         // Índices para mejor rendimiento
         await this.ejecutar(`
             CREATE INDEX IF NOT EXISTS idx_puntos_categoria ON puntos(categoria_id);
@@ -184,6 +205,9 @@ class BaseDeDatosPostgres {
             CREATE INDEX IF NOT EXISTS idx_historial_fecha ON historial_cambios(fecha_cambio);
             CREATE INDEX IF NOT EXISTS idx_fotos_punto ON fotos_puntos(punto_id);
             CREATE INDEX IF NOT EXISTS idx_fotos_usuario ON fotos_puntos(usuario_id);
+            CREATE INDEX IF NOT EXISTS idx_alertas_estado ON alertas_emergencia(estado);
+            CREATE INDEX IF NOT EXISTS idx_alertas_fecha ON alertas_emergencia(fecha_creacion);
+            CREATE INDEX IF NOT EXISTS idx_alertas_usuario ON alertas_emergencia(usuario_id);
         `);
 
         console.log('✅ Tablas inicializadas correctamente en PostgreSQL');

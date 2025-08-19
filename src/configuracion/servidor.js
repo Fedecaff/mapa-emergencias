@@ -17,6 +17,7 @@ import rutasCategorias from '../rutas/categorias.js';
 import rutasHistorial from '../rutas/historial.js';
 import rutasUsuarios from '../rutas/usuarios.js';
 import rutasFotos from '../rutas/fotos.js';
+import rutasAlertas from '../rutas/alertas.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ app.use('/api/categorias', rutasCategorias);
 app.use('/api/historial', rutasHistorial);
 app.use('/api/usuarios', rutasUsuarios);
 app.use('/api/fotos', rutasFotos);
+app.use('/api/alertas', rutasAlertas);
 
 // Ruta principal
 app.get('/', (req, res) => {
