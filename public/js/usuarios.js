@@ -153,6 +153,63 @@ class UsuariosManager {
             return false;
         }
     }
+
+    async cambiarDisponibilidad(disponible) {
+        try {
+            const userId = window.auth.getUser()?.id;
+            if (!userId) {
+                Notifications.error('Usuario no autenticado');
+                return false;
+            }
+
+            const response = await API.put(`/usuarios/${userId}/disponibilidad`, { disponible });
+            
+            if (response.mensaje) {
+                Notifications.success(response.mensaje);
+                
+                // Actualizar el estado en el localStorage
+                const user = window.auth.getUser();
+                if (user) {
+                    user.disponible = disponible;
+                    window.auth.setUser(user);
+                }
+                
+                // Actualizar la UI
+                this.actualizarUIEstadoDisponibilidad(disponible);
+                
+                return true;
+            }
+        } catch (error) {
+            Notifications.error(error.message || 'Error cambiando disponibilidad');
+            console.error('❌ Error cambiando disponibilidad:', error);
+            return false;
+        }
+    }
+
+    actualizarUIEstadoDisponibilidad(disponible) {
+        const btnDisponible = document.getElementById('btnDisponible');
+        const btnNoDisponible = document.getElementById('btnNoDisponible');
+        
+        if (btnDisponible && btnNoDisponible) {
+            if (disponible) {
+                btnDisponible.classList.add('active');
+                btnNoDisponible.classList.remove('active');
+            } else {
+                btnDisponible.classList.remove('active');
+                btnNoDisponible.classList.add('active');
+            }
+        }
+    }
+
+    async obtenerUsuariosDisponibles() {
+        try {
+            const response = await API.get('/usuarios/disponibles');
+            return response.usuarios || [];
+        } catch (error) {
+            console.error('❌ Error obteniendo usuarios disponibles:', error);
+            return [];
+        }
+    }
 }
 
 // Inicializar cuando el DOM esté listo

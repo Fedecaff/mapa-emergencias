@@ -1641,3 +1641,66 @@ body {
         margin-bottom: 1rem;
     }
 }
+
+/* Panel de perfil */
+.profile-panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-panel h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.profile-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.availability-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-availability {
+    flex: 1;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-availability:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.btn-availability.active {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.btn-availability:first-child.active {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.btn-availability:last-child.active {
+    background: #dc3545;
+    border-color: #dc3545;
+}

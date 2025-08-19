@@ -16,6 +16,8 @@ router.get('/', usuariosController.listar);
 
 // Obtener usuario específico
 router.get('/:id', usuariosController.obtener);
+router.put('/:id/disponibilidad', usuariosController.cambiarDisponibilidad);
+router.get('/disponibles', usuariosController.obtenerDisponibles);
 
 // Actualizar usuario
 router.put('/:id', usuariosController.actualizar);

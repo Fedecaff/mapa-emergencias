@@ -87,20 +87,58 @@ const usuariosController = {
     async obtener(req, res) {
         try {
             const { id } = req.params;
-
-            const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios WHERE id = $1',
-                [id]
-            );
-
-            if (!usuario) {
+            const query = 'SELECT id, email, nombre, rol, telefono, disponible FROM usuarios WHERE id = $1';
+            const result = await baseDeDatos.ejecutar(query, [id]);
+            
+            if (result.rows.length === 0) {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
-
-            res.json({ usuario });
-
+            
+            res.json(result.rows[0]);
         } catch (error) {
-            console.error('❌ Error obteniendo usuario:', error);
+            console.error('Error obteniendo usuario:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async cambiarDisponibilidad(req, res) {
+        try {
+            const { id } = req.params;
+            const { disponible } = req.body;
+            
+            // Validar que el usuario existe y es el mismo que hace la petición
+            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'admin') {
+                return res.status(403).json({ error: 'No autorizado' });
+            }
+            
+            const query = 'UPDATE usuarios SET disponible = $1 WHERE id = $2 RETURNING id, email, nombre, disponible';
+            const result = await baseDeDatos.ejecutar(query, [disponible, id]);
+            
+            if (result.rows.length === 0) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+            
+            res.json({
+                mensaje: `Estado de disponibilidad actualizado a ${disponible ? 'disponible' : 'no disponible'}`,
+                usuario: result.rows[0]
+            });
+        } catch (error) {
+            console.error('Error cambiando disponibilidad:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async obtenerDisponibles(req, res) {
+        try {
+            const query = "SELECT id, email, nombre, telefono FROM usuarios WHERE disponible = true AND rol = 'usuario'";
+            const result = await baseDeDatos.ejecutar(query);
+            
+            res.json({
+                total: result.rows.length,
+                usuarios: result.rows
+            });
+        } catch (error) {
+            console.error('Error obteniendo usuarios disponibles:', error);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
     },

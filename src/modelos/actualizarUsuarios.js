@@ -21,6 +21,18 @@ async function actualizarUsuarios() {
             `);
         }
 
+        // Agregar columna telefono si no existe
+        await baseDeDatos.ejecutar(`
+            ALTER TABLE usuarios 
+            ADD COLUMN IF NOT EXISTS telefono VARCHAR(20)
+        `);
+
+        // Agregar columna disponible si no existe
+        await baseDeDatos.ejecutar(`
+            ALTER TABLE usuarios 
+            ADD COLUMN IF NOT EXISTS disponible BOOLEAN DEFAULT true
+        `);
+
                        // Limpiar alertas de emergencia primero (por las restricciones de clave foránea)
                console.log('🗑️ Limpiando alertas de emergencia...');
                await baseDeDatos.ejecutar('DELETE FROM alertas_emergencia');

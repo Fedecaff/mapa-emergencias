@@ -106,12 +106,13 @@ class BaseDeDatosPostgres {
         await this.ejecutar(`
             CREATE TABLE IF NOT EXISTS usuarios (
                 id SERIAL PRIMARY KEY,
-                nombre VARCHAR(255) NOT NULL,
                 email VARCHAR(255) UNIQUE NOT NULL,
-                contraseña VARCHAR(255) NOT NULL,
-                telefono VARCHAR(20),
+                password VARCHAR(255) NOT NULL,
+                nombre VARCHAR(255) NOT NULL,
                 rol VARCHAR(50) DEFAULT 'usuario',
-                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                telefono VARCHAR(20),
+                disponible BOOLEAN DEFAULT true,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
 

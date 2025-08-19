@@ -243,6 +243,117 @@ class Auth {
             return false;
         }
     }
+
+    onUserLogin(user) {
+        console.log('✅ Usuario logueado:', user);
+        
+        // Mostrar información del usuario
+        document.getElementById('userName').textContent = user.nombre;
+        document.getElementById('userInfo').style.display = 'flex';
+        document.getElementById('authButtons').style.display = 'none';
+        
+        // Mostrar panel de administración si es admin
+        if (user.rol === 'admin') {
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+        
+        // Mostrar panel de perfil para todos los usuarios
+        document.getElementById('profilePanel').style.display = 'block';
+        
+        // Configurar estado inicial de disponibilidad
+        this.configurarDisponibilidad(user.disponible);
+        
+        // Cargar puntos en el mapa
+        if (window.mapaManager) {
+            window.mapaManager.loadPoints();
+        }
+    }
+
+    onUserLogout() {
+        console.log('🔐 Iniciando logout...');
+        
+        // Limpiar localStorage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        console.log('🗑️ localStorage limpiado');
+        
+        // Limpiar marcadores del mapa
+        if (window.mapaManager) {
+            window.mapaManager.onUserLogout();
+        }
+        
+        // Ocultar información del usuario
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('authButtons').style.display = 'flex';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('profilePanel').style.display = 'none';
+        
+        // Limpiar nombre de usuario
+        document.getElementById('userName').textContent = '';
+        
+        console.log('✅ Logout completado');
+    }
+
+    configurarDisponibilidad(disponible) {
+        const btnDisponible = document.getElementById('btnDisponible');
+        const btnNoDisponible = document.getElementById('btnNoDisponible');
+        
+        if (btnDisponible && btnNoDisponible) {
+            // Configurar estado inicial
+            if (disponible) {
+                btnDisponible.classList.add('active');
+                btnNoDisponible.classList.remove('active');
+            } else {
+                btnDisponible.classList.remove('active');
+                btnNoDisponible.classList.add('active');
+            }
+            
+            // Agregar event listeners
+            btnDisponible.addEventListener('click', () => {
+                this.cambiarDisponibilidad(true);
+            });
+            
+            btnNoDisponible.addEventListener('click', () => {
+                this.cambiarDisponibilidad(false);
+            });
+        }
+    }
+
+    async cambiarDisponibilidad(disponible) {
+        try {
+            const userId = this.getUser()?.id;
+            if (!userId) {
+                console.error('❌ Usuario no autenticado');
+                return;
+            }
+
+            const response = await API.put(`/usuarios/${userId}/disponibilidad`, { disponible });
+            
+            if (response.mensaje) {
+                // Actualizar el estado en el localStorage
+                const user = this.getUser();
+                if (user) {
+                    user.disponible = disponible;
+                    this.setUser(user);
+                }
+                
+                // Actualizar la UI
+                this.configurarDisponibilidad(disponible);
+                
+                // Mostrar notificación
+                if (window.Notifications) {
+                    window.Notifications.success(response.mensaje);
+                }
+                
+                console.log('✅ Disponibilidad actualizada:', disponible);
+            }
+        } catch (error) {
+            console.error('❌ Error cambiando disponibilidad:', error);
+            if (window.Notifications) {
+                window.Notifications.error('Error cambiando disponibilidad');
+            }
+        }
+    }
 }
 
 // Inicializar autenticación cuando el DOM esté listo
