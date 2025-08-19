@@ -30,35 +30,15 @@ class AlertasManager {
             });
         }
 
-        // Botones de cerrar modales
-        const cancelarConfirmacionBtn = document.querySelector('#modalConfirmacionEmergencia .btn-cerrar');
-        if (cancelarConfirmacionBtn) {
-            cancelarConfirmacionBtn.addEventListener('click', () => {
+        // Delegación de eventos para botones de cerrar
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#modalConfirmacionEmergencia .btn-cerrar')) {
                 Modal.hide('modalConfirmacionEmergencia');
-            });
-        }
-
-        const cancelarFormularioBtn = document.querySelector('#modalFormularioEmergencia .btn-cerrar');
-        if (cancelarFormularioBtn) {
-            cancelarFormularioBtn.addEventListener('click', () => {
+            }
+            if (e.target.closest('#modalFormularioEmergencia .btn-cerrar')) {
                 this.cancelarFormulario();
-            });
-        }
-
-        // Botones X de cerrar
-        const closeConfirmacionBtn = document.querySelector('#modalConfirmacionEmergencia .close-btn');
-        if (closeConfirmacionBtn) {
-            closeConfirmacionBtn.addEventListener('click', () => {
-                Modal.hide('modalConfirmacionEmergencia');
-            });
-        }
-
-        const closeFormularioBtn = document.querySelector('#modalFormularioEmergencia .close-btn');
-        if (closeFormularioBtn) {
-            closeFormularioBtn.addEventListener('click', () => {
-                this.cancelarFormulario();
-            });
-        }
+            }
+        });
 
         // Formulario de emergencia
         const formEmergencia = document.getElementById('formEmergencia');

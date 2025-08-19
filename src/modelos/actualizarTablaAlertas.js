@@ -28,7 +28,7 @@ async function actualizarTablaAlertas() {
                     direccion TEXT,
                     personas_afectadas INTEGER DEFAULT 0,
                     riesgos_especificos TEXT,
-                    concurrencia_solicitada INTEGER DEFAULT 1,
+                                               concurrencia_solicitada VARCHAR(10) DEFAULT '1',
                     estado VARCHAR(20) DEFAULT 'activa',
                     usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
                     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

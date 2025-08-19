@@ -423,12 +423,12 @@ class MapManager {
             window.alertasManager.emergencyMarker = null;
         }
         
-        // Limpiar todos los marcadores de alertas activas
+        // NO limpiar alertas activas - solo limpiar marcadores temporales
         this.map.eachLayer((layer) => {
             if (layer._icon && layer._icon.className && 
-                (layer._icon.className.includes('emergency-marker') || 
-                 layer._icon.className.includes('emergency-marker-active'))) {
-                console.log('🚨 Limpiando marcador de alerta activa');
+                layer._icon.className.includes('emergency-marker') && 
+                !layer._icon.className.includes('emergency-marker-active')) {
+                console.log('🚨 Limpiando marcador temporal de emergencia');
                 this.map.removeLayer(layer);
             }
         });
