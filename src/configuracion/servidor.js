@@ -11,6 +11,7 @@ import actualizarTablaFotos from '../modelos/actualizarTablaFotos.js';
 import actualizarUsuarios from '../modelos/actualizarUsuarios.js';
 import actualizarTablaAlertas from '../modelos/actualizarTablaAlertas.js';
 import verificarFotos from '../modelos/verificarFotos.js';
+import diagnosticarBaseDeDatos from '../modelos/diagnosticoDB.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -71,11 +72,16 @@ async function iniciarServidor() {
         // Inicializar base de datos
         console.log('🗄️ Inicializando base de datos...');
         await baseDeDatos.inicializarTablas();
-                        await baseDeDatos.insertarDatosIniciales();
-                await actualizarTablaFotos();
-                await actualizarUsuarios();
-                await actualizarTablaAlertas();
-                await verificarFotos();
+        await baseDeDatos.insertarDatosIniciales();
+        await actualizarTablaFotos();
+        await actualizarUsuarios();
+        await actualizarTablaAlertas();
+        await verificarFotos();
+        
+        // Ejecutar diagnóstico de base de datos
+        console.log('\n🔍 Ejecutando diagnóstico de base de datos...');
+        await diagnosticarBaseDeDatos();
+        
         console.log('✅ Base de datos inicializada correctamente');
         
         // Iniciar servidor
