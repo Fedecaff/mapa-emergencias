@@ -416,6 +416,23 @@ class MapManager {
             this.tempMarker = null;
         }
         
+        // Limpiar marcadores de alertas de emergencia
+        if (window.alertasManager && window.alertasManager.emergencyMarker) {
+            console.log('🚨 Limpiando marcador de emergencia');
+            this.map.removeLayer(window.alertasManager.emergencyMarker);
+            window.alertasManager.emergencyMarker = null;
+        }
+        
+        // Limpiar todos los marcadores de alertas activas
+        this.map.eachLayer((layer) => {
+            if (layer._icon && layer._icon.className && 
+                (layer._icon.className.includes('emergency-marker') || 
+                 layer._icon.className.includes('emergency-marker-active'))) {
+                console.log('🚨 Limpiando marcador de alerta activa');
+                this.map.removeLayer(layer);
+            }
+        });
+        
         console.log('✅ Limpieza de marcadores completada');
     }
     

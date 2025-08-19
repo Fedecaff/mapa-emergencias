@@ -5,6 +5,9 @@ const alertasController = {
     // Crear nueva alerta de emergencia
     async crear(req, res) {
         try {
+            console.log('📤 Datos recibidos para crear alerta:', req.body);
+            console.log('👤 Usuario autenticado:', req.usuario);
+            
             const {
                 tipo,
                 prioridad = 'media',
