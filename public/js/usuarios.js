@@ -60,12 +60,13 @@ class UsuariosManager {
         const userData = {
             nombre: formData.get('nombre').trim(),
             email: formData.get('email').trim(),
+            telefono: formData.get('telefono').trim(),
             password: formData.get('password'),
             rol: formData.get('rol')
         };
 
         // Validaciones
-        if (!userData.nombre || !userData.email || !userData.password || !userData.rol) {
+        if (!userData.nombre || !userData.email || !userData.telefono || !userData.password || !userData.rol) {
             Notifications.error('Por favor completa todos los campos');
             return;
         }
