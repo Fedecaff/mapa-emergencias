@@ -168,7 +168,52 @@ class AlertasManager {
             .addTo(window.mapManager.map)
             .bindPopup(popupContent, { maxWidth: 400 });
         
+        // Agregar event listener para cuando se abra el popup
+        marker.on('popupopen', () => {
+            this.bindPopupEvents(alerta);
+        });
+        
         return marker;
+    }
+
+    bindPopupEvents(alerta) {
+        // Event listener para botón "Ver Fotos"
+        const btnVerFotos = document.querySelector('.btn-ver-fotos-emergencia');
+        if (btnVerFotos) {
+            btnVerFotos.addEventListener('click', () => {
+                this.verFotosEmergencia(alerta.id);
+            });
+        }
+        
+        // Event listener para botón "Cambiar Estado" (solo admin)
+        const btnCambiarEstado = document.querySelector('.btn-cambiar-estado');
+        if (btnCambiarEstado) {
+            btnCambiarEstado.addEventListener('click', () => {
+                this.cambiarEstadoEmergencia(alerta.id);
+            });
+        }
+    }
+
+    async verFotosEmergencia(alertaId) {
+        try {
+            console.log('📸 Verificando fotos para alerta:', alertaId);
+            // Por ahora solo mostrar mensaje, implementar después
+            Notifications.info('Funcionalidad de fotos para emergencias próximamente');
+        } catch (error) {
+            console.error('Error verificando fotos:', error);
+            Notifications.error('Error al cargar fotos');
+        }
+    }
+
+    async cambiarEstadoEmergencia(alertaId) {
+        try {
+            console.log('🔄 Cambiando estado de alerta:', alertaId);
+            // Por ahora solo mostrar mensaje, implementar después
+            Notifications.info('Funcionalidad de cambio de estado próximamente');
+        } catch (error) {
+            console.error('Error cambiando estado:', error);
+            Notifications.error('Error al cambiar estado');
+        }
     }
 
     crearPopupAlerta(alerta) {

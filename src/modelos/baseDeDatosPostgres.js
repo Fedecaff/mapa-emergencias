@@ -92,10 +92,10 @@ class BaseDeDatosPostgres {
             SELECT COUNT(*) as count 
             FROM information_schema.tables 
             WHERE table_schema = 'public' 
-            AND table_name IN ('usuarios', 'categorias', 'puntos', 'historial_cambios', 'fotos_puntos')
+            AND table_name IN ('usuarios', 'categorias', 'puntos', 'historial_cambios', 'fotos_puntos', 'alertas_emergencia')
         `);
         
-        if (parseInt(tablasExistentes.count) === 5) {
+        if (parseInt(tablasExistentes.count) === 6) {
             console.log('ℹ️ Las tablas ya existen, saltando creación...');
             return;
         }
