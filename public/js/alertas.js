@@ -252,7 +252,7 @@ class AlertasManager {
                     ${alerta.direccion ? `<p><strong>Dirección:</strong> ${alerta.direccion}</p>` : ''}
                     ${alerta.personas_afectadas > 0 ? `<p><strong>Personas afectadas:</strong> ${alerta.personas_afectadas}</p>` : ''}
                     ${alerta.riesgos_especificos ? `<p><strong>Riesgos:</strong> ${alerta.riesgos_especificos}</p>` : ''}
-                    <p><strong>Concurrencia solicitada:</strong> ${alerta.concurrencia_solicitada} bomberos</p>
+                    <p><strong>Concurrencia solicitada:</strong> ${alerta.concurrencia_solicitada === 'todos' ? 'Todos los disponibles' : `${alerta.concurrencia_solicitada} bomberos`}</p>
                     <p><strong>Reportado por:</strong> ${alerta.usuario_nombre}</p>
                 </div>
                 
@@ -323,7 +323,7 @@ class AlertasManager {
                 direccion: formData.get('direccion'),
                 personas_afectadas: parseInt(formData.get('personas_afectadas')) || 0,
                 riesgos_especificos: formData.get('riesgos_especificos'),
-                concurrencia_solicitada: parseInt(formData.get('concurrencia_solicitada')) || 1
+                concurrencia_solicitada: formData.get('concurrencia_solicitada') === 'todos' ? 'todos' : parseInt(formData.get('concurrencia_solicitada')) || 1
             };
             
             console.log('📤 Enviando alerta:', alertaData);

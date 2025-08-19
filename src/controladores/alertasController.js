@@ -40,6 +40,13 @@ const alertasController = {
                 });
             }
 
+            // Validar concurrencia solicitada
+            if (concurrencia_solicitada !== 'todos' && (isNaN(concurrencia_solicitada) || concurrencia_solicitada < 1)) {
+                return res.status(400).json({
+                    error: 'La concurrencia solicitada debe ser un número mayor a 0 o "todos"'
+                });
+            }
+
             // Insertar alerta
             const resultado = await baseDeDatos.ejecutar(`
                 INSERT INTO alertas_emergencia (
