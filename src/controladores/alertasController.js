@@ -44,11 +44,17 @@ const alertasController = {
             }
 
             // Validar concurrencia solicitada
+            console.log('🔍 Validando concurrencia:', concurrencia_solicitada);
+            console.log('🔍 Tipo de concurrencia:', typeof concurrencia_solicitada);
+            
             if (concurrencia_solicitada !== 'todos' && (isNaN(concurrencia_solicitada) || concurrencia_solicitada < 1)) {
+                console.log('❌ Concurrencia inválida:', concurrencia_solicitada);
                 return res.status(400).json({
                     error: 'La concurrencia solicitada debe ser un número mayor a 0 o "todos"'
                 });
             }
+            
+            console.log('✅ Concurrencia válida:', concurrencia_solicitada);
 
             // Insertar alerta
             const resultado = await baseDeDatos.ejecutar(`

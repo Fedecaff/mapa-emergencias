@@ -381,6 +381,8 @@ class AlertasManager {
             };
             
             console.log('📤 Enviando alerta:', alertaData);
+            console.log('🔍 Concurrencia solicitada:', alertaData.concurrencia_solicitada);
+            console.log('🔍 Tipo de concurrencia:', typeof alertaData.concurrencia_solicitada);
             
             // Enviar alerta al servidor
             const response = await API.post('/alertas/crear', alertaData);
