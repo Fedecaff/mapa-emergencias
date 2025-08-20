@@ -335,21 +335,17 @@ class Auth {
 
     async cambiarDisponibilidad(disponible) {
         try {
-            const userId = this.getUser()?.id;
-            if (!userId) {
+            if (!this.currentUser?.id) {
                 console.error('❌ Usuario no autenticado');
                 return;
             }
 
-            const response = await API.put(`/usuarios/${userId}/disponibilidad`, { disponible });
+            const response = await API.put(`/usuarios/${this.currentUser.id}/disponibilidad`, { disponible });
             
             if (response.mensaje) {
-                // Actualizar el estado en el localStorage
-                const user = this.getUser();
-                if (user) {
-                    user.disponible = disponible;
-                    this.setUser(user);
-                }
+                // Actualizar el estado en el localStorage y en memoria
+                this.currentUser.disponible = disponible;
+                Storage.set('user', this.currentUser);
                 
                 // Actualizar la UI
                 this.actualizarEstadoDisponibilidad(disponible);
