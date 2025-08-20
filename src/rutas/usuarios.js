@@ -1,29 +1,22 @@
 import express from 'express';
 import usuariosController from '../controladores/usuariosController.js';
-import { verificarToken, verificarAdmin } from '../middleware/autenticacion.js';
+import { verificarToken, verificarAdmin, verificarDisponibilidad } from '../middleware/autenticacion.js';
 
 const router = express.Router();
 
-// Todas las rutas requieren autenticación y rol de admin
+// Todas las rutas requieren autenticación
 router.use(verificarToken);
-router.use(verificarAdmin);
 
-// Crear usuario
-router.post('/', usuariosController.crear);
+// Rutas que requieren permisos de administrador
+router.post('/', verificarAdmin, usuariosController.crear);
+router.get('/', verificarAdmin, usuariosController.listar);
+router.get('/:id', verificarAdmin, usuariosController.obtener);
+router.put('/:id', verificarAdmin, usuariosController.actualizar);
+router.delete('/:id', verificarAdmin, usuariosController.eliminar);
 
-// Listar usuarios
-router.get('/', usuariosController.listar);
-
-// Obtener usuario específico
-router.get('/:id', usuariosController.obtener);
-router.put('/:id/disponibilidad', usuariosController.cambiarDisponibilidad);
+// Rutas de disponibilidad (permiten a usuarios cambiar su propia disponibilidad)
+router.put('/:id/disponibilidad', verificarDisponibilidad, usuariosController.cambiarDisponibilidad);
 router.get('/disponibles', usuariosController.obtenerDisponibles);
-
-// Actualizar usuario
-router.put('/:id', usuariosController.actualizar);
-
-// Eliminar usuario
-router.delete('/:id', usuariosController.eliminar);
 
 export default router;
 

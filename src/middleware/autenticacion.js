@@ -51,13 +51,33 @@ export const verificarAdmin = (req, res, next) => {
         });
     }
 
-            if (req.usuario.rol !== 'administrador') {
+    if (req.usuario.rol !== 'administrador') {
         return res.status(403).json({
             error: 'Acceso denegado. Se requieren permisos de administrador'
         });
     }
 
     next();
+};
+
+// Middleware para verificar permisos de disponibilidad
+export const verificarDisponibilidad = (req, res, next) => {
+    if (!req.usuario) {
+        return res.status(401).json({
+            error: 'Usuario no autenticado'
+        });
+    }
+
+    const userId = parseInt(req.params.id);
+    
+    // Permitir si es administrador o si está cambiando su propia disponibilidad
+    if (req.usuario.rol === 'administrador' || req.usuario.id === userId) {
+        next();
+    } else {
+        return res.status(403).json({
+            error: 'Acceso denegado. Solo puedes cambiar tu propia disponibilidad'
+        });
+    }
 };
 
 // Middleware opcional para autenticación (no bloquea si no hay token)
