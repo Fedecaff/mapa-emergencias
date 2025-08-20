@@ -1,68 +1,94 @@
 # 🗺️ Mapa de Emergencias - Catamarca
 
-Sistema de mapeo interactivo para servicios de emergencia en Catamarca, Argentina.
+Sistema completo de gestión de emergencias para bomberos de Catamarca, Argentina. Plataforma web interactiva para mapeo, alertas y coordinación de servicios de emergencia.
 
-## 🎯 Características
+## 🎯 Características Principales
 
+### 🗺️ **Sistema de Mapeo**
 - **Mapa Interactivo** con OpenStreetMap y Leaflet.js
-- **Sistema de Autenticación** con roles (Usuario/Administrador)
-- **Gestión de Puntos de Emergencia:**
-  - 🚒 **Hidrantes** - Puntos de agua para bomberos
-  - 🚔 **Comisarías** - Estaciones de policía
-  - 🏫 **Escuelas** - Instituciones educativas
-  - 🏥 **Hospitales** - Centros de salud
-- **Marcado Directo en Mapa** para administradores
-- **Información Detallada** por categoría
-- **Búsqueda y Filtros**
-- **Geolocalización** del usuario
-- **Interfaz Responsive**
+- **Puntos de Emergencia** categorizados (hidrantes, comisarías, hospitales, etc.)
+- **Marcado Directo** en el mapa para administradores
+- **Búsqueda y Filtros** avanzados
+- **Geolocalización** automática del usuario
 
-## 🏗️ Arquitectura
+### 🚨 **Sistema de Alertas de Emergencia**
+- **Creación de Alertas** por administradores
+- **Tipos de Emergencia:** Incendio estructural, forestal, accidente vehicular, rescate, fuga de gas
+- **Niveles de Prioridad:** Baja, Media, Alta
+- **Concurrencia Solicitada:** Número específico o "Todos los disponibles"
+- **Persistencia de Alertas** hasta dar de baja
+- **Sonido de Sirena** para notificaciones
+
+### 👥 **Gestión de Usuarios**
+- **Sistema de Roles:** Administrador y Operador
+- **Autenticación JWT** segura
+- **Panel de Disponibilidad** para operadores
+- **Gestión de Usuarios** por administradores
+- **Teléfonos de Contacto** para notificaciones
+
+### 📸 **Sistema de Fotos**
+- **Carga de Fotos** para puntos de emergencia
+- **Almacenamiento en Cloudinary** (nube)
+- **Visualización** en galerías
+- **Gestión** por administradores
+
+## 🏗️ Arquitectura del Sistema
 
 ```
 mapa-emergencias/
 ├── src/
 │   ├── configuracion/
-│   │   └── servidor.js
+│   │   └── servidor.js                 # Configuración principal del servidor
 │   ├── controladores/
-│   │   ├── autenticacionController.js
-│   │   ├── puntosController.js
-│   │   └── categoriasController.js
+│   │   ├── autenticacionController.js  # Gestión de usuarios y sesiones
+│   │   ├── puntosController.js         # CRUD de puntos en el mapa
+│   │   ├── categoriasController.js     # Gestión de categorías
+│   │   ├── fotosController.js          # Gestión de fotos con Cloudinary
+│   │   ├── alertasController.js        # Sistema de alertas de emergencia
+│   │   └── usuariosController.js       # Gestión de usuarios y disponibilidad
 │   ├── modelos/
-│   │   ├── baseDeDatos.js
-│   │   ├── usuarioModel.js
-│   │   ├── puntoModel.js
-│   │   └── categoriaModel.js
+│   │   ├── baseDeDatosPostgres.js      # Conexión PostgreSQL
+│   │   ├── actualizarTablaFotos.js     # Scripts de migración
+│   │   ├── actualizarUsuarios.js       # Actualización de usuarios
+│   │   ├── actualizarTablaAlertas.js   # Migración de alertas
+│   │   ├── actualizarRoles.js          # Actualización de roles
+│   │   └── verificarRoles.js           # Diagnóstico de roles
 │   ├── rutas/
-│   │   ├── autenticacion.js
-│   │   ├── puntos.js
-│   │   └── categorias.js
-│   ├── middleware/
-│   │   ├── autenticacion.js
-│   │   └── validacion.js
-│   └── utilidades/
-│       ├── coordenadas.js
-│       └── notificaciones.js
+│   │   ├── autenticacion.js            # Rutas de login/logout
+│   │   ├── puntos.js                   # API de puntos
+│   │   ├── categorias.js               # API de categorías
+│   │   ├── fotos.js                    # API de fotos
+│   │   ├── alertas.js                  # API de alertas
+│   │   └── usuarios.js                 # API de usuarios
+│   └── middleware/
+│       └── autenticacion.js            # JWT y control de acceso
 ├── public/
 │   ├── css/
-│   │   ├── estilos.css
-│   │   └── componentes.css
+│   │   └── estilos.css                 # Estilos completos del sistema
 │   ├── js/
-│   │   ├── mapa.js
-│   │   ├── autenticacion.js
-│   │   ├── administracion.js
-│   │   └── utilidades.js
-│   └── index.html
-├── datos/
-│   └── mapa_emergencias.db
+│   │   ├── app.js                      # Inicialización principal
+│   │   ├── mapa.js                     # Gestión del mapa interactivo
+│   │   ├── autenticacion.js            # Sistema de autenticación
+│   │   ├── fotos.js                    # Gestión de fotos frontend
+│   │   ├── alertas.js                  # Sistema de alertas frontend
+│   │   ├── usuarios.js                 # Gestión de usuarios frontend
+│   │   └── utilidades.js               # Funciones auxiliares
+│   └── index.html                      # Interfaz principal
 └── package.json
 ```
 
-## 🚀 Instalación
+## 🚀 Instalación y Despliegue
 
+### **Requisitos Previos**
+- Node.js 18+
+- PostgreSQL (base de datos)
+- Cuenta en Cloudinary (fotos)
+- Cuenta en Railway (hosting)
+
+### **Configuración Local**
 1. **Clonar el repositorio:**
    ```bash
-   git clone [url-del-repositorio]
+   git clone https://github.com/Fedecaff/mapa-emergencias.git
    cd mapa-emergencias
    ```
 
@@ -71,12 +97,15 @@ mapa-emergencias/
    npm install
    ```
 
-3. **Inicializar la base de datos:**
-   ```bash
-   npm run init-db
+3. **Configurar variables de entorno:**
+   ```env
+   DATABASE_URL=postgresql://usuario:password@localhost:5432/mapa_emergencias
+   JWT_SECRET=tu_jwt_secret_super_seguro
+   CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+   PORT=3000
    ```
 
-4. **Iniciar el servidor:**
+4. **Inicializar base de datos:**
    ```bash
    npm start
    ```
@@ -86,68 +115,159 @@ mapa-emergencias/
    http://localhost:3000
    ```
 
-## 👤 Credenciales por Defecto
+## 👤 Sistema de Usuarios
 
+### **Roles Implementados:**
+- **🔧 Administrador:** Control total del sistema
+- **👷 Operador:** Gestión de disponibilidad y visualización
+
+### **Credenciales por Defecto:**
 - **Email:** `federico.gomez.sc@gmail.com`
 - **Contraseña:** `admin123`
 - **Rol:** Administrador
 
-## 🛠️ Tecnologías
+## 🛠️ Tecnologías Implementadas
 
-- **Backend:** Node.js, Express.js
-- **Base de Datos:** SQLite
-- **Autenticación:** JWT, bcrypt
-- **Frontend:** HTML5, CSS3, JavaScript ES6+
-- **Mapas:** Leaflet.js, OpenStreetMap
-- **Iconos:** Font Awesome
+### **Backend:**
+- **Node.js** + **Express.js** - Servidor web
+- **PostgreSQL** - Base de datos relacional
+- **JWT** - Autenticación segura
+- **bcrypt** - Encriptación de contraseñas
+- **Multer** - Manejo de archivos
+- **Cloudinary** - Almacenamiento de imágenes
+
+### **Frontend:**
+- **HTML5** + **CSS3** - Interfaz de usuario
+- **JavaScript ES6+** - Lógica del cliente
+- **Leaflet.js** - Mapas interactivos
+- **Font Awesome** - Iconografía
+- **Responsive Design** - Adaptable a dispositivos
+
+### **Infraestructura:**
+- **Railway** - Hosting y base de datos
+- **Cloudinary** - CDN para imágenes
+- **GitHub** - Control de versiones
 
 ## 📋 Funcionalidades por Rol
 
-### 👤 Usuario Normal
-- Visualizar puntos en el mapa
-- Filtrar por categorías
-- Buscar ubicaciones
-- Ver detalles de puntos
-- Geolocalización
+### 👷 **Operador**
+- ✅ Visualizar puntos en el mapa
+- ✅ Filtrar por categorías
+- ✅ Buscar ubicaciones
+- ✅ Ver detalles de puntos
+- ✅ Geolocalización automática
+- ✅ **Panel de Disponibilidad** (disponible/no disponible)
+- ✅ Visualizar alertas activas
+- ✅ Ver fotos de puntos
 
-### 🔧 Administrador
-- Todas las funciones de usuario
-- Agregar puntos haciendo clic en el mapa
-- Editar información de puntos
-- Gestionar categorías
-- Ver historial de cambios
+### 🔧 **Administrador**
+- ✅ Todas las funciones de operador
+- ✅ **Crear Alertas de Emergencia** con prioridades
+- ✅ **Solicitar Concurrencia** (número específico o "todos")
+- ✅ Agregar puntos haciendo clic en el mapa
+- ✅ Editar información de puntos
+- ✅ Gestionar categorías
+- ✅ **Sistema de Fotos** completo
+- ✅ **Gestión de Usuarios** (crear, editar, eliminar)
+- ✅ **Dar de Baja Alertas** de emergencia
+- ✅ Ver historial de cambios
 
-## 🔒 Seguridad
+## 🚨 Sistema de Alertas de Emergencia
 
-- Autenticación JWT
-- Encriptación de contraseñas con bcrypt
-- Middleware de autorización
-- Validación de datos
-- Headers de seguridad con Helmet
+### **Tipos de Emergencia:**
+- 🔥 **Incendio Estructural** - Edificios y construcciones
+- 🌲 **Incendio Forestal** - Zonas rurales y bosques
+- 🚗 **Accidente Vehicular** - Colisiones y rescates
+- 🆘 **Rescate** - Personas en peligro
+- ⛽ **Fuga de Gas** - Emergencias químicas
+- ⚠️ **Otro** - Emergencias diversas
+
+### **Niveles de Prioridad:**
+- 🟢 **Baja** - Situaciones controladas
+- 🟡 **Media** - Requiere atención moderada
+- 🔴 **Alta** - Emergencia crítica
+
+### **Flujo de Alerta:**
+1. **Administrador** crea alerta seleccionando ubicación
+2. **Sistema** valida datos y crea marcador
+3. **Alerta** se muestra en mapa con información completa
+4. **Sonido de sirena** notifica a usuarios
+5. **Alerta persiste** hasta que administrador la da de baja
+
+## 📸 Sistema de Gestión de Fotos
+
+### **Características:**
+- ✅ **Carga múltiple** de fotos por punto
+- ✅ **Almacenamiento en la nube** (Cloudinary)
+- ✅ **Visualización en galerías** modales
+- ✅ **Eliminación segura** con respaldo
+- ✅ **Optimización automática** de imágenes
+- ✅ **Acceso controlado** por roles
+
+## 🔒 Seguridad Implementada
+
+- ✅ **Autenticación JWT** con tokens seguros
+- ✅ **Encriptación bcrypt** para contraseñas
+- ✅ **Middleware de autorización** por roles
+- ✅ **Validación de datos** en frontend y backend
+- ✅ **Headers de seguridad** con Helmet
+- ✅ **CORS configurado** para producción
+- ✅ **Sanitización** de entradas de usuario
 
 ## 📱 Responsive Design
 
-La aplicación está optimizada para:
-- 📱 Dispositivos móviles
-- 💻 Tablets
-- 🖥️ Computadoras de escritorio
+La aplicación está completamente optimizada para:
+- 📱 **Dispositivos móviles** (Android/iOS)
+- 📱 **Tablets** (iPad, Android)
+- 💻 **Laptops** y computadoras
+- 🖥️ **Monitores grandes**
+
+## 🚀 Estado Actual del Proyecto
+
+### **✅ Funcionalidades Completadas:**
+- Sistema de autenticación completo
+- Gestión de puntos en mapa
+- Sistema de alertas de emergencia
+- Panel de disponibilidad para operadores
+- Sistema de fotos con Cloudinary
+- Gestión de usuarios por roles
+- Persistencia de datos en PostgreSQL
+- Interfaz responsive completa
+- Despliegue en Railway
+
+### **🔄 En Desarrollo:**
+- Sistema de notificaciones por SMS/WhatsApp
+- Aplicación móvil nativa
+- Dashboard de estadísticas
+- Integración con sistemas externos
+
+### **📋 Próximas Mejoras:**
+- Notificaciones push en tiempo real
+- Geolocalización avanzada
+- Reportes y analytics
+- Integración con sistemas de emergencia oficiales
 
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crear una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
+2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abrir un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
 ## 👨‍💻 Autor
 
 **Federico Caffettaro** - Desarrollador del Sistema de Mapeo de Emergencias
 
+**Contacto:** federico.gomez.sc@gmail.com
+
 ---
 
-*Desarrollado para mejorar la gestión de servicios de emergencia en Catamarca*
+*Desarrollado para mejorar la gestión y coordinación de servicios de emergencia en Catamarca, Argentina*
+
+**Versión:** 1.0.0  
+**Última actualización:** Enero 2024
