@@ -258,10 +258,20 @@ class Auth {
         }
         
         // Mostrar panel de disponibilidad solo para operadores (no administrador)
+        console.log('🔍 Verificando rol del usuario:', user.rol);
         if (user.rol === 'operador') {
-            document.getElementById('availabilityPanel').style.display = 'block';
-            // Configurar estado inicial de disponibilidad
-            this.configurarDisponibilidad(user.disponible);
+            console.log('✅ Usuario es operador, mostrando panel de disponibilidad');
+            const availabilityPanel = document.getElementById('availabilityPanel');
+            if (availabilityPanel) {
+                availabilityPanel.style.display = 'block';
+                console.log('✅ Panel de disponibilidad mostrado');
+                // Configurar estado inicial de disponibilidad
+                this.configurarDisponibilidad(user.disponible);
+            } else {
+                console.error('❌ Panel de disponibilidad no encontrado en el DOM');
+            }
+        } else {
+            console.log('ℹ️ Usuario no es operador, rol:', user.rol);
         }
         
         // Cargar puntos en el mapa
@@ -299,18 +309,28 @@ class Auth {
     }
 
     configurarDisponibilidad(disponible) {
+        console.log('🔧 Configurando disponibilidad:', disponible);
         const checkbox = document.getElementById('availabilityCheckbox');
         const status = document.getElementById('availabilityStatus');
         
+        console.log('🔍 Elementos encontrados:', {
+            checkbox: !!checkbox,
+            status: !!status
+        });
+        
         if (checkbox && status) {
+            console.log('✅ Configurando checkbox y estado');
             // Configurar estado inicial
             checkbox.checked = disponible;
             this.actualizarEstadoDisponibilidad(disponible);
             
             // Agregar event listener
             checkbox.addEventListener('change', (e) => {
+                console.log('🔄 Checkbox cambiado:', e.target.checked);
                 this.cambiarDisponibilidad(e.target.checked);
             });
+        } else {
+            console.error('❌ Elementos de disponibilidad no encontrados');
         }
     }
 
