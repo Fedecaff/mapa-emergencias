@@ -296,7 +296,15 @@ class Auth {
         document.getElementById('userInfo').style.display = 'none';
         document.getElementById('authButtons').style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
-        document.getElementById('availabilityPanel').style.display = 'none';
+        
+        // Ocultar panel de disponibilidad
+        const availabilityPanel = document.getElementById('availabilityPanel');
+        if (availabilityPanel) {
+            availabilityPanel.style.display = 'none';
+            console.log('✅ Panel de disponibilidad ocultado');
+        } else {
+            console.log('⚠️ Panel de disponibilidad no encontrado');
+        }
         
         // Limpiar nombre de usuario
         document.getElementById('userName').textContent = '';
