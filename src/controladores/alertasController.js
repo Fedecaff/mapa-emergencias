@@ -57,6 +57,13 @@ const alertasController = {
             console.log('✅ Concurrencia válida:', concurrencia_solicitada);
 
             // Insertar alerta
+            console.log('🗄️ Intentando insertar alerta en la base de datos...');
+            console.log('📊 Datos a insertar:', {
+                tipo, prioridad, titulo, descripcion, latitud, longitud,
+                direccion, personas_afectadas, riesgos_especificos,
+                concurrencia_solicitada, usuario_id: req.usuario.id
+            });
+            
             const resultado = await baseDeDatos.ejecutar(`
                 INSERT INTO alertas_emergencia (
                     tipo, prioridad, titulo, descripcion, latitud, longitud, 
@@ -69,6 +76,8 @@ const alertasController = {
                 direccion, personas_afectadas, riesgos_especificos,
                 concurrencia_solicitada, req.usuario.id
             ]);
+            
+            console.log('✅ Alerta insertada correctamente, ID:', resultado.rows[0].id);
 
             // Obtener la alerta creada
             const alerta = await baseDeDatos.obtenerUno(`
@@ -79,11 +88,14 @@ const alertasController = {
             `, [resultado.rows[0].id]);
 
             console.log(`🚨 Alerta creada: ${titulo} (ID: ${resultado.rows[0].id})`);
+            console.log('📤 Enviando respuesta al cliente...');
 
             res.status(201).json({
                 mensaje: 'Alerta de emergencia creada exitosamente',
                 alerta
             });
+            
+            console.log('✅ Respuesta enviada exitosamente');
 
         } catch (error) {
             console.error('❌ Error creando alerta:', error);
