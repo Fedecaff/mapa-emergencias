@@ -157,6 +157,9 @@ class Auth {
         // Actualizar UI
         this.updateUI();
         
+        // Llamar a onUserLogout para limpiar paneles específicos
+        this.onUserLogout();
+        
         // Disparar evento de logout
         window.dispatchEvent(new CustomEvent('userLogout'));
         
