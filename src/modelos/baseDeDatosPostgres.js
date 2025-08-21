@@ -14,7 +14,7 @@ class BaseDeDatosPostgres {
             const config = {
                 host: process.env.PGHOST || process.env.DB_HOST || 'localhost',
                 port: process.env.PGPORT || process.env.DB_PORT || 5432,
-                database: process.env.PGDATABASE || process.env.DB_NAME || 'mapa_emergencias',
+                database: process.env.PGDATABASE || process.env.DB_NAME || 'postgres',
                 user: process.env.PGUSER || process.env.DB_USER || 'postgres',
                 password: process.env.PGPASSWORD || process.env.DB_PASSWORD || 'password',
                 ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
@@ -285,14 +285,14 @@ class BaseDeDatosPostgres {
         const passwordHash = await bcrypt.hash('admin123', 10);
         
         await this.ejecutar(
-            'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4)',
+            'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
             ['Administrador', 'federico.gomez.sc@gmail.com', passwordHash, 'admin']
         );
 
         // Insertar usuario admin adicional
         const adminPasswordHash = await bcrypt.hash('admin123', 10);
         await this.ejecutar(
-            'INSERT INTO usuarios (nombre, email, contraseña, rol) VALUES ($1, $2, $3, $4)',
+            'INSERT INTO usuarios (nombre, email, password, rol) VALUES ($1, $2, $3, $4)',
             ['Admin', 'admin@test.com', adminPasswordHash, 'admin']
         );
 
