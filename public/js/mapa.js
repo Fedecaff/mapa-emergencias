@@ -221,15 +221,26 @@ class MapManager {
     }
     
     async loadPoints(filters = {}) {
+        // Verificar si hay categorías seleccionadas
+        const selectedCategories = Array.from(
+            document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked')
+        ).map(cb => parseInt(cb.value));
+        
+        // Si no hay categorías seleccionadas, NO cargar puntos
+        if (selectedCategories.length === 0) {
+            console.log('🚫 No hay categorías seleccionadas - NO cargando puntos');
+            this.clearPointMarkers();
+            return;
+        }
+        
         try {
             Loading.show();
             
             let endpoint = '/puntos';
             const params = new URLSearchParams();
             
-            if (filters.categoria_id) {
-                params.append('categoria_id', filters.categoria_id);
-            }
+            // Usar las categorías seleccionadas
+            selectedCategories.forEach(id => params.append('categoria_id', id));
             
             if (filters.latitud && filters.longitud && filters.radio) {
                 params.append('latitud', filters.latitud);
@@ -241,23 +252,20 @@ class MapManager {
                 endpoint += '?' + params.toString();
             }
             
-            console.log('🔍 Cargando puntos con filtros:', filters);
+            console.log('🔍 Cargando puntos con categorías:', selectedCategories);
             console.log('📡 Endpoint:', endpoint);
             
             const response = await API.get(endpoint);
             const points = response.puntos || [];
             
             console.log('📊 Puntos recibidos:', points.length);
-            console.log('📍 Marcadores antes de limpiar:', this.markers.length);
             
-            // Solo limpiar marcadores de puntos, no los de usuario o búsqueda
+            // Limpiar marcadores de puntos
             this.clearPointMarkers();
-            
-            console.log('🗑️ Marcadores después de limpiar:', this.markers.length);
             
             this.addMarkers(points);
             
-            console.log('✅ Marcadores después de agregar:', this.markers.length);
+            console.log('✅ Marcadores agregados:', this.markers.length);
             
         } catch (error) {
             console.error('Error cargando puntos:', error);
