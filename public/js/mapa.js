@@ -224,32 +224,11 @@ class MapManager {
         try {
             Loading.show();
             
-            // Si no hay filtros de categoría específicos, verificar los checkboxes
-            if (!filters.categoria_id) {
-                const selectedCategories = Array.from(
-                    document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked')
-                ).map(cb => parseInt(cb.value));
-                
-                // Si no hay categorías seleccionadas, no cargar puntos
-                if (selectedCategories.length === 0) {
-                    console.log('🚫 No hay categorías seleccionadas, limpiando marcadores');
-                    this.clearPointMarkers();
-                    return;
-                }
-                
-                // Usar las categorías seleccionadas
-                filters.categoria_id = selectedCategories;
-            }
-            
             let endpoint = '/puntos';
             const params = new URLSearchParams();
             
             if (filters.categoria_id) {
-                if (Array.isArray(filters.categoria_id)) {
-                    filters.categoria_id.forEach(id => params.append('categoria_id', id));
-                } else {
-                    params.append('categoria_id', filters.categoria_id);
-                }
+                params.append('categoria_id', filters.categoria_id);
             }
             
             if (filters.latitud && filters.longitud && filters.radio) {
@@ -462,13 +441,17 @@ class MapManager {
             document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked')
         ).map(cb => parseInt(cb.value));
         
+        console.log('🔍 Categorías seleccionadas:', selectedCategories);
+        
         this.markers.forEach(marker => {
-            if (selectedCategories.includes(marker.pointData.categoria_id)) {
+            if (selectedCategories.length === 0 || selectedCategories.includes(marker.pointData.categoria_id)) {
                 marker.addTo(this.map);
             } else {
                 this.map.removeLayer(marker);
             }
         });
+        
+        console.log('✅ Filtrado completado. Marcadores visibles:', this.markers.filter(m => this.map.hasLayer(m)).length);
     }
     
     async searchPoints() {
