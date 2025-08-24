@@ -17,8 +17,8 @@ class MapManager {
         this.initMap();
         this.bindEvents();
         this.loadCategories();
-        // Cargar puntos automáticamente sin necesidad de login
-        this.loadPoints();
+        // NO cargar puntos automáticamente - esperar a que el usuario seleccione categorías
+        // this.loadPoints();
     }
     
     initMap() {
@@ -459,7 +459,7 @@ class MapManager {
         const query = searchInput.value.trim();
         
         if (!query) {
-            this.loadPoints();
+            // No hacer nada si no hay búsqueda - respetar filtros de categorías
             return;
         }
         
@@ -556,12 +556,8 @@ class MapManager {
                 this.updateLocationInfo(position, 'Dirección no disponible');
             }
             
-            // Cargar puntos cercanos (sin limpiar marcadores de búsqueda)
-            this.loadPoints({
-                latitud: position.lat,
-                longitud: position.lng,
-                radio: 7 // Radio fijo de 7km
-            });
+            // NO cargar puntos automáticamente - respetar filtros de categorías
+            console.log('📍 Ubicación centrada - esperando selección de categorías');
             
             Notifications.success(`Ubicación centrada (precisión: ±${Math.round(position.accuracy)}m)`);
             
@@ -876,8 +872,9 @@ class MapManager {
     }
     
     onUserLogin() {
-        // Recargar puntos cuando el usuario se loguea
-        this.loadPoints();
+        // NO recargar puntos automáticamente al loguear
+        // Los puntos solo se cargarán cuando el usuario seleccione categorías
+        console.log('🔐 Usuario logueado - esperando selección de categorías');
     }
     
     onUserLogout() {
