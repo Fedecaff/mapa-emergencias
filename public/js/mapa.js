@@ -451,15 +451,15 @@ class MapManager {
         
         console.log('🔍 Categorías seleccionadas:', selectedCategories);
         
-        this.markers.forEach(marker => {
-            if (selectedCategories.includes(marker.pointData.categoria_id)) {
-                marker.addTo(this.map);
-            } else {
-                this.map.removeLayer(marker);
-            }
-        });
+        // Si no hay categorías seleccionadas, limpiar todos los marcadores
+        if (selectedCategories.length === 0) {
+            this.clearPointMarkers();
+            console.log('🚫 No hay categorías seleccionadas - limpiando marcadores');
+            return;
+        }
         
-        console.log('✅ Filtrado completado. Marcadores visibles:', this.markers.filter(m => this.map.hasLayer(m)).length);
+        // Si hay categorías seleccionadas, cargar los puntos correspondientes
+        this.loadPoints();
     }
     
     async searchPoints() {
