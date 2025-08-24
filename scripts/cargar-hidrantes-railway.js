@@ -16,8 +16,8 @@ class CargadorHidrantesRailway {
         try {
             console.log('🔌 Conectando a PostgreSQL en Railway...');
             
-            // Usar la variable de entorno de Railway
-            const databaseUrl = process.env.DATABASE_URL;
+            // Usar la variable de entorno de Railway (URL pública)
+            const databaseUrl = process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL;
             if (!databaseUrl) {
                 throw new Error('❌ DATABASE_URL no encontrada en las variables de entorno');
             }
