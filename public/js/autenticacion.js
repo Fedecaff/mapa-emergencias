@@ -19,11 +19,7 @@ class Auth {
             console.log('🔍 Token encontrado en localStorage, restaurando sesión...');
             // Restaurar sesión automáticamente sin verificar token
             this.updateUI();
-            // Cargar puntos automáticamente si ya hay sesión activa
-            this.loadPointsIfAuthenticated();
-        } else {
-            // Cargar puntos incluso sin sesión activa
-            this.loadPointsIfAuthenticated();
+            // NO cargar puntos automáticamente - esperar selección de categorías
         }
         
         this.bindEvents();
