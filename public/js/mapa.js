@@ -176,7 +176,7 @@ class MapManager {
             const filterDiv = document.createElement('div');
             filterDiv.className = 'category-filter';
             filterDiv.innerHTML = `
-                <input type="checkbox" id="filter_${category.id}" value="${category.id}" checked>
+                <input type="checkbox" id="filter_${category.id}" value="${category.id}">
                 <label for="filter_${category.id}">
                     <i class="fas ${category.icono}" style="color: ${category.color}"></i>
                     ${category.nombre}
@@ -224,11 +224,32 @@ class MapManager {
         try {
             Loading.show();
             
+            // Si no hay filtros de categoría específicos, verificar los checkboxes
+            if (!filters.categoria_id) {
+                const selectedCategories = Array.from(
+                    document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked')
+                ).map(cb => parseInt(cb.value));
+                
+                // Si no hay categorías seleccionadas, no cargar puntos
+                if (selectedCategories.length === 0) {
+                    console.log('🚫 No hay categorías seleccionadas, limpiando marcadores');
+                    this.clearPointMarkers();
+                    return;
+                }
+                
+                // Usar las categorías seleccionadas
+                filters.categoria_id = selectedCategories;
+            }
+            
             let endpoint = '/puntos';
             const params = new URLSearchParams();
             
             if (filters.categoria_id) {
-                params.append('categoria_id', filters.categoria_id);
+                if (Array.isArray(filters.categoria_id)) {
+                    filters.categoria_id.forEach(id => params.append('categoria_id', id));
+                } else {
+                    params.append('categoria_id', filters.categoria_id);
+                }
             }
             
             if (filters.latitud && filters.longitud && filters.radio) {
