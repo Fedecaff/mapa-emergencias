@@ -113,7 +113,6 @@ class InsertadorHidrantesRailway {
                 await this.client.query(`
                     INSERT INTO puntos (nombre, latitud, longitud, categoria_id, estado, datos_personalizados, fecha_creacion)
                     VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                    ON CONFLICT (nombre, categoria_id) DO NOTHING
                 `, [
                     nombre,
                     latitud,
