@@ -21,6 +21,9 @@ class Auth {
             this.updateUI();
             // Cargar puntos automáticamente si ya hay sesión activa
             this.loadPointsIfAuthenticated();
+        } else {
+            // Cargar puntos incluso sin sesión activa
+            this.loadPointsIfAuthenticated();
         }
         
         this.bindEvents();

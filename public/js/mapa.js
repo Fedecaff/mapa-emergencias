@@ -17,8 +17,8 @@ class MapManager {
         this.initMap();
         this.bindEvents();
         this.loadCategories();
-        // No cargar puntos hasta que el usuario inicie sesión
-        // this.loadPoints();
+        // Cargar puntos automáticamente sin necesidad de login
+        this.loadPoints();
     }
     
     initMap() {
