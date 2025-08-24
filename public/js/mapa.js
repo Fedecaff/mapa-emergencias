@@ -444,7 +444,7 @@ class MapManager {
         console.log('🔍 Categorías seleccionadas:', selectedCategories);
         
         this.markers.forEach(marker => {
-            if (selectedCategories.length === 0 || selectedCategories.includes(marker.pointData.categoria_id)) {
+            if (selectedCategories.includes(marker.pointData.categoria_id)) {
                 marker.addTo(this.map);
             } else {
                 this.map.removeLayer(marker);
