@@ -14,10 +14,18 @@ class PuntosController {
             `;
             let parametros = [];
 
-            // Filtro por categoría
+            // Filtro por categoría (puede ser múltiple)
             if (categoria_id) {
-                sql += ' AND p.categoria_id = $1';
-                parametros.push(categoria_id);
+                if (Array.isArray(categoria_id)) {
+                    // Múltiples categorías
+                    const placeholders = categoria_id.map((_, index) => `$${parametros.length + index + 1}`).join(',');
+                    sql += ` AND p.categoria_id IN (${placeholders})`;
+                    parametros.push(...categoria_id);
+                } else {
+                    // Una sola categoría
+                    sql += ' AND p.categoria_id = $1';
+                    parametros.push(categoria_id);
+                }
             }
 
             // Filtro por proximidad (radio en km)
