@@ -283,6 +283,11 @@ class Auth {
         }
         
         // NO cargar puntos automáticamente - esperar selección de categorías
+        
+        // Inicializar geolocalización para operadores
+        if (user.rol === 'operador') {
+            this.inicializarGeolocalizacion(user.id);
+        }
     }
 
     onUserLogout() {
@@ -320,6 +325,9 @@ class Auth {
         
         // Limpiar nombre de usuario
         document.getElementById('userName').textContent = '';
+        
+        // Detener geolocalización
+        this.detenerGeolocalizacion();
         
         console.log('✅ Logout completado');
     }
@@ -382,6 +390,35 @@ class Auth {
             if (window.Notifications) {
                 window.Notifications.error('Error cambiando disponibilidad');
             }
+        }
+    }
+
+    // Métodos de geolocalización
+    inicializarGeolocalizacion(userId) {
+        try {
+            if (window.GeolocalizacionManager) {
+                if (!this.geolocalizacionManager) {
+                    this.geolocalizacionManager = new GeolocalizacionManager();
+                }
+                this.geolocalizacionManager.init(userId);
+                console.log('📍 Geolocalización inicializada para usuario:', userId);
+            } else {
+                console.warn('⚠️ GeolocalizacionManager no disponible');
+            }
+        } catch (error) {
+            console.error('❌ Error inicializando geolocalización:', error);
+        }
+    }
+
+    detenerGeolocalizacion() {
+        try {
+            if (this.geolocalizacionManager) {
+                this.geolocalizacionManager.stop();
+                this.geolocalizacionManager = null;
+                console.log('📍 Geolocalización detenida');
+            }
+        } catch (error) {
+            console.error('❌ Error deteniendo geolocalización:', error);
         }
     }
 }

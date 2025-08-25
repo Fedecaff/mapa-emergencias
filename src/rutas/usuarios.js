@@ -25,6 +25,10 @@ router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizar
 router.get('/instituciones', usuariosController.obtenerInstituciones);
 router.get('/roles-institucion', usuariosController.obtenerRolesInstitucion);
 
+// Rutas de geolocalización
+router.put('/:id/ubicacion', verificarDisponibilidad, usuariosController.actualizarUbicacion);
+router.get('/operadores-ubicacion', usuariosController.obtenerOperadoresConUbicacion);
+
 export default router;
 
 

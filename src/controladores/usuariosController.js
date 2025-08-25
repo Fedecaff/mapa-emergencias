@@ -367,6 +367,100 @@ const usuariosController = {
             console.error('❌ Error obteniendo roles de institución:', error);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
+    },
+
+    async actualizarUbicacion(req, res) {
+        try {
+            const { id } = req.params;
+            const { latitud, longitud } = req.body;
+
+            // Verificar que el usuario existe
+            const usuario = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE id = $1',
+                [id]
+            );
+
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            // Verificar que el usuario está actualizando su propia ubicación o es admin
+            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'administrador') {
+                return res.status(403).json({ error: 'No autorizado para actualizar esta ubicación' });
+            }
+
+            // Validar coordenadas
+            if (typeof latitud !== 'number' || typeof longitud !== 'number') {
+                return res.status(400).json({ error: 'Latitud y longitud deben ser números' });
+            }
+
+            if (latitud < -90 || latitud > 90) {
+                return res.status(400).json({ error: 'Latitud debe estar entre -90 y 90' });
+            }
+
+            if (longitud < -180 || longitud > 180) {
+                return res.status(400).json({ error: 'Longitud debe estar entre -180 y 180' });
+            }
+
+            // Actualizar ubicación
+            await baseDeDatos.ejecutar(
+                'UPDATE usuarios SET latitud = $1, longitud = $2, ultima_actualizacion_ubicacion = NOW() WHERE id = $3',
+                [latitud, longitud, id]
+            );
+
+            console.log(`✅ Ubicación actualizada para usuario ID: ${id} (${latitud}, ${longitud})`);
+
+            res.json({
+                mensaje: 'Ubicación actualizada exitosamente',
+                ubicacion: {
+                    latitud,
+                    longitud,
+                    ultima_actualizacion: new Date()
+                }
+            });
+
+        } catch (error) {
+            console.error('❌ Error actualizando ubicación:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async obtenerOperadoresConUbicacion(req, res) {
+        try {
+            // Solo administradores pueden ver ubicaciones de operadores
+            if (req.usuario.rol !== 'administrador') {
+                return res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador' });
+            }
+
+            const operadores = await baseDeDatos.obtenerTodos(`
+                SELECT 
+                    id, 
+                    nombre, 
+                    email, 
+                    telefono, 
+                    disponible, 
+                    institucion, 
+                    rol_institucion, 
+                    foto_perfil,
+                    latitud, 
+                    longitud, 
+                    ultima_actualizacion_ubicacion
+                FROM usuarios 
+                WHERE rol = 'operador' 
+                AND latitud IS NOT NULL 
+                AND longitud IS NOT NULL
+                ORDER BY nombre
+            `);
+
+            res.json({
+                total: operadores.length,
+                operadores: operadores
+            });
+
+        } catch (error) {
+            console.error('❌ Error obteniendo operadores con ubicación:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
     }
 };
 

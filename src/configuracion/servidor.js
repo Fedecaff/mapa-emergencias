@@ -15,6 +15,7 @@ import diagnosticarBaseDeDatos from '../modelos/diagnosticoDB.js';
 import actualizarRoles from '../modelos/actualizarRoles.js';
 import verificarRoles from '../modelos/verificarRoles.js';
 import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js';
+import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -89,6 +90,7 @@ async function iniciarServidor() {
         await actualizarRoles();
         await verificarRoles();
         await actualizarPerfilOperadores();
+        await actualizarGeolocalizacion();
         
         console.log('✅ Base de datos inicializada correctamente');
         
