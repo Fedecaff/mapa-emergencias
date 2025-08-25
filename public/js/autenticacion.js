@@ -260,6 +260,11 @@ class Auth {
         // Mostrar panel de administración si es administrador
         if (user.rol === 'administrador') {
             document.getElementById('adminPanel').style.display = 'block';
+            // Mostrar botón de emergencia solo para administradores
+            const emergencyBtn = document.getElementById('emergencyBtn');
+            if (emergencyBtn) {
+                emergencyBtn.style.display = 'inline-flex';
+            }
         }
         
         // Mostrar panel de disponibilidad solo para operadores (no administrador)
@@ -270,15 +275,14 @@ class Auth {
                 // Configurar estado inicial de disponibilidad
                 this.configurarDisponibilidad(user.disponible);
             }
+            // Ocultar botón de emergencia para operadores
+            const emergencyBtn = document.getElementById('emergencyBtn');
+            if (emergencyBtn) {
+                emergencyBtn.style.display = 'none';
+            }
         }
         
-        // Cargar puntos en el mapa
-        if (window.mapaManager) {
-            window.mapaManager.loadPoints();
-        }
-        
-        // Disparar evento de login
-        window.dispatchEvent(new CustomEvent('userLogin'));
+        // NO cargar puntos automáticamente - esperar selección de categorías
     }
 
     onUserLogout() {
@@ -306,6 +310,12 @@ class Auth {
             console.log('✅ Panel de disponibilidad ocultado');
         } else {
             console.log('⚠️ Panel de disponibilidad no encontrado');
+        }
+        
+        // Ocultar botón de emergencia
+        const emergencyBtn = document.getElementById('emergencyBtn');
+        if (emergencyBtn) {
+            emergencyBtn.style.display = 'none';
         }
         
         // Limpiar nombre de usuario
