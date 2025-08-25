@@ -1,7 +1,7 @@
-import BaseDeDatosPostgres from './baseDeDatosPostgres.js';
+import baseDeDatos from './baseDeDatosPostgres.js';
 
 async function actualizarPerfilOperadores() {
-    const db = new BaseDeDatosPostgres();
+    const db = baseDeDatos;
     
     try {
         await db.conectar();
