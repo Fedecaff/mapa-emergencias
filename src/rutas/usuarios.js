@@ -18,6 +18,13 @@ router.delete('/:id', verificarAdmin, usuariosController.eliminar);
 router.put('/:id/disponibilidad', verificarDisponibilidad, usuariosController.cambiarDisponibilidad);
 router.get('/disponibles', usuariosController.obtenerDisponibles);
 
+// Rutas de perfil (permiten a usuarios actualizar su propio perfil)
+router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizarPerfil);
+
+// Rutas públicas para obtener datos de instituciones y roles
+router.get('/instituciones', usuariosController.obtenerInstituciones);
+router.get('/roles-institucion', usuariosController.obtenerRolesInstitucion);
+
 export default router;
 
 

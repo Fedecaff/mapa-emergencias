@@ -14,6 +14,7 @@ import verificarFotos from '../modelos/verificarFotos.js';
 import diagnosticarBaseDeDatos from '../modelos/diagnosticoDB.js';
 import actualizarRoles from '../modelos/actualizarRoles.js';
 import verificarRoles from '../modelos/verificarRoles.js';
+import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -23,6 +24,7 @@ import rutasHistorial from '../rutas/historial.js';
 import rutasUsuarios from '../rutas/usuarios.js';
 import rutasFotos from '../rutas/fotos.js';
 import rutasAlertas from '../rutas/alertas.js';
+import rutasPerfil from '../rutas/perfil.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,6 +50,7 @@ app.use('/api/historial', rutasHistorial);
 app.use('/api/usuarios', rutasUsuarios);
 app.use('/api/fotos', rutasFotos);
 app.use('/api/alertas', rutasAlertas);
+app.use('/api/perfil', rutasPerfil);
 
 // Ruta principal
 app.get('/', (req, res) => {
@@ -85,6 +88,7 @@ async function iniciarServidor() {
         await diagnosticarBaseDeDatos();
         await actualizarRoles();
         await verificarRoles();
+        await actualizarPerfilOperadores();
         
         console.log('✅ Base de datos inicializada correctamente');
         

@@ -5,7 +5,7 @@ const usuariosController = {
 
     async crear(req, res) {
         try {
-            const { nombre, email, password, telefono, rol = 'operador' } = req.body;
+            const { nombre, email, password, telefono, rol = 'operador', institucion, rol_institucion } = req.body;
 
             // Validaciones
             if (!nombre || !email || !password || !telefono) {
@@ -45,15 +45,15 @@ const usuariosController = {
             // Encriptar contraseña
             const passwordHash = await bcrypt.hash(password, 10);
 
-            // Insertar usuario
+            // Insertar usuario con nuevos campos
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (nombre, email, contraseña, telefono, rol) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-                [nombre, email, passwordHash, telefono, rol]
+                'INSERT INTO usuarios (nombre, email, password, telefono, rol, institucion, rol_institucion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
+                [nombre, email, passwordHash, telefono, rol, institucion || null, rol_institucion || null]
             );
 
             // Obtener el usuario creado (sin contraseña)
             const nuevoUsuario = await baseDeDatos.obtenerUno(
-                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios WHERE id = $1',
+                'SELECT id, nombre, email, telefono, rol, institucion, rol_institucion, foto_perfil, fecha_creacion FROM usuarios WHERE id = $1',
                 [resultado.rows[0].id]
             );
 
@@ -87,7 +87,7 @@ const usuariosController = {
     async obtener(req, res) {
         try {
             const { id } = req.params;
-            const query = 'SELECT id, email, nombre, rol, telefono, disponible FROM usuarios WHERE id = $1';
+            const query = 'SELECT id, email, nombre, rol, telefono, disponible, institucion, rol_institucion, foto_perfil FROM usuarios WHERE id = $1';
             const result = await baseDeDatos.ejecutar(query, [id]);
             
             if (result.rows.length === 0) {
@@ -219,6 +219,80 @@ const usuariosController = {
         }
     },
 
+    async actualizarPerfil(req, res) {
+        try {
+            const { id } = req.params;
+            const { nombre, institucion, rol_institucion, foto_perfil } = req.body;
+
+            // Verificar si el usuario existe
+            const usuarioExistente = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE id = $1',
+                [id]
+            );
+
+            if (!usuarioExistente) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            // Construir query de actualización
+            const campos = [];
+            const valores = [];
+            let contador = 2;
+
+            if (nombre !== undefined) {
+                campos.push(`nombre = $${contador}`);
+                valores.push(nombre);
+                contador++;
+            }
+
+            if (institucion !== undefined) {
+                campos.push(`institucion = $${contador}`);
+                valores.push(institucion);
+                contador++;
+            }
+
+            if (rol_institucion !== undefined) {
+                campos.push(`rol_institucion = $${contador}`);
+                valores.push(rol_institucion);
+                contador++;
+            }
+
+            if (foto_perfil !== undefined) {
+                campos.push(`foto_perfil = $${contador}`);
+                valores.push(foto_perfil);
+                contador++;
+            }
+
+            if (campos.length === 0) {
+                return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
+            }
+
+            valores.push(id);
+
+            await baseDeDatos.ejecutar(
+                `UPDATE usuarios SET ${campos.join(', ')} WHERE id = $${contador}`,
+                valores
+            );
+
+            // Obtener usuario actualizado
+            const usuarioActualizado = await baseDeDatos.obtenerUno(
+                'SELECT id, nombre, email, telefono, rol, institucion, rol_institucion, foto_perfil, disponible FROM usuarios WHERE id = $1',
+                [id]
+            );
+
+            console.log(`✅ Perfil actualizado: ID ${id}`);
+
+            res.json({
+                mensaje: 'Perfil actualizado exitosamente',
+                usuario: usuarioActualizado
+            });
+
+        } catch (error) {
+            console.error('❌ Error actualizando perfil:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
     async eliminar(req, res) {
         try {
             const { id } = req.params;
@@ -252,6 +326,45 @@ const usuariosController = {
 
         } catch (error) {
             console.error('❌ Error eliminando usuario:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async obtenerInstituciones(req, res) {
+        try {
+            // Lista hardcodeada de instituciones
+            const instituciones = [
+                "Bomberos Voluntarios de Valle Viejo",
+                "Bomberos Voluntarios de San Fernando"
+            ];
+
+            res.json({
+                instituciones: instituciones
+            });
+
+        } catch (error) {
+            console.error('❌ Error obteniendo instituciones:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async obtenerRolesInstitucion(req, res) {
+        try {
+            // Lista hardcodeada de roles de institución
+            const roles = [
+                "Comandante",
+                "Subcomandante",
+                "Oficial",
+                "Bombero",
+                "Cadete"
+            ];
+
+            res.json({
+                roles: roles
+            });
+
+        } catch (error) {
+            console.error('❌ Error obteniendo roles de institución:', error);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
     }
