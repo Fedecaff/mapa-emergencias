@@ -1,7 +1,8 @@
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
+import path from 'path';
+import fs from 'fs';
 
 // Configurar Cloudinary
 cloudinary.config({
@@ -10,21 +11,39 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Configurar almacenamiento de Cloudinary
-const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-        folder: 'perfiles_usuarios',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
-        transformation: [
-            { width: 300, height: 300, crop: 'fill' },
-            { quality: 'auto' }
-        ]
+// Configurar almacenamiento temporal
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadDir = './uploads/temp';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'perfil-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
 // Configurar multer
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB máximo
+    },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos de imagen (jpeg, jpg, png, gif)'));
+        }
+    }
+});
 
 const perfilController = {
 
@@ -71,6 +90,13 @@ const perfilController = {
                 'UPDATE usuarios SET foto_perfil = $1 WHERE id = $2',
                 [resultado.secure_url, id]
             );
+
+            // Eliminar archivo temporal
+            try {
+                fs.unlinkSync(req.file.path);
+            } catch (error) {
+                console.log('⚠️ Error eliminando archivo temporal:', error);
+            }
 
             console.log(`✅ Foto de perfil subida para usuario ID: ${id}`);
 
@@ -135,4 +161,17 @@ const perfilController = {
     }
 };
 
-export { perfilController, upload };
+// Middleware para manejar errores de multer
+const handleMulterError = (error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ error: 'El archivo es demasiado grande. Máximo 5MB' });
+        }
+        return res.status(400).json({ error: 'Error al subir el archivo' });
+    } else if (error) {
+        return res.status(400).json({ error: error.message });
+    }
+    next();
+};
+
+export { perfilController, upload, handleMulterError };
