@@ -59,7 +59,7 @@ async function actualizarGeolocalizacion() {
         console.error('❌ Error actualizando geolocalización:', error);
         throw error;
     } finally {
-        await db.desconectar();
+        // No necesitamos desconectar manualmente
     }
 }
 

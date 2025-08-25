@@ -288,6 +288,11 @@ class Auth {
         if (user.rol === 'operador') {
             this.inicializarGeolocalizacion(user.id);
         }
+        
+        // Iniciar actualización de operadores para administradores
+        if (user.rol === 'administrador' && window.mapManager) {
+            window.mapManager.startOperatorUpdates();
+        }
     }
 
     onUserLogout() {
@@ -328,6 +333,11 @@ class Auth {
         
         // Detener geolocalización
         this.detenerGeolocalizacion();
+        
+        // Detener actualización de operadores
+        if (window.mapManager) {
+            window.mapManager.stopOperatorUpdates();
+        }
         
         console.log('✅ Logout completado');
     }

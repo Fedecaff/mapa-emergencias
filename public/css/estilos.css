@@ -13,6 +13,43 @@
     --transition: all 0.3s ease;
 }
 
+/* Estilos para marcadores de operadores */
+.operator-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.operator-marker i {
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    transition: all 0.3s ease;
+}
+
+.operator-marker:hover i {
+    transform: scale(1.2);
+    filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.4));
+}
+
+.operator-popup {
+    min-width: 200px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.operator-popup h6 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--light-gray);
+    padding-bottom: 0.5rem;
+}
+
+.operator-popup p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+}
+
+.operator-popup strong {
+    color: var(--dark-gray);
+}
+
 /* Reset y estilos base */
 * {
     margin: 0;

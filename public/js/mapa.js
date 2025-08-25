@@ -10,6 +10,10 @@ class MapManager {
         this.isAddingPoint = false;
         this.tempMarker = null;
         
+        // Propiedades para operadores
+        this.operatorMarkers = [];
+        this.operatorUpdateInterval = null;
+        
         this.init();
     }
     
@@ -965,6 +969,143 @@ class MapManager {
             Notifications.error('Error actualizando punto');
         } finally {
             Loading.hide();
+        }
+    }
+
+    // ===== FUNCIONES PARA OPERADORES =====
+
+    // Cargar operadores con ubicación
+    async loadOperators() {
+        try {
+            // Solo cargar si es administrador
+            if (!window.auth.isAdmin()) {
+                return;
+            }
+
+            console.log('👥 Cargando operadores con ubicación...');
+            
+            const response = await API.get('/usuarios/operadores-ubicacion');
+            const operadores = response.operadores || [];
+            
+            // Limpiar marcadores anteriores
+            this.clearOperatorMarkers();
+            
+            // Crear marcadores para cada operador
+            operadores.forEach(operador => {
+                if (operador.latitud && operador.longitud) {
+                    this.createOperatorMarker(operador);
+                }
+            });
+            
+            console.log(`✅ ${operadores.length} operadores cargados en el mapa`);
+            
+        } catch (error) {
+            console.error('❌ Error cargando operadores:', error);
+        }
+    }
+
+    // Crear marcador para un operador
+    createOperatorMarker(operador) {
+        try {
+            // Color según disponibilidad
+            const color = operador.disponible ? '#28a745' : '#dc3545';
+            const status = operador.disponible ? 'Disponible' : 'No disponible';
+            
+            // Icono personalizado
+            const operatorIcon = L.divIcon({
+                className: 'operator-marker',
+                html: `<i class="fas fa-user" style="color: ${color}; font-size: 18px;"></i>`,
+                iconSize: [25, 25],
+                iconAnchor: [12, 12]
+            });
+            
+            // Crear marcador
+            const marker = L.marker([operador.latitud, operador.longitud], { 
+                icon: operatorIcon,
+                title: operador.nombre
+            });
+            
+            // Popup con información del operador
+            const popupContent = `
+                <div class="operator-popup">
+                    <h6><i class="fas fa-user"></i> ${operador.nombre}</h6>
+                    <p><strong>Estado:</strong> <span style="color: ${color};">${status}</span></p>
+                    <p><strong>Institución:</strong> ${operador.institucion || 'No especificada'}</p>
+                    <p><strong>Rol:</strong> ${operador.rol_institucion || 'No especificado'}</p>
+                    <p><strong>Última actualización:</strong> ${this.formatDateTime(operador.ultima_actualizacion_ubicacion)}</p>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            
+            // Agregar al mapa
+            marker.addTo(this.map);
+            
+            // Guardar referencia
+            this.operatorMarkers.push({
+                id: operador.id,
+                marker: marker,
+                operador: operador
+            });
+            
+        } catch (error) {
+            console.error('❌ Error creando marcador de operador:', error);
+        }
+    }
+
+    // Limpiar marcadores de operadores
+    clearOperatorMarkers() {
+        this.operatorMarkers.forEach(item => {
+            if (item.marker && this.map) {
+                this.map.removeLayer(item.marker);
+            }
+        });
+        this.operatorMarkers = [];
+    }
+
+    // Iniciar actualización automática de operadores
+    startOperatorUpdates() {
+        // Solo para administradores
+        if (!window.auth.isAdmin()) {
+            return;
+        }
+
+        // Cargar operadores inicialmente
+        this.loadOperators();
+        
+        // Actualizar cada 30 segundos
+        this.operatorUpdateInterval = setInterval(() => {
+            this.loadOperators();
+        }, 30000);
+        
+        console.log('🔄 Actualización automática de operadores iniciada');
+    }
+
+    // Detener actualización automática
+    stopOperatorUpdates() {
+        if (this.operatorUpdateInterval) {
+            clearInterval(this.operatorUpdateInterval);
+            this.operatorUpdateInterval = null;
+        }
+        this.clearOperatorMarkers();
+        console.log('⏹️ Actualización automática de operadores detenida');
+    }
+
+    // Formatear fecha y hora
+    formatDateTime(dateString) {
+        if (!dateString) return 'No disponible';
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-AR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return 'Fecha inválida';
         }
     }
 }
