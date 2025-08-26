@@ -380,21 +380,7 @@ class Auth {
             });
         }
         
-        // Botones de disponibilidad
-        const btnDisponible = document.getElementById('btnDisponible');
-        const btnNoDisponible = document.getElementById('btnNoDisponible');
-        
-        if (btnDisponible && btnNoDisponible) {
-            btnDisponible.addEventListener('click', () => {
-                this.cambiarDisponibilidad(true);
-                this.actualizarBotonesDisponibilidad(true);
-            });
-            
-            btnNoDisponible.addEventListener('click', () => {
-                this.cambiarDisponibilidad(false);
-                this.actualizarBotonesDisponibilidad(false);
-            });
-        }
+
     }
 
     // Cambiar foto de perfil
@@ -485,16 +471,7 @@ class Auth {
         }
     }
 
-    // Actualizar botones de disponibilidad
-    actualizarBotonesDisponibilidad(disponible) {
-        const btnDisponible = document.getElementById('btnDisponible');
-        const btnNoDisponible = document.getElementById('btnNoDisponible');
-        
-        if (btnDisponible && btnNoDisponible) {
-            btnDisponible.classList.toggle('active', disponible);
-            btnNoDisponible.classList.toggle('active', !disponible);
-        }
-    }
+
 
     onUserLogout() {
         console.log('🔐 Iniciando logout...');

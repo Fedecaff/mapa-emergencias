@@ -222,7 +222,7 @@ const usuariosController = {
     async actualizarPerfil(req, res) {
         try {
             const { id } = req.params;
-            const { nombre, institucion, rol_institucion, foto_perfil } = req.body;
+            const { nombre, institucion, rol_institucion, foto_perfil, telefono } = req.body;
 
             // Verificar si el usuario existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
@@ -260,6 +260,12 @@ const usuariosController = {
             if (foto_perfil !== undefined) {
                 campos.push(`foto_perfil = $${contador}`);
                 valores.push(foto_perfil);
+                contador++;
+            }
+
+            if (telefono !== undefined) {
+                campos.push(`telefono = $${contador}`);
+                valores.push(telefono);
                 contador++;
             }
 

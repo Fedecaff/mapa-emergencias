@@ -2140,62 +2140,7 @@ body {
     box-shadow: none;
 }
 
-/* Sección de disponibilidad */
-.availability-section {
-    border-top: 1px solid #e1e8ed;
-    padding-top: 20px;
-}
 
-.availability-section p {
-    margin: 0 0 15px 0;
-    color: var(--primary-color);
-    font-weight: 600;
-    font-size: 14px;
-}
-
-.availability-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-availability {
-    flex: 1;
-    padding: 10px 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    background: #f8f9fa;
-    color: #666;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-}
-
-.btn-availability:hover {
-    background: #e9ecef;
-    border-color: #adb5bd;
-    transform: translateY(-1px);
-}
-
-.btn-availability.active {
-    background: #28a745;
-    border-color: #28a745;
-    color: white;
-    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
-}
-
-.btn-availability:first-child.active {
-    background: #28a745;
-    border-color: #28a745;
-}
-
-.btn-availability:last-child.active {
-    background: #dc3545;
-    border-color: #dc3545;
-}
 
 /* Responsive para panel de perfil */
 @media (max-width: 768px) {
