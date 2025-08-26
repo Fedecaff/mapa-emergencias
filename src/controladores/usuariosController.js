@@ -508,15 +508,15 @@ const usuariosController = {
             }
 
             console.log('✅ Archivo recibido correctamente:', {
-                filename: req.file.filename,
                 originalname: req.file.originalname,
                 mimetype: req.file.mimetype,
-                size: req.file.size
+                size: req.file.size,
+                buffer: req.file.buffer ? 'Presente' : 'Ausente'
             });
 
             // Aquí usarías Cloudinary para subir la imagen
-            // Por ahora, simulamos la subida
-            const fotoUrl = `https://via.placeholder.com/150/3498db/ffffff?text=${req.usuario.nombre}`;
+            // Por ahora, simulamos la subida con un placeholder personalizado
+            const fotoUrl = `https://via.placeholder.com/150/3498db/ffffff?text=${encodeURIComponent(req.usuario.nombre)}`;
 
             // Actualizar la foto en la base de datos
             await baseDeDatos.ejecutar(
