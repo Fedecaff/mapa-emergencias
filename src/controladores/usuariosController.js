@@ -305,7 +305,7 @@ const usuariosController = {
 
             // Verificar si el usuario existe
             const usuario = await baseDeDatos.obtenerUno(
-                'SELECT id, email FROM usuarios WHERE id = $16',
+                'SELECT id, email FROM usuarios WHERE id = $1',
                 [id]
             );
 
@@ -316,7 +316,8 @@ const usuariosController = {
             // No permitir eliminar el último admin
             if (usuario.rol === 'administrador') {
                 const adminCount = await baseDeDatos.obtenerUno(
-                    'SELECT COUNT(*) as count FROM usuarios WHERE rol = "administrador"'
+                    'SELECT COUNT(*) as count FROM usuarios WHERE rol = $1',
+                    ['administrador']
                 );
 
                 if (adminCount.count <= 1) {
@@ -477,6 +478,10 @@ const usuariosController = {
     async subirFotoPerfil(req, res) {
         try {
             const { id } = req.params;
+            
+            console.log('📸 Iniciando subida de foto de perfil...');
+            console.log('📋 Parámetros:', { id, usuario: req.usuario.id, rol: req.usuario.rol });
+            console.log('📁 Archivo recibido:', req.file);
 
             // Verificar que el usuario existe
             const usuario = await baseDeDatos.obtenerUno(
@@ -485,18 +490,30 @@ const usuariosController = {
             );
 
             if (!usuario) {
+                console.log('❌ Usuario no encontrado:', id);
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
 
             // Verificar que el usuario está actualizando su propia foto o es admin
             if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'administrador') {
+                console.log('❌ No autorizado para actualizar foto');
                 return res.status(403).json({ error: 'No autorizado para actualizar esta foto' });
             }
 
             // Verificar que se subió un archivo
             if (!req.file) {
+                console.log('❌ No se proporcionó archivo');
+                console.log('📋 Headers:', req.headers);
+                console.log('📋 Body:', req.body);
                 return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
             }
+
+            console.log('✅ Archivo recibido correctamente:', {
+                filename: req.file.filename,
+                originalname: req.file.originalname,
+                mimetype: req.file.mimetype,
+                size: req.file.size
+            });
 
             // Aquí usarías Cloudinary para subir la imagen
             // Por ahora, simulamos la subida
