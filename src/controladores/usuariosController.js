@@ -273,12 +273,16 @@ const usuariosController = {
                 return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
             }
 
+            // Agregar el ID al final de los valores
             valores.push(id);
 
-            await baseDeDatos.ejecutar(
-                `UPDATE usuarios SET ${campos.join(', ')} WHERE id = $${contador}`,
-                valores
-            );
+            // Construir la query con el número correcto de parámetros
+            const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = $${valores.length}`;
+            
+            console.log('🔍 Query de actualización:', query);
+            console.log('📋 Valores:', valores);
+
+            await baseDeDatos.ejecutar(query, valores);
 
             // Obtener usuario actualizado
             const usuarioActualizado = await baseDeDatos.obtenerUno(
@@ -325,7 +329,7 @@ const usuariosController = {
                 }
             }
 
-            await baseDeDatos.ejecutar('DELETE FROM usuarios WHERE id = $17', [id]);
+            await baseDeDatos.ejecutar('DELETE FROM usuarios WHERE id = $1', [id]);
 
             console.log(`✅ Usuario eliminado: ${usuario.email} (ID: ${id})`);
 
