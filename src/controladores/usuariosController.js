@@ -472,6 +472,90 @@ const usuariosController = {
             console.error('❌ Error obteniendo operadores con ubicación:', error);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
+    },
+
+    async subirFotoPerfil(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Verificar que el usuario existe
+            const usuario = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE id = $1',
+                [id]
+            );
+
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            // Verificar que el usuario está actualizando su propia foto o es admin
+            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'administrador') {
+                return res.status(403).json({ error: 'No autorizado para actualizar esta foto' });
+            }
+
+            // Verificar que se subió un archivo
+            if (!req.file) {
+                return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
+            }
+
+            // Aquí usarías Cloudinary para subir la imagen
+            // Por ahora, simulamos la subida
+            const fotoUrl = `https://via.placeholder.com/150/3498db/ffffff?text=${req.usuario.nombre}`;
+
+            // Actualizar la foto en la base de datos
+            await baseDeDatos.ejecutar(
+                'UPDATE usuarios SET foto_perfil = $1 WHERE id = $2',
+                [fotoUrl, id]
+            );
+
+            console.log(`✅ Foto de perfil subida para usuario ID: ${id}`);
+
+            res.json({
+                mensaje: 'Foto de perfil subida exitosamente',
+                foto_perfil: fotoUrl
+            });
+
+        } catch (error) {
+            console.error('❌ Error subiendo foto de perfil:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async eliminarFotoPerfil(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Verificar que el usuario existe
+            const usuario = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE id = $1',
+                [id]
+            );
+
+            if (!usuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            // Verificar que el usuario está eliminando su propia foto o es admin
+            if (parseInt(id) !== req.usuario.id && req.usuario.rol !== 'administrador') {
+                return res.status(403).json({ error: 'No autorizado para eliminar esta foto' });
+            }
+
+            // Eliminar la foto de la base de datos
+            await baseDeDatos.ejecutar(
+                'UPDATE usuarios SET foto_perfil = NULL WHERE id = $1',
+                [id]
+            );
+
+            console.log(`✅ Foto de perfil eliminada para usuario ID: ${id}`);
+
+            res.json({
+                mensaje: 'Foto de perfil eliminada exitosamente'
+            });
+
+        } catch (error) {
+            console.error('❌ Error eliminando foto de perfil:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
     }
 };
 
