@@ -112,14 +112,63 @@
             <div class="profile-panel" id="profilePanel" style="display: none;">
                 <h3><i class="fas fa-user"></i> Mi Perfil</h3>
                 <div class="profile-info">
-                    <p><strong>Estado de disponibilidad:</strong></p>
-                    <div class="availability-buttons">
-                        <button id="btnDisponible" class="btn-availability">
-                            <i class="fas fa-check-circle"></i> Disponible
+                    <div class="profile-avatar">
+                        <img id="profileAvatar" src="" alt="Foto de perfil" style="display: none;">
+                        <div id="profileInitials" class="profile-initials"></div>
+                        <button id="changePhotoBtn" class="btn-change-photo">
+                            <i class="fas fa-camera"></i> Cambiar foto
                         </button>
-                        <button id="btnNoDisponible" class="btn-availability">
-                            <i class="fas fa-times-circle"></i> No Disponible
+                    </div>
+                    
+                    <div class="profile-fields">
+                        <div class="form-group">
+                            <label for="profileName">Nombre:</label>
+                            <input type="text" id="profileName" placeholder="Tu nombre completo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileInstitution">Institución:</label>
+                            <select id="profileInstitution">
+                                <option value="">Seleccionar institución</option>
+                                <option value="Bomberos Voluntarios de Valla Viejo">Bomberos Voluntarios de Valla Viejo</option>
+                                <option value="Bomberos Voluntarios de San Fernando">Bomberos Voluntarios de San Fernando</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileRole">Rol en la institución:</label>
+                            <select id="profileRole">
+                                <option value="">Seleccionar rol</option>
+                                <option value="Bombero">Bombero</option>
+                                <option value="Oficial">Oficial</option>
+                                <option value="Comandante">Comandante</option>
+                                <option value="Conductor">Conductor</option>
+                                <option value="Rescatista">Rescatista</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profilePhone">Teléfono:</label>
+                            <input type="tel" id="profilePhone" placeholder="Tu número de teléfono">
+                        </div>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button id="saveProfileBtn" class="btn-save-profile">
+                            <i class="fas fa-save"></i> Guardar cambios
                         </button>
+                    </div>
+                    
+                    <div class="availability-section">
+                        <p><strong>Estado de disponibilidad:</strong></p>
+                        <div class="availability-buttons">
+                            <button id="btnDisponible" class="btn-availability">
+                                <i class="fas fa-check-circle"></i> Disponible
+                            </button>
+                            <button id="btnNoDisponible" class="btn-availability">
+                                <i class="fas fa-times-circle"></i> No Disponible
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -136,6 +185,28 @@
                 <button id="viewHistoryBtn" class="btn-admin">
                     <i class="fas fa-history"></i> Ver Historial
                 </button>
+            </div>
+
+            <!-- Panel de operadores (solo para admins) -->
+            <div class="operators-panel" id="operatorsPanel" style="display: none;">
+                <h3><i class="fas fa-users"></i> Operadores Disponibles</h3>
+                
+                <!-- Checkbox para mostrar/ocultar operadores en el mapa -->
+                <div class="operators-map-toggle">
+                    <label class="operators-checkbox">
+                        <input type="checkbox" id="showOperatorsMapCheckbox">
+                        <span class="checkmark"></span>
+                        <span class="operators-text">Mostrar operadores en el mapa</span>
+                    </label>
+                </div>
+                
+                <div class="operators-list" id="operatorsList">
+                    <!-- Lista de operadores se cargará dinámicamente -->
+                </div>
+                <div class="operators-status">
+                    <i class="fas fa-circle"></i>
+                    <span id="operatorsCount">0 operadores disponibles</span>
+                </div>
             </div>
         </aside>
 

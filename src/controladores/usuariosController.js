@@ -444,12 +444,17 @@ const usuariosController = {
                     foto_perfil,
                     latitud, 
                     longitud, 
-                    ultima_actualizacion_ubicacion
+                    ultima_actualizacion_ubicacion,
+                    CASE 
+                        WHEN disponible = true 
+                        AND ultima_actualizacion_ubicacion IS NOT NULL 
+                        AND ultima_actualizacion_ubicacion > NOW() - INTERVAL '5 minutes'
+                        THEN true 
+                        ELSE false 
+                    END as disponible_real
                 FROM usuarios 
                 WHERE rol = 'operador' 
-                AND latitud IS NOT NULL 
-                AND longitud IS NOT NULL
-                ORDER BY nombre
+                ORDER BY disponible_real DESC, nombre
             `);
 
             res.json({

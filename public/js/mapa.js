@@ -144,6 +144,21 @@ class MapManager {
                 this.updateEditCustomFields(e.target.value);
             });
         }
+        
+        // Checkbox para mostrar/ocultar operadores en el mapa
+        const showOperatorsCheckbox = document.getElementById('showOperatorsMapCheckbox');
+        if (showOperatorsCheckbox) {
+            showOperatorsCheckbox.addEventListener('change', (e) => {
+                this.toggleOperatorsVisibility(e.target.checked);
+            });
+            
+            // Cargar estado guardado
+            const savedState = localStorage.getItem('showOperatorsOnMap');
+            if (savedState !== null) {
+                showOperatorsCheckbox.checked = savedState === 'true';
+                this.toggleOperatorsVisibility(showOperatorsCheckbox.checked);
+            }
+        }
     }
     
     bindCategoryFilters() {
@@ -974,11 +989,30 @@ class MapManager {
 
     // ===== FUNCIONES PARA OPERADORES =====
 
+    // Toggle para mostrar/ocultar operadores en el mapa
+    toggleOperatorsVisibility(show) {
+        localStorage.setItem('showOperatorsOnMap', show.toString());
+        if (show) {
+            console.log('👥 Mostrando operadores en el mapa...');
+            this.loadOperators();
+        } else {
+            console.log('👥 Ocultando operadores del mapa...');
+            this.clearOperatorMarkers();
+        }
+    }
+
     // Cargar operadores con ubicación
     async loadOperators() {
         try {
             // Solo cargar si es administrador
             if (!window.auth.isAdmin()) {
+                return;
+            }
+            
+            // Verificar si el checkbox está marcado
+            const showOperatorsCheckbox = document.getElementById('showOperatorsMapCheckbox');
+            if (showOperatorsCheckbox && !showOperatorsCheckbox.checked) {
+                console.log('👥 Checkbox desmarcado, no cargando operadores');
                 return;
             }
 
@@ -987,21 +1021,87 @@ class MapManager {
             const response = await API.get('/usuarios/operadores-ubicacion');
             const operadores = response.operadores || [];
             
-            // Limpiar marcadores anteriores
-            this.clearOperatorMarkers();
-            
-            // Crear marcadores para cada operador
-            operadores.forEach(operador => {
-                if (operador.latitud && operador.longitud) {
-                    this.createOperatorMarker(operador);
-                }
-            });
-            
-            console.log(`✅ ${operadores.length} operadores cargados en el mapa`);
+            // Verificar si hay cambios reales antes de actualizar
+            if (this.hasOperatorChanges(operadores)) {
+                console.log('🔄 Cambios detectados en operadores, actualizando mapa...');
+                
+                // Limpiar marcadores anteriores
+                this.clearOperatorMarkers();
+                
+                // Crear marcadores solo para operadores disponibles
+                operadores.forEach(operador => {
+                    if (operador.latitud && operador.longitud && operador.disponible_real) {
+                        this.createOperatorMarker(operador);
+                    }
+                });
+                
+                // Guardar estado actual para comparaciones futuras
+                this.lastOperatorState = this.getOperatorState(operadores);
+                
+                console.log(`✅ ${operadores.length} operadores cargados en el mapa`);
+            } else {
+                console.log('ℹ️ No hay cambios en operadores, saltando actualización');
+            }
             
         } catch (error) {
             console.error('❌ Error cargando operadores:', error);
+            throw error; // Re-lanzar para manejo en loadOperatorsWithRetry
         }
+    }
+
+    // Verificar si hay cambios en los operadores
+    hasOperatorChanges(newOperadores) {
+        if (!this.lastOperatorState) {
+            return true; // Primera carga
+        }
+
+        const newState = this.getOperatorState(newOperadores);
+        
+        // Comparar estados
+        if (newState.hash !== this.lastOperatorState.hash) {
+            return true;
+        }
+
+        // Verificar cambios en ubicaciones de operadores disponibles
+        const availableOperators = newOperadores.filter(op => op.disponible_real);
+        const lastAvailableOperators = this.lastOperatorState.availableOperators || [];
+
+        if (availableOperators.length !== lastAvailableOperators.length) {
+            return true;
+        }
+
+        // Verificar cambios en ubicaciones
+        for (let i = 0; i < availableOperators.length; i++) {
+            const current = availableOperators[i];
+            const last = lastAvailableOperators[i];
+            
+            if (!last || 
+                current.id !== last.id ||
+                Math.abs(current.latitud - last.latitud) > 0.0001 ||
+                Math.abs(current.longitud - last.longitud) > 0.0001) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Obtener estado de operadores para comparación
+    getOperatorState(operadores) {
+        const availableOperators = operadores.filter(op => op.disponible_real);
+        
+        return {
+            hash: JSON.stringify(operadores.map(op => ({
+                id: op.id,
+                disponible_real: op.disponible_real,
+                latitud: op.latitud,
+                longitud: op.longitud,
+                ultima_actualizacion: op.ultima_actualizacion_ubicacion
+            }))),
+            availableOperators: availableOperators,
+            totalCount: operadores.length,
+            availableCount: availableOperators.length
+        };
     }
 
     // Crear marcador para un operador
@@ -1070,23 +1170,114 @@ class MapManager {
             return;
         }
 
-        // Cargar operadores inicialmente
-        this.loadOperators();
+        // Configuración del polling
+        this.pollingConfig = {
+            interval: 30000, // 30 segundos
+            maxRetries: 3,
+            retryDelay: 5000, // 5 segundos
+            currentRetries: 0,
+            lastUpdate: null,
+            isPolling: false
+        };
+
+        // NO cargar operadores inicialmente - esperar a que el usuario marque el checkbox
+        // this.loadOperators();
         
-        // Actualizar cada 30 segundos
-        this.operatorUpdateInterval = setInterval(() => {
-            this.loadOperators();
-        }, 30000);
+        // Iniciar polling robusto
+        this.startRobustPolling();
         
-        console.log('🔄 Actualización automática de operadores iniciada');
+        console.log('🔄 Actualización automática de operadores iniciada (esperando checkbox)');
+    }
+
+    // Polling robusto con manejo de errores y reintentos
+    async startRobustPolling() {
+        if (this.pollingConfig.isPolling) {
+            return; // Evitar múltiples polling simultáneos
+        }
+
+        this.pollingConfig.isPolling = true;
+
+        const poll = async () => {
+            try {
+                const showOperatorsCheckbox = document.getElementById('showOperatorsMapCheckbox');
+                if (showOperatorsCheckbox && showOperatorsCheckbox.checked) {
+                    await this.loadOperatorsWithRetry();
+                }
+                
+                // Resetear contador de reintentos en caso de éxito
+                this.pollingConfig.currentRetries = 0;
+                
+            } catch (error) {
+                console.error('❌ Error en polling de operadores:', error);
+                this.handlePollingError();
+            }
+
+            // Programar siguiente polling
+            this.operatorUpdateInterval = setTimeout(poll, this.pollingConfig.interval);
+        };
+
+        // Iniciar primer polling
+        poll();
+    }
+
+    // Cargar operadores con reintentos
+    async loadOperatorsWithRetry() {
+        try {
+            await this.loadOperators();
+        } catch (error) {
+            this.pollingConfig.currentRetries++;
+            
+            if (this.pollingConfig.currentRetries <= this.pollingConfig.maxRetries) {
+                console.log(`🔄 Reintentando carga de operadores (${this.pollingConfig.currentRetries}/${this.pollingConfig.maxRetries})...`);
+                
+                // Esperar antes del reintento
+                await new Promise(resolve => setTimeout(resolve, this.pollingConfig.retryDelay));
+                
+                // Reintentar
+                return this.loadOperatorsWithRetry();
+            } else {
+                console.error('❌ Máximo de reintentos alcanzado para carga de operadores');
+                Notifications.warning('Error de conexión con operadores. Reintentando en el próximo ciclo...');
+                throw error;
+            }
+        }
+    }
+
+    // Manejar errores de polling
+    handlePollingError() {
+        this.pollingConfig.currentRetries++;
+        
+        if (this.pollingConfig.currentRetries <= this.pollingConfig.maxRetries) {
+            console.log(`🔄 Reintentando polling (${this.pollingConfig.currentRetries}/${this.pollingConfig.maxRetries})...`);
+            
+            // Reintentar después de un delay
+            setTimeout(() => {
+                this.startRobustPolling();
+            }, this.pollingConfig.retryDelay);
+        } else {
+            console.error('❌ Máximo de reintentos alcanzado para polling');
+            Notifications.error('Error de conexión. El sistema reintentará automáticamente.');
+            
+            // Resetear contador y reintentar después de un tiempo más largo
+            setTimeout(() => {
+                this.pollingConfig.currentRetries = 0;
+                this.startRobustPolling();
+            }, 60000); // 1 minuto
+        }
     }
 
     // Detener actualización automática
     stopOperatorUpdates() {
         if (this.operatorUpdateInterval) {
-            clearInterval(this.operatorUpdateInterval);
+            clearTimeout(this.operatorUpdateInterval);
             this.operatorUpdateInterval = null;
         }
+        
+        if (this.pollingConfig) {
+            this.pollingConfig.isPolling = false;
+            this.pollingConfig.currentRetries = 0;
+        }
+        
         this.clearOperatorMarkers();
         console.log('⏹️ Actualización automática de operadores detenida');
     }

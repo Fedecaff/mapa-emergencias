@@ -204,6 +204,32 @@ mapa-emergencias/
 - ✅ **Optimización automática** de imágenes
 - ✅ **Acceso controlado** por roles
 
+## 👥 Sistema de Tracking de Operadores
+
+### **Características:**
+- ✅ **Geolocalización en tiempo real** de operadores
+- ✅ **Panel de operadores** con lista completa
+- ✅ **Fotos de perfil** o iniciales automáticas
+- ✅ **Estado de disponibilidad** (disponible/no disponible)
+- ✅ **Checkbox para mostrar/ocultar** operadores en mapa
+- ✅ **Actualizaciones automáticas** cada 30 segundos
+- ✅ **Sistema robusto de polling** con reintentos automáticos
+- ✅ **Detección de cambios** para optimizar actualizaciones
+- ✅ **Manejo de errores** y recuperación automática
+
+### **Funcionalidades para Administradores:**
+- 📍 **Ver ubicación** de operadores disponibles en mapa
+- 👥 **Panel lateral** con todos los operadores
+- 🟢 **Indicadores visuales** de disponibilidad
+- 📱 **Información completa** (institución, rol, foto)
+- ⚙️ **Control de visibilidad** en mapa
+
+### **Funcionalidades para Operadores:**
+- 📍 **Actualizar ubicación** automáticamente
+- 👤 **Editar perfil** con foto e información
+- 🟢 **Cambiar estado** de disponibilidad
+- 📱 **Ver solo su ubicación** en mapa
+
 ## 🔒 Seguridad Implementada
 
 - ✅ **Autenticación JWT** con tokens seguros
@@ -234,12 +260,17 @@ La aplicación está completamente optimizada para:
 - Persistencia de datos en PostgreSQL
 - Interfaz responsive completa
 - Despliegue en Railway
+- **Sistema de tracking de operadores en tiempo real**
+- **Panel de operadores con fotos de perfil**
+- **Checkbox para mostrar/ocultar operadores en mapa**
+- **Actualizaciones robustas con polling mejorado**
 
 ### **🔄 En Desarrollo:**
 - Sistema de notificaciones por SMS/WhatsApp
 - Aplicación móvil nativa
 - Dashboard de estadísticas
 - Integración con sistemas externos
+- WebSocket para actualizaciones instantáneas
 
 ### **📋 Próximas Mejoras:**
 - Notificaciones push en tiempo real
@@ -269,5 +300,5 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 *Desarrollado para mejorar la gestión y coordinación de servicios de emergencia en Catamarca, Argentina*
 
-**Versión:** 1.0.0  
-**Última actualización:** Enero 2024
+**Versión:** 1.1.0  
+**Última actualización:** Enero 2025

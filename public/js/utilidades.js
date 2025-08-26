@@ -258,7 +258,12 @@ class Geolocation {
 class Storage {
     static set(key, value) {
         try {
-            localStorage.setItem(key, JSON.stringify(value));
+            // Para tokens, guardar como string simple sin JSON.stringify
+            if (key === 'token') {
+                localStorage.setItem(key, value);
+            } else {
+                localStorage.setItem(key, JSON.stringify(value));
+            }
         } catch (error) {
             console.error('Error guardando en localStorage:', error);
         }
@@ -267,7 +272,14 @@ class Storage {
     static get(key, defaultValue = null) {
         try {
             const item = localStorage.getItem(key);
-            return item ? JSON.parse(item) : defaultValue;
+            if (!item) return defaultValue;
+            
+            // Para tokens, devolver como string simple sin JSON.parse
+            if (key === 'token') {
+                return item;
+            } else {
+                return JSON.parse(item);
+            }
         } catch (error) {
             console.error('Error leyendo de localStorage:', error);
             return defaultValue;

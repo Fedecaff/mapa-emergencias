@@ -82,20 +82,20 @@ async function iniciarServidor() {
         await actualizarTablaFotos();
         await actualizarUsuarios();
         await actualizarTablaAlertas();
-        await verificarFotos();
+        // await verificarFotos(); // Comentado temporalmente para evitar colgadas
         
-        // Ejecutar diagnóstico de base de datos
-        console.log('\n🔍 Ejecutando diagnóstico de base de datos...');
-        await diagnosticarBaseDeDatos();
-        await actualizarRoles();
-        await verificarRoles();
+        // Ejecutar diagnóstico de base de datos (comentado temporalmente)
+        // console.log('\n🔍 Ejecutando diagnóstico de base de datos...');
+        // await diagnosticarBaseDeDatos();
+        // await actualizarRoles();
+        // await verificarRoles();
         await actualizarPerfilOperadores();
         await actualizarGeolocalizacion();
         
         console.log('✅ Base de datos inicializada correctamente');
         
         // Iniciar servidor
-        app.listen(PUERTO, () => {
+        app.listen(PUERTO, '0.0.0.0', () => {
             console.log(`🚀 Servidor iniciado en puerto ${PUERTO}`);
             console.log(`📱 Aplicación disponible en: http://localhost:${PUERTO}`);
         });

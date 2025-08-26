@@ -260,6 +260,7 @@ class Auth {
         // Mostrar panel de administración si es administrador
         if (user.rol === 'administrador') {
             document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('operatorsPanel').style.display = 'block';
             // Mostrar botón de emergencia solo para administradores
             const emergencyBtn = document.getElementById('emergencyBtn');
             if (emergencyBtn) {
@@ -290,8 +291,208 @@ class Auth {
         }
         
         // Iniciar actualización de operadores para administradores
-        if (user.rol === 'administrador' && window.mapManager) {
-            window.mapManager.startOperatorUpdates();
+        if (user.rol === 'administrador') {
+            console.log('👨‍💼 Usuario es administrador, esperando mapManager...');
+            const waitForMapManager = () => {
+                if (window.mapManager) {
+                    console.log('✅ mapManager disponible, iniciando actualizaciones...');
+                    window.mapManager.startOperatorUpdates();
+                    console.log('🔄 Llamando a cargarOperadoresEnPanel...');
+                    this.cargarOperadoresEnPanel();
+                    
+                    // Iniciar polling automático del panel
+                    this.startPanelPolling();
+                } else {
+                    console.log('⏳ mapManager no disponible aún, reintentando en 100ms...');
+                    setTimeout(waitForMapManager, 100);
+                }
+            };
+            waitForMapManager();
+        } else {
+            console.log('❌ Usuario no es administrador, rol:', user.rol);
+        }
+        
+        // Inicializar panel de perfil para operadores
+        if (user.rol === 'operador') {
+            this.inicializarPanelPerfil(user);
+        }
+    }
+
+    // Inicializar panel de perfil para operadores
+    inicializarPanelPerfil(user) {
+        console.log('👤 Inicializando panel de perfil para operador...');
+        
+        // Mostrar panel de perfil
+        const profilePanel = document.getElementById('profilePanel');
+        if (profilePanel) {
+            profilePanel.style.display = 'block';
+        }
+        
+        // Cargar datos del usuario en el formulario
+        this.cargarDatosPerfil(user);
+        
+        // Configurar event listeners
+        this.configurarEventListenersPerfil();
+    }
+
+    // Cargar datos del usuario en el formulario de perfil
+    cargarDatosPerfil(user) {
+        // Avatar
+        const profileAvatar = document.getElementById('profileAvatar');
+        const profileInitials = document.getElementById('profileInitials');
+        
+        if (user.foto_perfil) {
+            profileAvatar.src = user.foto_perfil;
+            profileAvatar.style.display = 'block';
+            profileInitials.style.display = 'none';
+        } else {
+            profileAvatar.style.display = 'none';
+            profileInitials.style.display = 'flex';
+            const iniciales = user.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+            profileInitials.textContent = iniciales;
+        }
+        
+        // Campos del formulario
+        document.getElementById('profileName').value = user.nombre || '';
+        document.getElementById('profileInstitution').value = user.institucion || '';
+        document.getElementById('profileRole').value = user.rol_institucion || '';
+        document.getElementById('profilePhone').value = user.telefono || '';
+        
+        // Configurar disponibilidad
+        this.configurarDisponibilidad(user.disponible || false);
+    }
+
+    // Configurar event listeners del panel de perfil
+    configurarEventListenersPerfil() {
+        // Botón de cambiar foto
+        const changePhotoBtn = document.getElementById('changePhotoBtn');
+        if (changePhotoBtn) {
+            changePhotoBtn.addEventListener('click', () => {
+                this.cambiarFotoPerfil();
+            });
+        }
+        
+        // Botón de guardar perfil
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        if (saveProfileBtn) {
+            saveProfileBtn.addEventListener('click', () => {
+                this.guardarPerfil();
+            });
+        }
+        
+        // Botones de disponibilidad
+        const btnDisponible = document.getElementById('btnDisponible');
+        const btnNoDisponible = document.getElementById('btnNoDisponible');
+        
+        if (btnDisponible && btnNoDisponible) {
+            btnDisponible.addEventListener('click', () => {
+                this.cambiarDisponibilidad(true);
+                this.actualizarBotonesDisponibilidad(true);
+            });
+            
+            btnNoDisponible.addEventListener('click', () => {
+                this.cambiarDisponibilidad(false);
+                this.actualizarBotonesDisponibilidad(false);
+            });
+        }
+    }
+
+    // Cambiar foto de perfil
+    async cambiarFotoPerfil() {
+        try {
+            // Crear input file oculto
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            
+            input.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    await this.subirFotoPerfil(file);
+                }
+            });
+            
+            input.click();
+        } catch (error) {
+            console.error('❌ Error al cambiar foto de perfil:', error);
+            Notifications.error('Error al cambiar la foto de perfil');
+        }
+    }
+
+    // Subir foto de perfil
+    async subirFotoPerfil(file) {
+        try {
+            const formData = new FormData();
+            formData.append('foto', file);
+            
+            const response = await API.post(`/usuarios/${this.currentUser.id}/foto`, formData);
+            
+            if (response.foto_perfil) {
+                // Actualizar avatar en el panel
+                const profileAvatar = document.getElementById('profileAvatar');
+                const profileInitials = document.getElementById('profileInitials');
+                
+                profileAvatar.src = response.foto_perfil;
+                profileAvatar.style.display = 'block';
+                profileInitials.style.display = 'none';
+                
+                // Actualizar usuario en memoria
+                this.currentUser.foto_perfil = response.foto_perfil;
+                Storage.set('user', this.currentUser);
+                
+                Notifications.success('Foto de perfil actualizada correctamente');
+            }
+        } catch (error) {
+            console.error('❌ Error al subir foto de perfil:', error);
+            Notifications.error('Error al subir la foto de perfil');
+        }
+    }
+
+    // Guardar perfil
+    async guardarPerfil() {
+        try {
+            const saveBtn = document.getElementById('saveProfileBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+            
+            const datosPerfil = {
+                nombre: document.getElementById('profileName').value,
+                institucion: document.getElementById('profileInstitution').value,
+                rol_institucion: document.getElementById('profileRole').value,
+                telefono: document.getElementById('profilePhone').value
+            };
+            
+            const response = await API.put(`/usuarios/${this.currentUser.id}/perfil`, datosPerfil);
+            
+            if (response.mensaje) {
+                // Actualizar usuario en memoria
+                Object.assign(this.currentUser, datosPerfil);
+                Storage.set('user', this.currentUser);
+                
+                // Actualizar nombre en el header
+                document.getElementById('userName').textContent = datosPerfil.nombre;
+                
+                Notifications.success('Perfil actualizado correctamente');
+            }
+        } catch (error) {
+            console.error('❌ Error al guardar perfil:', error);
+            Notifications.error('Error al guardar el perfil');
+        } finally {
+            const saveBtn = document.getElementById('saveProfileBtn');
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> Guardar cambios';
+        }
+    }
+
+    // Actualizar botones de disponibilidad
+    actualizarBotonesDisponibilidad(disponible) {
+        const btnDisponible = document.getElementById('btnDisponible');
+        const btnNoDisponible = document.getElementById('btnNoDisponible');
+        
+        if (btnDisponible && btnNoDisponible) {
+            btnDisponible.classList.toggle('active', disponible);
+            btnNoDisponible.classList.toggle('active', !disponible);
         }
     }
 
@@ -312,6 +513,8 @@ class Auth {
         document.getElementById('userInfo').style.display = 'none';
         document.getElementById('authButtons').style.display = 'flex';
         document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('operatorsPanel').style.display = 'none';
+        document.getElementById('profilePanel').style.display = 'none';
         
         // Ocultar panel de disponibilidad
         const availabilityPanel = document.getElementById('availabilityPanel');
@@ -338,6 +541,9 @@ class Auth {
         if (window.mapManager) {
             window.mapManager.stopOperatorUpdates();
         }
+        
+        // Detener polling del panel
+        this.stopPanelPolling();
         
         console.log('✅ Logout completado');
     }
@@ -430,6 +636,229 @@ class Auth {
         } catch (error) {
             console.error('❌ Error deteniendo geolocalización:', error);
         }
+    }
+
+    // Cargar operadores en el panel lateral
+    async cargarOperadoresEnPanel() {
+        try {
+            console.log('🔄 Cargando operadores en panel...');
+            const response = await API.get('/usuarios/operadores-ubicacion');
+            
+            if (response.operadores) {
+                // Verificar si hay cambios antes de actualizar el panel
+                if (this.hasPanelChanges(response.operadores)) {
+                    this.mostrarOperadoresEnPanel(response.operadores);
+                    console.log('✅ Operadores cargados en panel:', response.operadores.length);
+                } else {
+                    console.log('ℹ️ No hay cambios en panel de operadores, saltando actualización');
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error cargando operadores en panel:', error);
+            // Mostrar notificación sutil al usuario
+            if (window.Notifications) {
+                Notifications.warning('Error de conexión. Reintentando...');
+            }
+        }
+    }
+
+    // Verificar si hay cambios en el panel de operadores
+    hasPanelChanges(newOperadores) {
+        if (!this.lastPanelState) {
+            return true; // Primera carga
+        }
+
+        const newState = this.getPanelState(newOperadores);
+        
+        // Comparar estados
+        return newState.hash !== this.lastPanelState.hash;
+    }
+
+    // Obtener estado del panel para comparación
+    getPanelState(operadores) {
+        return {
+            hash: JSON.stringify(operadores.map(op => ({
+                id: op.id,
+                nombre: op.nombre,
+                disponible_real: op.disponible_real,
+                institucion: op.institucion,
+                rol_institucion: op.rol_institucion,
+                foto_perfil: op.foto_perfil
+            }))),
+            totalCount: operadores.length,
+            availableCount: operadores.filter(op => op.disponible_real).length
+        };
+    }
+
+    // Iniciar polling automático del panel de operadores
+    startPanelPolling() {
+        // Configuración del polling del panel
+        this.panelPollingConfig = {
+            interval: 30000, // 30 segundos
+            maxRetries: 3,
+            retryDelay: 5000, // 5 segundos
+            currentRetries: 0,
+            isPolling: false
+        };
+
+        console.log('🔄 Iniciando polling automático del panel de operadores...');
+        this.startRobustPanelPolling();
+    }
+
+    // Polling robusto para el panel
+    async startRobustPanelPolling() {
+        if (this.panelPollingConfig.isPolling) {
+            return; // Evitar múltiples polling simultáneos
+        }
+
+        this.panelPollingConfig.isPolling = true;
+
+        const poll = async () => {
+            try {
+                // Solo actualizar si el usuario es administrador y está logueado
+                if (this.currentUser && this.currentUser.rol === 'administrador') {
+                    await this.cargarOperadoresEnPanelWithRetry();
+                }
+                
+                // Resetear contador de reintentos en caso de éxito
+                this.panelPollingConfig.currentRetries = 0;
+                
+            } catch (error) {
+                console.error('❌ Error en polling del panel:', error);
+                this.handlePanelPollingError();
+            }
+
+            // Programar siguiente polling
+            this.panelUpdateInterval = setTimeout(poll, this.panelPollingConfig.interval);
+        };
+
+        // Iniciar primer polling
+        poll();
+    }
+
+    // Cargar operadores en panel con reintentos
+    async cargarOperadoresEnPanelWithRetry() {
+        try {
+            await this.cargarOperadoresEnPanel();
+        } catch (error) {
+            this.panelPollingConfig.currentRetries++;
+            
+            if (this.panelPollingConfig.currentRetries <= this.panelPollingConfig.maxRetries) {
+                console.log(`🔄 Reintentando carga del panel (${this.panelPollingConfig.currentRetries}/${this.panelPollingConfig.maxRetries})...`);
+                
+                // Esperar antes del reintento
+                await new Promise(resolve => setTimeout(resolve, this.panelPollingConfig.retryDelay));
+                
+                // Reintentar
+                return this.cargarOperadoresEnPanelWithRetry();
+            } else {
+                console.error('❌ Máximo de reintentos alcanzado para panel');
+                throw error;
+            }
+        }
+    }
+
+    // Manejar errores de polling del panel
+    handlePanelPollingError() {
+        this.panelPollingConfig.currentRetries++;
+        
+        if (this.panelPollingConfig.currentRetries <= this.panelPollingConfig.maxRetries) {
+            console.log(`🔄 Reintentando polling del panel (${this.panelPollingConfig.currentRetries}/${this.panelPollingConfig.maxRetries})...`);
+            
+            // Reintentar después de un delay
+            setTimeout(() => {
+                this.startRobustPanelPolling();
+            }, this.panelPollingConfig.retryDelay);
+        } else {
+            console.error('❌ Máximo de reintentos alcanzado para panel');
+            
+            // Resetear contador y reintentar después de un tiempo más largo
+            setTimeout(() => {
+                this.panelPollingConfig.currentRetries = 0;
+                this.startRobustPanelPolling();
+            }, 60000); // 1 minuto
+        }
+    }
+
+    // Detener polling del panel
+    stopPanelPolling() {
+        if (this.panelUpdateInterval) {
+            clearTimeout(this.panelUpdateInterval);
+            this.panelUpdateInterval = null;
+        }
+        
+        if (this.panelPollingConfig) {
+            this.panelPollingConfig.isPolling = false;
+            this.panelPollingConfig.currentRetries = 0;
+        }
+        
+        console.log('⏹️ Polling del panel detenido');
+    }
+
+    // Mostrar operadores en el panel lateral
+    mostrarOperadoresEnPanel(operadores) {
+        const operatorsList = document.getElementById('operatorsList');
+        const operatorsCount = document.getElementById('operatorsCount');
+        
+        if (!operatorsList || !operatorsCount) {
+            console.error('❌ Elementos del panel de operadores no encontrados');
+            return;
+        }
+
+        // Separar operadores disponibles y no disponibles
+        const disponibles = operadores.filter(op => op.disponible_real);
+        const noDisponibles = operadores.filter(op => !op.disponible_real);
+
+        // Limpiar lista
+        operatorsList.innerHTML = '';
+
+        // Mostrar operadores disponibles primero
+        disponibles.forEach(operador => {
+            operatorsList.appendChild(this.crearElementoOperador(operador, true));
+        });
+
+        // Mostrar operadores no disponibles después
+        noDisponibles.forEach(operador => {
+            operatorsList.appendChild(this.crearElementoOperador(operador, false));
+        });
+
+        // Actualizar contador
+        operatorsCount.textContent = `${disponibles.length} operadores disponibles`;
+        
+        // Guardar estado actual para comparaciones futuras
+        this.lastPanelState = this.getPanelState(operadores);
+    }
+
+    // Crear elemento HTML para un operador
+    crearElementoOperador(operador, disponible) {
+        const div = document.createElement('div');
+        div.className = `operator-item ${disponible ? 'online' : 'offline'}`;
+        
+        const iniciales = operador.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+        
+        // Mostrar foto de perfil si está disponible, sino mostrar iniciales
+        let avatarHTML = '';
+        if (operador.foto_perfil) {
+            avatarHTML = `<img src="${operador.foto_perfil}" alt="${operador.nombre}" class="operator-avatar-img">`;
+        } else {
+            avatarHTML = `<div class="operator-avatar">${iniciales}</div>`;
+        }
+
+        div.innerHTML = `
+            ${avatarHTML}
+            <div class="operator-info">
+                <div class="operator-name">${operador.nombre}</div>
+                <div class="operator-details">
+                    ${operador.institucion || 'Sin institución'} • ${operador.rol_institucion || 'Sin rol'}
+                </div>
+                <div class="operator-status ${disponible ? 'online' : 'offline'}">
+                    <i class="fas fa-circle"></i>
+                    <span>${disponible ? 'Disponible' : 'No disponible'}</span>
+                </div>
+            </div>
+        `;
+
+        return div;
     }
 }
 
