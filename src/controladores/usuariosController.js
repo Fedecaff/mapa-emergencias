@@ -222,7 +222,10 @@ const usuariosController = {
     async actualizarPerfil(req, res) {
         try {
             const { id } = req.params;
-            const { nombre, institucion, rol_institucion, foto_perfil, telefono } = req.body;
+            const { nombre, institucion, rol_institucion, telefono } = req.body;
+
+            console.log('📝 Actualizando perfil para usuario:', id);
+            console.log('📋 Datos recibidos:', { nombre, institucion, rol_institucion, telefono });
 
             // Verificar si el usuario existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
@@ -234,55 +237,47 @@ const usuariosController = {
                 return res.status(404).json({ error: 'Usuario no encontrado' });
             }
 
-            // Construir query de actualización
-            const campos = [];
-            const valores = [];
-            let contador = 2;
+            // Actualizar solo los campos que se proporcionaron
+            const updates = [];
+            const values = [];
+            let paramCount = 1;
 
-            if (nombre !== undefined) {
-                campos.push(`nombre = $${contador}`);
-                valores.push(nombre);
-                contador++;
+            if (nombre !== undefined && nombre !== null && nombre.trim() !== '') {
+                updates.push(`nombre = $${paramCount}`);
+                values.push(nombre.trim());
+                paramCount++;
             }
 
-            if (institucion !== undefined) {
-                campos.push(`institucion = $${contador}`);
-                valores.push(institucion);
-                contador++;
+            if (institucion !== undefined && institucion !== null && institucion.trim() !== '') {
+                updates.push(`institucion = $${paramCount}`);
+                values.push(institucion.trim());
+                paramCount++;
             }
 
-            if (rol_institucion !== undefined) {
-                campos.push(`rol_institucion = $${contador}`);
-                valores.push(rol_institucion);
-                contador++;
+            if (rol_institucion !== undefined && rol_institucion !== null && rol_institucion.trim() !== '') {
+                updates.push(`rol_institucion = $${paramCount}`);
+                values.push(rol_institucion.trim());
+                paramCount++;
             }
 
-            if (foto_perfil !== undefined) {
-                campos.push(`foto_perfil = $${contador}`);
-                valores.push(foto_perfil);
-                contador++;
+            if (telefono !== undefined && telefono !== null && telefono.trim() !== '') {
+                updates.push(`telefono = $${paramCount}`);
+                values.push(telefono.trim());
+                paramCount++;
             }
 
-            if (telefono !== undefined) {
-                campos.push(`telefono = $${contador}`);
-                valores.push(telefono);
-                contador++;
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
             }
 
-            if (campos.length === 0) {
-                return res.status(400).json({ error: 'No se proporcionaron campos para actualizar' });
-            }
+            // Agregar el ID como último parámetro
+            values.push(id);
+            const query = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = $${paramCount}`;
 
-            // Agregar el ID al final de los valores
-            valores.push(id);
+            console.log('🔍 Query final:', query);
+            console.log('📋 Valores finales:', values);
 
-            // Construir la query con el número correcto de parámetros
-            const query = `UPDATE usuarios SET ${campos.join(', ')} WHERE id = $${valores.length}`;
-            
-            console.log('🔍 Query de actualización:', query);
-            console.log('📋 Valores:', valores);
-
-            await baseDeDatos.ejecutar(query, valores);
+            await baseDeDatos.ejecutar(query, values);
 
             // Obtener usuario actualizado
             const usuarioActualizado = await baseDeDatos.obtenerUno(
@@ -290,7 +285,7 @@ const usuariosController = {
                 [id]
             );
 
-            console.log(`✅ Perfil actualizado: ID ${id}`);
+            console.log(`✅ Perfil actualizado exitosamente: ID ${id}`);
 
             res.json({
                 mensaje: 'Perfil actualizado exitosamente',

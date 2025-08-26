@@ -386,20 +386,26 @@ class Auth {
     // Cambiar foto de perfil
     async cambiarFotoPerfil() {
         try {
-            // Crear input file oculto
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.style.display = 'none';
+            // Crear input file único si no existe
+            if (!this.fileInput) {
+                this.fileInput = document.createElement('input');
+                this.fileInput.type = 'file';
+                this.fileInput.accept = 'image/*';
+                this.fileInput.style.display = 'none';
+                
+                this.fileInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        await this.subirFotoPerfil(file);
+                    }
+                    // Limpiar el input para permitir seleccionar el mismo archivo
+                    this.fileInput.value = '';
+                });
+                
+                document.body.appendChild(this.fileInput);
+            }
             
-            input.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    await this.subirFotoPerfil(file);
-                }
-            });
-            
-            input.click();
+            this.fileInput.click();
         } catch (error) {
             console.error('❌ Error al cambiar foto de perfil:', error);
             Notifications.error('Error al cambiar la foto de perfil');
