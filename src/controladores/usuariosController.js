@@ -481,6 +481,8 @@ const usuariosController = {
             console.log('📸 Iniciando subida de foto de perfil...');
             console.log('📋 Parámetros:', { id, usuario: req.usuario.id, rol: req.usuario.rol });
             console.log('📁 Archivo recibido:', req.file);
+            console.log('📋 Headers:', req.headers);
+            console.log('📋 Body keys:', Object.keys(req.body));
 
             // Verificar que el usuario existe
             const usuario = await baseDeDatos.obtenerUno(
@@ -533,7 +535,16 @@ const usuariosController = {
 
         } catch (error) {
             console.error('❌ Error subiendo foto de perfil:', error);
-            res.status(500).json({ error: 'Error interno del servidor' });
+            console.error('❌ Stack trace:', error.stack);
+            console.error('❌ Error details:', {
+                message: error.message,
+                name: error.name,
+                code: error.code
+            });
+            res.status(500).json({ 
+                error: 'Error interno del servidor',
+                details: process.env.NODE_ENV === 'development' ? error.message : 'Error procesando archivo'
+            });
         }
     },
 
