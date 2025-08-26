@@ -384,56 +384,53 @@ class Auth {
     }
 
     // Cambiar foto de perfil
-    async cambiarFotoPerfil() {
-        try {
-            // Crear input file único si no existe
-            if (!this.fileInput) {
-                this.fileInput = document.createElement('input');
-                this.fileInput.type = 'file';
-                this.fileInput.accept = 'image/*';
-                this.fileInput.style.display = 'none';
-                
-                // Remover event listeners existentes para evitar duplicados
-                this.fileInput.removeEventListener('change', this.handleFileChange);
-                
-                // Crear función de manejo de archivo
-                this.handleFileChange = async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
-                        
-                        // Validar tamaño del archivo (10MB máximo)
-                        const maxSize = 10 * 1024 * 1024; // 10MB
-                        if (file.size > maxSize) {
-                            Notifications.error(`El archivo es demasiado grande. Máximo 10MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-                            this.fileInput.value = '';
-                            return;
+                    async cambiarFotoPerfil() {
+                    try {
+                        // Crear input file único si no existe
+                        if (!this.fileInput) {
+                            this.fileInput = document.createElement('input');
+                            this.fileInput.type = 'file';
+                            this.fileInput.accept = 'image/*';
+                            this.fileInput.style.display = 'none';
+                            
+                            // Crear función de manejo de archivo
+                            this.handleFileChange = async (e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                    console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
+                                    
+                                    // Validar tamaño del archivo (10MB máximo)
+                                    const maxSize = 10 * 1024 * 1024; // 10MB
+                                    if (file.size > maxSize) {
+                                        Notifications.error(`El archivo es demasiado grande. Máximo 10MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+                                        this.fileInput.value = '';
+                                        return;
+                                    }
+                                    
+                                    // Validar tipo de archivo
+                                    if (!file.type.startsWith('image/')) {
+                                        Notifications.error('Solo se permiten archivos de imagen');
+                                        this.fileInput.value = '';
+                                        return;
+                                    }
+                                    
+                                    await this.subirFotoPerfil(file);
+                                }
+                                // Limpiar el input para permitir seleccionar el mismo archivo
+                                this.fileInput.value = '';
+                            };
+                            
+                            this.fileInput.addEventListener('change', this.handleFileChange);
+                            document.body.appendChild(this.fileInput);
                         }
                         
-                        // Validar tipo de archivo
-                        if (!file.type.startsWith('image/')) {
-                            Notifications.error('Solo se permiten archivos de imagen');
-                            this.fileInput.value = '';
-                            return;
-                        }
-                        
-                        await this.subirFotoPerfil(file);
+                        console.log('🖱️ Abriendo selector de archivos...');
+                        this.fileInput.click();
+                    } catch (error) {
+                        console.error('❌ Error al cambiar foto de perfil:', error);
+                        Notifications.error('Error al cambiar la foto de perfil');
                     }
-                    // Limpiar el input para permitir seleccionar el mismo archivo
-                    this.fileInput.value = '';
-                };
-                
-                this.fileInput.addEventListener('change', this.handleFileChange);
-                document.body.appendChild(this.fileInput);
-            }
-            
-            console.log('🖱️ Abriendo selector de archivos...');
-            this.fileInput.click();
-        } catch (error) {
-            console.error('❌ Error al cambiar foto de perfil:', error);
-            Notifications.error('Error al cambiar la foto de perfil');
-        }
-    }
+                }
 
     // Subir foto de perfil
     async subirFotoPerfil(file) {
@@ -514,6 +511,14 @@ class Auth {
     onUserLogout() {
         console.log('🔐 Iniciando logout...');
         
+        // Limpiar event listeners de disponibilidad
+        const checkbox = document.getElementById('availabilityCheckbox');
+        if (checkbox && this.availabilityChangeHandler) {
+            checkbox.removeEventListener('change', this.availabilityChangeHandler);
+            this.availabilityChangeHandler = null;
+            console.log('🗑️ Event listener de disponibilidad removido');
+        }
+        
         // Limpiar localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -568,14 +573,22 @@ class Auth {
         const status = document.getElementById('availabilityStatus');
         
         if (checkbox && status) {
+            // Remover event listener existente para evitar duplicados
+            if (this.availabilityChangeHandler) {
+                checkbox.removeEventListener('change', this.availabilityChangeHandler);
+            }
+            
             // Configurar estado inicial
             checkbox.checked = disponible;
             this.actualizarEstadoDisponibilidad(disponible);
             
-            // Agregar event listener
-            checkbox.addEventListener('change', (e) => {
+            // Crear y guardar el event listener
+            this.availabilityChangeHandler = (e) => {
                 this.cambiarDisponibilidad(e.target.checked);
-            });
+            };
+            
+            // Agregar event listener
+            checkbox.addEventListener('change', this.availabilityChangeHandler);
         }
     }
 

@@ -40,9 +40,29 @@ app.use(helmet({
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // Aumentar límite para archivos grandes
-app.use(express.urlencoded({ limit: '10mb', extended: true })); // Para FormData
 app.use(express.static(path.join(__dirname, '../../public')));
+
+// Middleware para JSON - solo para rutas que no sean de archivos
+app.use((req, res, next) => {
+    // Si es una ruta de subida de archivos, saltar el parsing de JSON
+    if (req.path.includes('/foto') && req.method === 'POST') {
+        return next();
+    }
+    
+    // Para otras rutas, usar el parsing de JSON
+    express.json({ limit: '10mb' })(req, res, next);
+});
+
+// Middleware para URL encoded - solo para rutas que no sean de archivos
+app.use((req, res, next) => {
+    // Si es una ruta de subida de archivos, saltar el parsing de URL encoded
+    if (req.path.includes('/foto') && req.method === 'POST') {
+        return next();
+    }
+    
+    // Para otras rutas, usar el parsing de URL encoded
+    express.urlencoded({ limit: '10mb', extended: true })(req, res, next);
+});
 
 // Rutas API
 app.use('/api/autenticacion', rutasAutenticacion);
