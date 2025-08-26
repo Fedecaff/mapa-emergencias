@@ -40,7 +40,8 @@ app.use(helmet({
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Aumentar límite para archivos grandes
+app.use(express.urlencoded({ limit: '10mb', extended: true })); // Para FormData
 app.use(express.static(path.join(__dirname, '../../public')));
 
 // Rutas API
@@ -61,6 +62,15 @@ app.get('/', (req, res) => {
 // Manejo de errores
 app.use((err, req, res, next) => {
     console.error('Error del servidor:', err);
+    
+    // Manejo específico para archivos demasiado grandes
+    if (err.type === 'entity.too.large') {
+        return res.status(413).json({ 
+            error: 'Archivo demasiado grande',
+            mensaje: 'El archivo excede el tamaño máximo permitido (10MB)'
+        });
+    }
+    
     res.status(500).json({ 
         error: 'Error interno del servidor',
         mensaje: process.env.NODE_ENV === 'development' ? err.message : 'Algo salió mal'

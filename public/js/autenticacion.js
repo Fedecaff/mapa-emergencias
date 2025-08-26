@@ -401,6 +401,22 @@ class Auth {
                     const file = e.target.files[0];
                     if (file) {
                         console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
+                        
+                        // Validar tamaño del archivo (10MB máximo)
+                        const maxSize = 10 * 1024 * 1024; // 10MB
+                        if (file.size > maxSize) {
+                            Notifications.error(`El archivo es demasiado grande. Máximo 10MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+                            this.fileInput.value = '';
+                            return;
+                        }
+                        
+                        // Validar tipo de archivo
+                        if (!file.type.startsWith('image/')) {
+                            Notifications.error('Solo se permiten archivos de imagen');
+                            this.fileInput.value = '';
+                            return;
+                        }
+                        
                         await this.subirFotoPerfil(file);
                     }
                     // Limpiar el input para permitir seleccionar el mismo archivo
