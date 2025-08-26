@@ -44,7 +44,16 @@ router.put('/:id/disponibilidad', verificarDisponibilidad, usuariosController.ca
 router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizarPerfil);
 
 // Rutas de fotos de perfil
-router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), usuariosController.subirFotoPerfil);
+router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), (req, res, next) => {
+    // Middleware para manejar errores de multer
+    if (req.fileValidationError) {
+        return res.status(400).json({ error: req.fileValidationError });
+    }
+    if (!req.file) {
+        return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
+    }
+    next();
+}, usuariosController.subirFotoPerfil);
 router.delete('/:id/foto', verificarDisponibilidad, usuariosController.eliminarFotoPerfil);
 
 // Rutas de geolocalización

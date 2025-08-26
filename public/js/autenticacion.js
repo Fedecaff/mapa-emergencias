@@ -393,18 +393,25 @@ class Auth {
                 this.fileInput.accept = 'image/*';
                 this.fileInput.style.display = 'none';
                 
-                this.fileInput.addEventListener('change', async (e) => {
+                // Remover event listeners existentes para evitar duplicados
+                this.fileInput.removeEventListener('change', this.handleFileChange);
+                
+                // Crear función de manejo de archivo
+                this.handleFileChange = async (e) => {
                     const file = e.target.files[0];
                     if (file) {
+                        console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
                         await this.subirFotoPerfil(file);
                     }
                     // Limpiar el input para permitir seleccionar el mismo archivo
                     this.fileInput.value = '';
-                });
+                };
                 
+                this.fileInput.addEventListener('change', this.handleFileChange);
                 document.body.appendChild(this.fileInput);
             }
             
+            console.log('🖱️ Abriendo selector de archivos...');
             this.fileInput.click();
         } catch (error) {
             console.error('❌ Error al cambiar foto de perfil:', error);
@@ -415,9 +422,12 @@ class Auth {
     // Subir foto de perfil
     async subirFotoPerfil(file) {
         try {
+            console.log('📤 Iniciando subida de archivo:', file.name, file.size, file.type);
+            
             const formData = new FormData();
             formData.append('foto', file);
             
+            console.log('📋 FormData creado, enviando petición...');
             const response = await API.post(`/usuarios/${this.currentUser.id}/foto`, formData);
             
             if (response.foto_perfil) {
