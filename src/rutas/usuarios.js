@@ -10,10 +10,13 @@ const upload = multer({
         fileSize: 5 * 1024 * 1024 // 5MB máximo
     },
     fileFilter: function (req, file, cb) {
+        console.log('🔍 Multer fileFilter - Archivo:', file.originalname, file.mimetype);
         // Solo permitir imágenes
         if (file.mimetype.startsWith('image/')) {
+            console.log('✅ Archivo de imagen válido');
             cb(null, true);
         } else {
+            console.log('❌ Archivo no válido:', file.mimetype);
             cb(new Error('Solo se permiten archivos de imagen'), false);
         }
     }
@@ -45,13 +48,20 @@ router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizar
 
 // Rutas de fotos de perfil
 router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), (req, res, next) => {
+    console.log('🔍 Middleware de archivos - req.file:', req.file);
+    console.log('🔍 Middleware de archivos - req.body:', req.body);
+    console.log('🔍 Middleware de archivos - req.headers:', req.headers['content-type']);
+    
     // Middleware para manejar errores de multer
     if (req.fileValidationError) {
+        console.log('❌ Error de validación de archivo:', req.fileValidationError);
         return res.status(400).json({ error: req.fileValidationError });
     }
     if (!req.file) {
+        console.log('❌ No se proporcionó archivo');
         return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
     }
+    console.log('✅ Archivo procesado correctamente por multer');
     next();
 }, usuariosController.subirFotoPerfil);
 router.delete('/:id/foto', verificarDisponibilidad, usuariosController.eliminarFotoPerfil);

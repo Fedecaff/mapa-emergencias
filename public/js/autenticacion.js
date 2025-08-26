@@ -427,7 +427,13 @@ class Auth {
             const formData = new FormData();
             formData.append('foto', file);
             
-            console.log('📋 FormData creado, enviando petición...');
+            // Debug: verificar contenido del FormData
+            console.log('📋 FormData creado:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes)` : value);
+            }
+            
+            console.log('📋 Enviando petición...');
             const response = await API.post(`/usuarios/${this.currentUser.id}/foto`, formData);
             
             if (response.foto_perfil) {

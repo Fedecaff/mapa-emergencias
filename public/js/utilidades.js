@@ -166,10 +166,22 @@ class API {
     }
     
     static post(endpoint, data) {
-        return this.request(endpoint, {
+        const options = {
             method: 'POST',
-            body: JSON.stringify(data),
-        });
+        };
+        
+        // Si es FormData, no usar JSON.stringify
+        if (data instanceof FormData) {
+            options.body = data;
+            // No establecer Content-Type, el navegador lo hará automáticamente con el boundary
+        } else {
+            options.body = JSON.stringify(data);
+            options.headers = {
+                'Content-Type': 'application/json'
+            };
+        }
+        
+        return this.request(endpoint, options);
     }
     
     static put(endpoint, data) {
