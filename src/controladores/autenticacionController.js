@@ -67,7 +67,12 @@ class AutenticacionController {
                     id: usuario.id,
                     email: usuario.email,
                     nombre: usuario.nombre,
-                    rol: usuario.rol
+                    rol: usuario.rol,
+                    foto_perfil: usuario.foto_perfil,
+                    institucion: usuario.institucion,
+                    rol_institucion: usuario.rol_institucion,
+                    telefono: usuario.telefono,
+                    disponible: usuario.disponible
                 }
             });
 
