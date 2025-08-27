@@ -103,9 +103,7 @@ class API {
         
         // Configuración por defecto
         const defaultOptions = {
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: {},
         };
         
         // Agregar token si existe
@@ -170,11 +168,13 @@ class API {
             method: 'POST',
         };
         
-        // Si es FormData, no usar JSON.stringify
+        // Si es FormData, no usar JSON.stringify y no establecer Content-Type
         if (data instanceof FormData) {
+            console.log('📤 Enviando FormData...');
             options.body = data;
-            // No establecer Content-Type, el navegador lo hará automáticamente con el boundary
+            // El navegador establecerá automáticamente el Content-Type con el boundary
         } else {
+            console.log('📤 Enviando JSON...');
             options.body = JSON.stringify(data);
             options.headers = {
                 'Content-Type': 'application/json'
