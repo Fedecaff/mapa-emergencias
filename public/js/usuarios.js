@@ -176,19 +176,24 @@ class UsuariosManager {
     // Método para verificar si todos los campos están completos
     verificarCamposCompletos() {
         const form = document.getElementById('createUserForm');
-        const nombre = form.querySelector('[name="nombre"]').value.trim();
-        const email = form.querySelector('[name="email"]').value.trim();
-        const telefono = form.querySelector('[name="telefono"]').value.trim();
-        const password = form.querySelector('[name="password"]').value;
-        const rol = form.querySelector('[name="rol"]').value;
+        if (!form) return;
+        
+        const nombre = form.querySelector('[name="nombre"]')?.value.trim() || '';
+        const email = form.querySelector('[name="email"]')?.value.trim() || '';
+        const telefono = form.querySelector('[name="telefono"]')?.value.trim() || '';
+        const password = form.querySelector('[name="password"]')?.value || '';
+        const rol = form.querySelector('[name="rol"]')?.value || '';
         
         const submitBtn = form.querySelector('button[type="submit"]');
         
         // Solo habilitar si todos los campos están completos
         const camposCompletos = nombre && email && telefono && password && rol;
         
+        console.log('Verificando campos:', { nombre, email, telefono, password: password ? '***' : '', rol, camposCompletos });
+        
         if (submitBtn) {
             submitBtn.disabled = !camposCompletos;
+            console.log('Botón submit:', submitBtn.disabled ? 'DESHABILITADO' : 'HABILITADO');
         }
     }
 
