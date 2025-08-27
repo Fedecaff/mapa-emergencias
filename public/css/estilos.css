@@ -2016,6 +2016,48 @@ body {
     gap: 0.5rem;
 }
 
+/* Botones de modo del perfil */
+.profile-mode-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e1e8ed;
+    padding-bottom: 15px;
+}
+
+.btn-mode {
+    flex: 1;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    color: var(--dark-gray);
+    border: 2px solid #e1e8ed;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-mode:hover {
+    background: #e9ecef;
+    border-color: var(--secondary-color);
+}
+
+.btn-mode-active {
+    background: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.btn-mode-active:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
 /* Avatar del perfil */
 .profile-avatar {
     text-align: center;
@@ -2138,6 +2180,21 @@ body {
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+/* Modo de solo lectura */
+.profile-readonly .form-group input,
+.profile-readonly .form-group select {
+    background: #f8f9fa;
+    border-color: #e1e8ed;
+    color: var(--dark-gray);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.profile-readonly .btn-change-photo,
+.profile-readonly .btn-save-profile {
+    display: none;
 }
 
 

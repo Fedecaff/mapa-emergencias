@@ -333,6 +333,9 @@ class Auth {
         
         // Configurar event listeners
         this.configurarEventListenersPerfil();
+        
+        // Iniciar en modo "Ver Info"
+        this.cambiarAModoVer();
     }
 
     // Cargar datos del usuario en el formulario de perfil
@@ -364,6 +367,28 @@ class Auth {
 
     // Configurar event listeners del panel de perfil
     configurarEventListenersPerfil() {
+        // Botones de modo
+        const viewInfoBtn = document.getElementById('viewInfoBtn');
+        const editInfoBtn = document.getElementById('editInfoBtn');
+        
+        if (viewInfoBtn && editInfoBtn) {
+            // Remover event listeners existentes
+            viewInfoBtn.removeEventListener('click', this.viewInfoHandler);
+            editInfoBtn.removeEventListener('click', this.editInfoHandler);
+            
+            // Crear nuevos handlers
+            this.viewInfoHandler = () => {
+                this.cambiarAModoVer();
+            };
+            
+            this.editInfoHandler = () => {
+                this.cambiarAModoEditar();
+            };
+            
+            viewInfoBtn.addEventListener('click', this.viewInfoHandler);
+            editInfoBtn.addEventListener('click', this.editInfoHandler);
+        }
+        
         // Botón de cambiar foto
         const changePhotoBtn = document.getElementById('changePhotoBtn');
         if (changePhotoBtn) {
@@ -390,6 +415,49 @@ class Auth {
             };
             
             saveProfileBtn.addEventListener('click', this.saveProfileHandler);
+        }
+    }
+
+    // Cambiar a modo ver información
+    cambiarAModoVer() {
+        console.log('👁️ Cambiando a modo Ver Info...');
+        
+        // Actualizar botones
+        const viewInfoBtn = document.getElementById('viewInfoBtn');
+        const editInfoBtn = document.getElementById('editInfoBtn');
+        
+        if (viewInfoBtn && editInfoBtn) {
+            viewInfoBtn.classList.add('btn-mode-active');
+            editInfoBtn.classList.remove('btn-mode-active');
+        }
+        
+        // Agregar clase readonly al panel
+        const profileInfo = document.querySelector('.profile-info');
+        if (profileInfo) {
+            profileInfo.classList.add('profile-readonly');
+        }
+        
+        // Cargar datos actuales del usuario
+        this.cargarDatosPerfil();
+    }
+    
+    // Cambiar a modo editar información
+    cambiarAModoEditar() {
+        console.log('✏️ Cambiando a modo Editar Info...');
+        
+        // Actualizar botones
+        const viewInfoBtn = document.getElementById('viewInfoBtn');
+        const editInfoBtn = document.getElementById('editInfoBtn');
+        
+        if (viewInfoBtn && editInfoBtn) {
+            viewInfoBtn.classList.remove('btn-mode-active');
+            editInfoBtn.classList.add('btn-mode-active');
+        }
+        
+        // Remover clase readonly del panel
+        const profileInfo = document.querySelector('.profile-info');
+        if (profileInfo) {
+            profileInfo.classList.remove('profile-readonly');
         }
     }
 
