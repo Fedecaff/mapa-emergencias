@@ -72,10 +72,34 @@ const usuariosController = {
 
     async listar(req, res) {
         try {
-            const usuarios = await baseDeDatos.obtenerTodos(
-                'SELECT id, nombre, email, telefono, rol, fecha_creacion FROM usuarios ORDER BY fecha_creacion DESC'
-            );
-
+            const { rol, estado } = req.query;
+            
+            let query = `
+                SELECT id, nombre, email, telefono, rol, institucion, rol_institucion, 
+                       disponible, fecha_creacion, email_verificado
+                FROM usuarios 
+                WHERE 1=1
+            `;
+            const params = [];
+            let paramCount = 1;
+            
+            // Filtrar por rol
+            if (rol) {
+                query += ` AND rol = $${paramCount}`;
+                params.push(rol);
+                paramCount++;
+            }
+            
+            // Filtrar por estado (disponibilidad)
+            if (estado === 'activo') {
+                query += ` AND disponible = true`;
+            } else if (estado === 'inactivo') {
+                query += ` AND disponible = false`;
+            }
+            
+            query += ` ORDER BY fecha_creacion DESC`;
+            
+            const usuarios = await baseDeDatos.obtenerTodos(query, params);
             res.json({ usuarios });
 
         } catch (error) {

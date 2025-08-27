@@ -270,6 +270,9 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
 }
 
 .btn-logout {
@@ -846,23 +849,27 @@ body {
     background: var(--white);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
+    gap: 1rem;
 }
 
 .user-info {
     flex: 1;
+    min-width: 0;
 }
 
 .user-info h4 {
     color: var(--primary-color);
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
     font-size: 1rem;
+    font-weight: 600;
 }
 
 .user-info p {
     font-size: 0.9rem;
     color: var(--dark-gray);
     margin-bottom: 0.25rem;
+    word-wrap: break-word;
 }
 
 .user-role {

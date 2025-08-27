@@ -449,6 +449,9 @@ class AdminManager {
             const response = await API.get(endpoint);
             const users = response.usuarios || [];
             
+            // Guardar usuarios actuales para usar en deleteUser
+            this.currentUsers = users;
+            
             this.displayUsers(users);
             
         } catch (error) {
