@@ -356,9 +356,9 @@ class Auth {
             return;
         }
         
-        // Si no tenemos foto_perfil, intentar obtenerla del servidor
-        if (!userData.foto_perfil && userData.id) {
-            this.obtenerFotoPerfil(userData.id);
+        // Si no tenemos foto_perfil, mostrar iniciales
+        if (!userData.foto_perfil) {
+            console.log('ℹ️ No hay foto de perfil, mostrando iniciales');
         }
         
         // Avatar
@@ -379,10 +379,15 @@ class Auth {
         }
         
         // Campos del formulario
-        document.getElementById('profileName').value = userData.nombre || '';
-        document.getElementById('profileInstitution').value = userData.institucion || '';
-        document.getElementById('profileRole').value = userData.rol_institucion || '';
-        document.getElementById('profilePhone').value = userData.telefono || '';
+        const profileName = document.getElementById('profileName');
+        const profileInstitution = document.getElementById('profileInstitution');
+        const profileRole = document.getElementById('profileRole');
+        const profilePhone = document.getElementById('profilePhone');
+        
+        if (profileName) profileName.value = userData.nombre || '';
+        if (profileInstitution) profileInstitution.value = userData.institucion || '';
+        if (profileRole) profileRole.value = userData.rol_institucion || '';
+        if (profilePhone) profilePhone.value = userData.telefono || '';
         
         // Configurar disponibilidad
         this.configurarDisponibilidad(userData.disponible || false);
