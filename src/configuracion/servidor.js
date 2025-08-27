@@ -45,6 +45,8 @@ app.use(express.static(path.join(__dirname, '../../public')));
 
 // Middleware para JSON - solo para rutas que no sean de archivos
 app.use((req, res, next) => {
+    console.log('🔍 Middleware JSON - Path:', req.path, 'Method:', req.method);
+    
     // Si es una ruta de subida de archivos, saltar el parsing de JSON
     if (req.path.includes('/foto') && req.method === 'POST') {
         console.log('🔄 Saltando parsing JSON para subida de archivo:', req.path);
