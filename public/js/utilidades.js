@@ -242,89 +242,11 @@ class Geolocation {
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 30000,
-                    maximumAge: 0
+                    timeout: 15000,
+                    maximumAge: 60000
                 }
             );
         });
-    }
-
-    static async getHighAccuracyPosition() {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error('Geolocalización no soportada'));
-                return;
-            }
-
-            let positions = [];
-            let attempts = 0;
-            const maxAttempts = 3;
-
-            const getPosition = () => {
-                attempts++;
-                
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        positions.push({
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        });
-
-                        // Si tenemos al menos 2 lecturas o ya hicimos 3 intentos, promediar
-                        if (positions.length >= 2 || attempts >= maxAttempts) {
-                            const avgPosition = this.averagePositions(positions);
-                            resolve(avgPosition);
-                        } else {
-                            // Esperar 2 segundos antes del siguiente intento
-                            setTimeout(getPosition, 2000);
-                        }
-                    },
-                    (error) => {
-                        if (positions.length > 0) {
-                            // Si tenemos al menos una lectura, usar esa
-                            const avgPosition = this.averagePositions(positions);
-                            resolve(avgPosition);
-                        } else {
-                            reject(new Error(`Error de geolocalización: ${error.message}`));
-                        }
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 20000,
-                        maximumAge: 0
-                    }
-                );
-            };
-
-            getPosition();
-        });
-    }
-
-    static averagePositions(positions) {
-        if (positions.length === 1) {
-            return positions[0];
-        }
-
-        // Calcular promedio ponderado por precisión
-        let totalWeight = 0;
-        let weightedLat = 0;
-        let weightedLng = 0;
-        let minAccuracy = Infinity;
-
-        positions.forEach(pos => {
-            const weight = 1 / pos.accuracy;
-            totalWeight += weight;
-            weightedLat += pos.lat * weight;
-            weightedLng += pos.lng * weight;
-            minAccuracy = Math.min(minAccuracy, pos.accuracy);
-        });
-
-        return {
-            lat: weightedLat / totalWeight,
-            lng: weightedLng / totalWeight,
-            accuracy: minAccuracy
-        };
     }
 
     static async reverseGeocode(lat, lng) {

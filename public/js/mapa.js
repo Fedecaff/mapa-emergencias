@@ -513,9 +513,9 @@ class MapManager {
     async centerOnUserLocation() {
         try {
             Loading.show();
-            Notifications.info('Obteniendo tu ubicación con alta precisión...');
+            Notifications.info('Obteniendo tu ubicación...');
             
-            const position = await Geolocation.getHighAccuracyPosition();
+            const position = await Geolocation.getCurrentPosition();
             this.currentLocation = position;
             
             // Crear o actualizar marcador de usuario
@@ -532,20 +532,10 @@ class MapManager {
             
             this.userMarker = L.marker([position.lat, position.lng], { icon: userIcon })
                 .addTo(this.map)
-                .bindPopup(`<b>Tu ubicación actual</b><br>Precisión: ±${Math.round(position.accuracy)}m<br>Coordenadas: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`);
+                .bindPopup(`<b>Tu ubicación actual</b><br>Precisión: ±${Math.round(position.accuracy)}m`);
             
-            // Determinar el nivel de zoom basado en la precisión
-            let zoomLevel = 16;
-            if (position.accuracy > 100) {
-                zoomLevel = 14; // Menos zoom si la precisión es baja
-            } else if (position.accuracy > 50) {
-                zoomLevel = 15;
-            } else if (position.accuracy <= 10) {
-                zoomLevel = 17; // Más zoom si la precisión es muy alta
-            }
-            
-            // Centrar mapa en la ubicación del usuario con zoom adaptativo
-            this.map.setView([position.lat, position.lng], zoomLevel);
+            // Centrar mapa en la ubicación del usuario
+            this.map.setView([position.lat, position.lng], 16);
             
             // Obtener dirección
             try {
@@ -556,19 +546,8 @@ class MapManager {
                 this.updateLocationInfo(position, 'Dirección no disponible');
             }
             
-            // Mostrar información detallada sobre la precisión
-            let precisionMessage = `Ubicación centrada`;
-            if (position.accuracy <= 10) {
-                precisionMessage += ` (precisión excelente: ±${Math.round(position.accuracy)}m)`;
-            } else if (position.accuracy <= 50) {
-                precisionMessage += ` (precisión buena: ±${Math.round(position.accuracy)}m)`;
-            } else if (position.accuracy <= 100) {
-                precisionMessage += ` (precisión aceptable: ±${Math.round(position.accuracy)}m)`;
-            } else {
-                precisionMessage += ` (precisión baja: ±${Math.round(position.accuracy)}m)`;
-            }
-            
-            Notifications.success(precisionMessage);
+            // NO cargar puntos automáticamente - respetar filtros de categorías
+            Notifications.success(`Ubicación centrada (precisión: ±${Math.round(position.accuracy)}m)`);
             
         } catch (error) {
             console.error('Error obteniendo ubicación:', error);
