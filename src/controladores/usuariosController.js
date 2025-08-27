@@ -47,8 +47,8 @@ const usuariosController = {
 
             // Insertar usuario con nuevos campos
             const resultado = await baseDeDatos.ejecutar(
-                'INSERT INTO usuarios (nombre, email, password, telefono, rol, institucion, rol_institucion) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-                [nombre, email, passwordHash, telefono, rol, institucion || null, rol_institucion || null]
+                'INSERT INTO usuarios (nombre, email, password, telefono, rol, institucion, rol_institucion, email_verificado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+                [nombre, email, passwordHash, telefono, rol, institucion || null, rol_institucion || null, false]
             );
 
             // Obtener el usuario creado (sin contraseña)
@@ -111,7 +111,7 @@ const usuariosController = {
     async obtener(req, res) {
         try {
             const { id } = req.params;
-            const query = 'SELECT id, email, nombre, rol, telefono, disponible, institucion, rol_institucion, foto_perfil FROM usuarios WHERE id = $1';
+            const query = 'SELECT id, email, nombre, rol, telefono, disponible, institucion, rol_institucion, foto_perfil, email_verificado FROM usuarios WHERE id = $1';
             const result = await baseDeDatos.ejecutar(query, [id]);
             
             if (result.rows.length === 0) {
@@ -121,6 +121,31 @@ const usuariosController = {
             res.json(result.rows[0]);
         } catch (error) {
             console.error('Error obteniendo usuario:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
+
+    async verificarEmail(req, res) {
+        try {
+            const { email } = req.query;
+            
+            if (!email) {
+                return res.status(400).json({ error: 'Email requerido' });
+            }
+            
+            // Verificar si el email ya existe
+            const usuarioExistente = await baseDeDatos.obtenerUno(
+                'SELECT id FROM usuarios WHERE email = $1',
+                [email]
+            );
+            
+            res.json({
+                disponible: !usuarioExistente,
+                mensaje: usuarioExistente ? 'Email ya está registrado' : 'Email disponible'
+            });
+            
+        } catch (error) {
+            console.error('Error verificando email:', error);
             res.status(500).json({ error: 'Error interno del servidor' });
         }
     },

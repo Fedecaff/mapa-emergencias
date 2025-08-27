@@ -27,6 +27,14 @@ class UsuariosManager {
             });
         }
 
+        // Campo de email para verificación en tiempo real
+        const emailInput = document.getElementById('newUserEmail');
+        if (emailInput) {
+            emailInput.addEventListener('blur', () => {
+                this.verificarEmailUnico(emailInput.value.trim());
+            });
+        }
+
         // Botón cancelar crear usuario
         const cancelCreateUser = document.getElementById('cancelCreateUser');
         if (cancelCreateUser) {
@@ -48,10 +56,128 @@ class UsuariosManager {
         Modal.show('createUserModal');
         // Limpiar formulario
         document.getElementById('createUserForm').reset();
+        // Resetear estado de verificación
+        this.resetEmailVerification();
     }
 
     hideCreateUserModal() {
         Modal.hide('createUserModal');
+        // Resetear estado de verificación
+        this.resetEmailVerification();
+    }
+
+    async verificarEmailUnico(email) {
+        if (!email || !Utils.isValidEmail(email)) {
+            this.resetEmailVerification();
+            return;
+        }
+
+        try {
+            const response = await API.get(`/usuarios/verificar-email?email=${encodeURIComponent(email)}`);
+            
+            if (response.disponible) {
+                this.mostrarEmailDisponible(email);
+            } else {
+                this.mostrarEmailNoDisponible(email);
+            }
+        } catch (error) {
+            console.error('Error verificando email:', error);
+            this.mostrarErrorVerificacion();
+        }
+    }
+
+    mostrarEmailDisponible(email) {
+        const emailInput = document.getElementById('newUserEmail');
+        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
+        const emailStatus = document.getElementById('emailStatus');
+        
+        if (emailInput) {
+            emailInput.style.borderColor = '#28a745';
+            emailInput.classList.add('email-valid');
+            emailInput.classList.remove('email-invalid');
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Usuario';
+        }
+        
+        if (emailStatus) {
+            emailStatus.innerHTML = `
+                <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                <span style="color: #28a745;">Email disponible</span>
+            `;
+            emailStatus.style.display = 'block';
+        }
+    }
+
+    mostrarEmailNoDisponible(email) {
+        const emailInput = document.getElementById('newUserEmail');
+        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
+        const emailStatus = document.getElementById('emailStatus');
+        
+        if (emailInput) {
+            emailInput.style.borderColor = '#dc3545';
+            emailInput.classList.add('email-invalid');
+            emailInput.classList.remove('email-valid');
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Email ya registrado';
+        }
+        
+        if (emailStatus) {
+            emailStatus.innerHTML = `
+                <i class="fas fa-times-circle" style="color: #dc3545;"></i>
+                <span style="color: #dc3545;">Email ya está registrado</span>
+            `;
+            emailStatus.style.display = 'block';
+        }
+    }
+
+    mostrarErrorVerificacion() {
+        const emailInput = document.getElementById('newUserEmail');
+        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
+        const emailStatus = document.getElementById('emailStatus');
+        
+        if (emailInput) {
+            emailInput.style.borderColor = '#ffc107';
+            emailInput.classList.remove('email-valid', 'email-invalid');
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Verificar email';
+        }
+        
+        if (emailStatus) {
+            emailStatus.innerHTML = `
+                <i class="fas fa-exclamation-triangle" style="color: #ffc107;"></i>
+                <span style="color: #ffc107;">Error verificando email</span>
+            `;
+            emailStatus.style.display = 'block';
+        }
+    }
+
+    resetEmailVerification() {
+        const emailInput = document.getElementById('newUserEmail');
+        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
+        const emailStatus = document.getElementById('emailStatus');
+        
+        if (emailInput) {
+            emailInput.style.borderColor = '';
+            emailInput.classList.remove('email-valid', 'email-invalid');
+        }
+        
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Usuario';
+        }
+        
+        if (emailStatus) {
+            emailStatus.style.display = 'none';
+        }
     }
 
     async handleCreateUser() {

@@ -2275,6 +2275,33 @@ body {
     color: #28a745;
 }
 
+/* Estado de verificación de email en formulario de crear usuario */
+.email-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.email-status i {
+    font-size: 14px;
+}
+
+/* Estilos para inputs de email */
+input[type="email"].email-valid {
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25) !important;
+}
+
+input[type="email"].email-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+}
+
 /* Botón de guardar */
 .profile-actions {
     margin-bottom: 20px;

@@ -53,6 +53,7 @@ router.get('/roles-institucion', usuariosController.obtenerRolesInstitucion);
 // Rutas que requieren permisos de administrador
 router.post('/', verificarAdmin, usuariosController.crear);
 router.get('/', verificarAdmin, usuariosController.listar);
+router.get('/verificar-email', verificarAdmin, usuariosController.verificarEmail);
 router.get('/:id', verificarAdmin, usuariosController.obtener);
 router.put('/:id', verificarAdmin, usuariosController.actualizar);
 router.delete('/:id', verificarAdmin, usuariosController.eliminar);
