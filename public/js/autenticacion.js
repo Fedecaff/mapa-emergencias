@@ -322,6 +322,12 @@ class Auth {
     inicializarPanelPerfil(user) {
         console.log('👤 Inicializando panel de perfil para operador...');
         
+        // Solo mostrar panel de perfil para operadores
+        if (user.rol !== 'operador') {
+            console.log('ℹ️ Panel de perfil solo disponible para operadores');
+            return;
+        }
+        
         // Mostrar panel de perfil
         const profilePanel = document.getElementById('profilePanel');
         if (profilePanel) {
@@ -339,30 +345,42 @@ class Auth {
     }
 
     // Cargar datos del usuario en el formulario de perfil
-    cargarDatosPerfil(user) {
+    cargarDatosPerfil(user = null) {
+        // Usar el usuario actual si no se proporciona uno
+        const userData = user || this.currentUser;
+        
+        console.log('📋 Cargando datos del perfil:', userData);
+        
+        if (!userData) {
+            console.error('❌ No hay datos de usuario disponibles');
+            return;
+        }
+        
         // Avatar
         const profileAvatar = document.getElementById('profileAvatar');
         const profileInitials = document.getElementById('profileInitials');
         
-        if (user.foto_perfil) {
-            profileAvatar.src = user.foto_perfil;
+        if (userData.foto_perfil) {
+            profileAvatar.src = userData.foto_perfil;
             profileAvatar.style.display = 'block';
             profileInitials.style.display = 'none';
+            console.log('✅ Foto de perfil cargada:', userData.foto_perfil);
         } else {
             profileAvatar.style.display = 'none';
             profileInitials.style.display = 'flex';
-            const iniciales = user.nombre.split(' ').map(n => n[0]).join('').toUpperCase();
+            const iniciales = userData.nombre ? userData.nombre.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
             profileInitials.textContent = iniciales;
+            console.log('ℹ️ Mostrando iniciales:', iniciales);
         }
         
         // Campos del formulario
-        document.getElementById('profileName').value = user.nombre || '';
-        document.getElementById('profileInstitution').value = user.institucion || '';
-        document.getElementById('profileRole').value = user.rol_institucion || '';
-        document.getElementById('profilePhone').value = user.telefono || '';
+        document.getElementById('profileName').value = userData.nombre || '';
+        document.getElementById('profileInstitution').value = userData.institucion || '';
+        document.getElementById('profileRole').value = userData.rol_institucion || '';
+        document.getElementById('profilePhone').value = userData.telefono || '';
         
         // Configurar disponibilidad
-        this.configurarDisponibilidad(user.disponible || false);
+        this.configurarDisponibilidad(userData.disponible || false);
     }
 
     // Configurar event listeners del panel de perfil
@@ -565,12 +583,26 @@ class Auth {
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             
+            // Obtener valores de los campos
+            const nombre = document.getElementById('profileName').value.trim();
+            const institucion = document.getElementById('profileInstitution').value.trim();
+            const rol_institucion = document.getElementById('profileRole').value.trim();
+            const telefono = document.getElementById('profilePhone').value.trim();
+            
+            // Validar que al menos el nombre esté presente
+            if (!nombre) {
+                Notifications.error('El nombre es obligatorio');
+                return;
+            }
+            
             const datosPerfil = {
-                nombre: document.getElementById('profileName').value,
-                institucion: document.getElementById('profileInstitution').value,
-                rol_institucion: document.getElementById('profileRole').value,
-                telefono: document.getElementById('profilePhone').value
+                nombre: nombre,
+                institucion: institucion,
+                rol_institucion: rol_institucion,
+                telefono: telefono
             };
+            
+            console.log('📋 Enviando datos del perfil:', datosPerfil);
             
             const response = await API.put(`/usuarios/${this.currentUser.id}/perfil`, datosPerfil);
             
