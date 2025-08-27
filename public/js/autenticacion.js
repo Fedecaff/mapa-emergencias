@@ -356,6 +356,11 @@ class Auth {
             return;
         }
         
+        // Si no tenemos foto_perfil, intentar obtenerla del servidor
+        if (!userData.foto_perfil && userData.id) {
+            this.obtenerFotoPerfil(userData.id);
+        }
+        
         // Avatar
         const profileAvatar = document.getElementById('profileAvatar');
         const profileInitials = document.getElementById('profileInitials');
@@ -584,10 +589,24 @@ class Auth {
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
             
             // Obtener valores de los campos
-            const nombre = document.getElementById('profileName').value.trim();
-            const institucion = document.getElementById('profileInstitution').value.trim();
-            const rol_institucion = document.getElementById('profileRole').value.trim();
-            const telefono = document.getElementById('profilePhone').value.trim();
+            const nombreElement = document.getElementById('profileName');
+            const institucionElement = document.getElementById('profileInstitution');
+            const rolElement = document.getElementById('profileRole');
+            const telefonoElement = document.getElementById('profilePhone');
+            
+            console.log('🔍 Elementos del DOM encontrados:', {
+                nombre: !!nombreElement,
+                institucion: !!institucionElement,
+                rol: !!rolElement,
+                telefono: !!telefonoElement
+            });
+            
+            const nombre = nombreElement ? nombreElement.value.trim() : '';
+            const institucion = institucionElement ? institucionElement.value.trim() : '';
+            const rol_institucion = rolElement ? rolElement.value.trim() : '';
+            const telefono = telefonoElement ? telefonoElement.value.trim() : '';
+            
+            console.log('📋 Valores obtenidos:', { nombre, institucion, rol_institucion, telefono });
             
             // Validar que al menos el nombre esté presente
             if (!nombre) {
@@ -604,6 +623,7 @@ class Auth {
             if (telefono) datosPerfil.telefono = telefono;
             
             console.log('📋 Enviando datos del perfil:', datosPerfil);
+            console.log('📋 ID del usuario:', this.currentUser.id);
             
             const response = await API.put(`/usuarios/${this.currentUser.id}/perfil`, datosPerfil);
             
