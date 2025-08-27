@@ -17,6 +17,7 @@ import verificarRoles from '../modelos/verificarRoles.js';
 import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js';
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
+import whatsappService from '../servicios/whatsappService.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -126,6 +127,14 @@ async function iniciarServidor() {
         
         // Actualizar campo foto_perfil para permitir imágenes base64
         await actualizarCampoFoto();
+        
+        // Inicializar servicio de WhatsApp (opcional)
+        try {
+            await whatsappService.initialize();
+            console.log('✅ WhatsApp Service inicializado');
+        } catch (error) {
+            console.warn('⚠️ WhatsApp Service no disponible:', error.message);
+        }
         
         console.log('✅ Base de datos inicializada correctamente');
         

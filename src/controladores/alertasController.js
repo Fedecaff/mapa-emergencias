@@ -1,4 +1,5 @@
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
+import whatsappService from '../servicios/whatsappService.js';
 
 const alertasController = {
 
@@ -88,6 +89,43 @@ const alertasController = {
             `, [resultado.rows[0].id]);
 
             console.log(`🚨 Alerta creada: ${titulo} (ID: ${resultado.rows[0].id})`);
+            
+            // Enviar notificaciones WhatsApp a operadores disponibles
+            try {
+                console.log('📱 Iniciando envío de notificaciones WhatsApp...');
+                
+                // Obtener operadores disponibles con teléfono
+                const operadores = await baseDeDatos.obtenerTodos(`
+                    SELECT id, nombre, telefono, disponible, institucion
+                    FROM usuarios 
+                    WHERE rol = 'operador' 
+                    AND disponible = true 
+                    AND telefono IS NOT NULL 
+                    AND telefono != ''
+                `);
+                
+                if (operadores.length > 0) {
+                    console.log(`📱 Enviando notificaciones a ${operadores.length} operadores disponibles`);
+                    
+                    // Enviar notificaciones en segundo plano (no bloquear la respuesta)
+                    setImmediate(async () => {
+                        try {
+                            const resultadoNotificaciones = await whatsappService.enviarNotificacionEmergencia(alerta, operadores);
+                            if (resultadoNotificaciones) {
+                                console.log(`✅ Notificaciones enviadas: ${resultadoNotificaciones.enviados} exitosas, ${resultadoNotificaciones.fallidas} fallidas`);
+                            }
+                        } catch (error) {
+                            console.error('❌ Error enviando notificaciones WhatsApp:', error);
+                        }
+                    });
+                } else {
+                    console.log('ℹ️ No hay operadores disponibles con teléfono para notificar');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error obteniendo operadores para notificación:', error);
+            }
+            
             console.log('📤 Enviando respuesta al cliente...');
 
             res.status(201).json({
