@@ -138,9 +138,14 @@ async function iniciarServidor() {
         // Actualizar tabla de códigos de verificación
         await actualizarCodigosVerificacion();
         
-        // Inicializar servicio de email
+        // Inicializar servicio de email (opcional)
         console.log('📧 Inicializando servicio de email...');
-        await emailService.initialize();
+        try {
+            await emailService.initialize();
+        } catch (error) {
+            console.warn('⚠️ Servicio de email no disponible:', error.message);
+            console.log('ℹ️ El sistema funcionará sin envío de emails');
+        }
         
         console.log('✅ Base de datos inicializada correctamente');
         
