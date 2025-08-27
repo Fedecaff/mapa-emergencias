@@ -516,9 +516,12 @@ const usuariosController = {
                 buffer: req.file.buffer ? 'Presente' : 'Ausente'
             });
 
+            // Convertir la imagen a base64 para almacenarla temporalmente
+            const base64Image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+            
             // Aquí usarías Cloudinary para subir la imagen
-            // Por ahora, simulamos la subida con un placeholder personalizado
-            const fotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(req.usuario.nombre)}&size=150&background=3498db&color=ffffff&bold=true`;
+            // Por ahora, usamos base64 como solución temporal
+            const fotoUrl = base64Image;
 
             // Actualizar la foto en la base de datos
             await baseDeDatos.ejecutar(

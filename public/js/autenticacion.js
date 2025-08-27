@@ -367,20 +367,30 @@ class Auth {
         // Botón de cambiar foto
         const changePhotoBtn = document.getElementById('changePhotoBtn');
         if (changePhotoBtn) {
-            changePhotoBtn.addEventListener('click', () => {
+            // Remover event listener existente para evitar duplicados
+            changePhotoBtn.removeEventListener('click', this.changePhotoHandler);
+            
+            // Crear nuevo handler
+            this.changePhotoHandler = () => {
                 this.cambiarFotoPerfil();
-            });
+            };
+            
+            changePhotoBtn.addEventListener('click', this.changePhotoHandler);
         }
         
         // Botón de guardar perfil
         const saveProfileBtn = document.getElementById('saveProfileBtn');
         if (saveProfileBtn) {
-            saveProfileBtn.addEventListener('click', () => {
+            // Remover event listener existente para evitar duplicados
+            saveProfileBtn.removeEventListener('click', this.saveProfileHandler);
+            
+            // Crear nuevo handler
+            this.saveProfileHandler = () => {
                 this.guardarPerfil();
-            });
+            };
+            
+            saveProfileBtn.addEventListener('click', this.saveProfileHandler);
         }
-        
-
     }
 
     // Cambiar foto de perfil
