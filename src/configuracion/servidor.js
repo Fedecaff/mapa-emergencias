@@ -46,6 +46,7 @@ app.use(express.static(path.join(__dirname, '../../public')));
 app.use((req, res, next) => {
     // Si es una ruta de subida de archivos, saltar el parsing de JSON
     if (req.path.includes('/foto') && req.method === 'POST') {
+        console.log('🔄 Saltando parsing JSON para subida de archivo:', req.path);
         return next();
     }
     
@@ -57,6 +58,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
     // Si es una ruta de subida de archivos, saltar el parsing de URL encoded
     if (req.path.includes('/foto') && req.method === 'POST') {
+        console.log('🔄 Saltando parsing URL encoded para subida de archivo:', req.path);
         return next();
     }
     

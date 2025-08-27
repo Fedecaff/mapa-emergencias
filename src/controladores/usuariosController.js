@@ -481,7 +481,7 @@ const usuariosController = {
             console.log('📸 Iniciando subida de foto de perfil...');
             console.log('📋 Parámetros:', { id, usuario: req.usuario.id, rol: req.usuario.rol });
             console.log('📁 Archivo recibido:', req.file);
-            console.log('📋 Headers:', req.headers);
+            console.log('📋 Content-Type:', req.headers['content-type']);
             console.log('📋 Body keys:', Object.keys(req.body));
 
             // Verificar que el usuario existe
@@ -541,8 +541,17 @@ const usuariosController = {
                 name: error.name,
                 code: error.code
             });
+            
+            // Error más específico para debugging
+            let errorMessage = 'Error interno del servidor';
+            if (error.message.includes('JSON')) {
+                errorMessage = 'Error en el formato de datos enviados';
+            } else if (error.message.includes('file')) {
+                errorMessage = 'Error procesando el archivo';
+            }
+            
             res.status(500).json({ 
-                error: 'Error interno del servidor',
+                error: errorMessage,
                 details: process.env.NODE_ENV === 'development' ? error.message : 'Error procesando archivo'
             });
         }

@@ -3,11 +3,33 @@ import multer from 'multer';
 import usuariosController from '../controladores/usuariosController.js';
 import { verificarToken, verificarAdmin, verificarDisponibilidad } from '../middleware/autenticacion.js';
 
+// Middleware para manejar errores de multer
+const handleMulterError = (error, req, res, next) => {
+    console.log('🔍 Error de multer detectado:', error);
+    
+    if (error instanceof multer.MulterError) {
+        if (error.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ error: 'El archivo es demasiado grande. Máximo 10MB.' });
+        }
+        if (error.code === 'LIMIT_FILE_COUNT') {
+            return res.status(400).json({ error: 'Demasiados archivos. Solo se permite 1 archivo.' });
+        }
+        return res.status(400).json({ error: 'Error al procesar el archivo' });
+    }
+    
+    if (error.message.includes('Solo se permiten archivos de imagen')) {
+        return res.status(400).json({ error: 'Solo se permiten archivos de imagen (JPG, PNG, GIF, etc.)' });
+    }
+    
+    console.error('❌ Error no manejado de multer:', error);
+    return res.status(500).json({ error: 'Error interno del servidor' });
+};
+
 // Configuración de multer para subida de archivos
 const upload = multer({ 
     storage: multer.memoryStorage(), // Usar memoria en lugar de disco
     limits: {
-        fileSize: 5 * 1024 * 1024 // 5MB máximo
+        fileSize: 10 * 1024 * 1024 // 10MB máximo
     },
     fileFilter: function (req, file, cb) {
         console.log('🔍 Multer fileFilter - Archivo:', file.originalname, file.mimetype);
@@ -47,21 +69,24 @@ router.put('/:id/disponibilidad', verificarDisponibilidad, usuariosController.ca
 router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizarPerfil);
 
 // Rutas de fotos de perfil
-router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), (req, res, next) => {
+router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), handleMulterError, (req, res, next) => {
     console.log('🔍 Middleware de archivos - req.file:', req.file);
     console.log('🔍 Middleware de archivos - req.body:', req.body);
-    console.log('🔍 Middleware de archivos - req.headers:', req.headers['content-type']);
+    console.log('🔍 Middleware de archivos - Content-Type:', req.headers['content-type']);
     
-    // Middleware para manejar errores de multer
-    if (req.fileValidationError) {
-        console.log('❌ Error de validación de archivo:', req.fileValidationError);
-        return res.status(400).json({ error: req.fileValidationError });
-    }
+    // Verificar que se subió un archivo
     if (!req.file) {
         console.log('❌ No se proporcionó archivo');
+        console.log('📋 Content-Type recibido:', req.headers['content-type']);
+        console.log('📋 Body recibido:', req.body);
         return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
     }
-    console.log('✅ Archivo procesado correctamente por multer');
+    
+    console.log('✅ Archivo procesado correctamente por multer:', {
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+    });
     next();
 }, usuariosController.subirFotoPerfil);
 router.delete('/:id/foto', verificarDisponibilidad, usuariosController.eliminarFotoPerfil);
