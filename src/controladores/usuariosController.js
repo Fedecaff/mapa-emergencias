@@ -518,7 +518,7 @@ const usuariosController = {
 
             // Aquí usarías Cloudinary para subir la imagen
             // Por ahora, simulamos la subida con un placeholder personalizado
-            const fotoUrl = `https://via.placeholder.com/150/3498db/ffffff?text=${encodeURIComponent(req.usuario.nombre)}`;
+            const fotoUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(req.usuario.nombre)}&size=150&background=3498db&color=ffffff&bold=true`;
 
             // Actualizar la foto en la base de datos
             await baseDeDatos.ejecutar(
