@@ -188,6 +188,9 @@ class API {
         return this.request(endpoint, {
             method: 'PUT',
             body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
     }
     
