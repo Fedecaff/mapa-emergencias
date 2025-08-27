@@ -35,6 +35,20 @@ class UsuariosManager {
             });
         }
 
+        // Verificar campos en tiempo real
+        const form = document.getElementById('createUserForm');
+        if (form) {
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    this.verificarCamposCompletos();
+                });
+                input.addEventListener('change', () => {
+                    this.verificarCamposCompletos();
+                });
+            });
+        }
+
         // Botón cancelar crear usuario
         const cancelCreateUser = document.getElementById('cancelCreateUser');
         if (cancelCreateUser) {
@@ -97,11 +111,6 @@ class UsuariosManager {
             emailInput.classList.remove('email-invalid');
         }
         
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Usuario';
-        }
-        
         if (emailStatus) {
             emailStatus.innerHTML = `
                 <i class="fas fa-check-circle" style="color: #28a745;"></i>
@@ -109,6 +118,9 @@ class UsuariosManager {
             `;
             emailStatus.style.display = 'block';
         }
+        
+        // Verificar si todos los campos están completos para habilitar el botón
+        this.verificarCamposCompletos();
     }
 
     mostrarEmailNoDisponible(email) {
@@ -177,6 +189,26 @@ class UsuariosManager {
         
         if (emailStatus) {
             emailStatus.style.display = 'none';
+        }
+    }
+
+    // Método para verificar si todos los campos están completos
+    verificarCamposCompletos() {
+        const form = document.getElementById('createUserForm');
+        const nombre = form.querySelector('[name="nombre"]').value.trim();
+        const email = form.querySelector('[name="email"]').value.trim();
+        const telefono = form.querySelector('[name="telefono"]').value.trim();
+        const password = form.querySelector('[name="password"]').value;
+        const rol = form.querySelector('[name="rol"]').value;
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Solo habilitar si todos los campos están completos Y el email está verificado
+        const camposCompletos = nombre && email && telefono && password && rol;
+        const emailVerificado = email && document.getElementById('newUserEmail').classList.contains('email-valid');
+        
+        if (submitBtn) {
+            submitBtn.disabled = !(camposCompletos && emailVerificado);
         }
     }
 

@@ -83,5 +83,4 @@ router.delete('/:id/foto', verificarDisponibilidad, usuariosController.eliminarF
 // Rutas de geolocalización
 router.put('/:id/ubicacion', verificarDisponibilidad, usuariosController.actualizarUbicacion);
 
-export default router;
-
+export default router
