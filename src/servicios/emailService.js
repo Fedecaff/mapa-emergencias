@@ -16,13 +16,21 @@ class EmailService {
                 throw new Error('Variables de entorno EMAIL_USER y EMAIL_PASSWORD no configuradas');
             }
 
-            // Configurar transporter para Gmail
+            // Configurar transporter para Gmail con configuración más robusta
             this.transporter = nodemailer.createTransport({
-                service: 'gmail',
+                host: 'smtp.gmail.com',
+                port: 587,
+                secure: false, // true para 465, false para otros puertos
                 auth: {
                     user: process.env.EMAIL_USER,
                     pass: process.env.EMAIL_PASSWORD
-                }
+                },
+                tls: {
+                    rejectUnauthorized: false
+                },
+                connectionTimeout: 60000, // 60 segundos
+                greetingTimeout: 30000,   // 30 segundos
+                socketTimeout: 60000      // 60 segundos
             });
 
             // Verificar conexión
