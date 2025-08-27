@@ -384,53 +384,53 @@ class Auth {
     }
 
     // Cambiar foto de perfil
-                    async cambiarFotoPerfil() {
-                    try {
-                        // Crear input file único si no existe
-                        if (!this.fileInput) {
-                            this.fileInput = document.createElement('input');
-                            this.fileInput.type = 'file';
-                            this.fileInput.accept = 'image/*';
-                            this.fileInput.style.display = 'none';
-                            
-                            // Crear función de manejo de archivo
-                            this.handleFileChange = async (e) => {
-                                const file = e.target.files[0];
-                                if (file) {
-                                    console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
-                                    
-                                    // Validar tamaño del archivo (10MB máximo)
-                                    const maxSize = 10 * 1024 * 1024; // 10MB
-                                    if (file.size > maxSize) {
-                                        Notifications.error(`El archivo es demasiado grande. Máximo 10MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-                                        this.fileInput.value = '';
-                                        return;
-                                    }
-                                    
-                                    // Validar tipo de archivo
-                                    if (!file.type.startsWith('image/')) {
-                                        Notifications.error('Solo se permiten archivos de imagen');
-                                        this.fileInput.value = '';
-                                        return;
-                                    }
-                                    
-                                    await this.subirFotoPerfil(file);
-                                }
-                                // Limpiar el input para permitir seleccionar el mismo archivo
-                                this.fileInput.value = '';
-                            };
-                            
-                            this.fileInput.addEventListener('change', this.handleFileChange);
-                            document.body.appendChild(this.fileInput);
+    async cambiarFotoPerfil() {
+        try {
+            // Crear input file único si no existe
+            if (!this.fileInput) {
+                this.fileInput = document.createElement('input');
+                this.fileInput.type = 'file';
+                this.fileInput.accept = 'image/*';
+                this.fileInput.style.display = 'none';
+                
+                // Crear función de manejo de archivo
+                this.handleFileChange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
+                        
+                        // Validar tamaño del archivo (10MB máximo)
+                        const maxSize = 10 * 1024 * 1024; // 10MB
+                        if (file.size > maxSize) {
+                            Notifications.error(`El archivo es demasiado grande. Máximo 10MB. Tu archivo: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+                            this.fileInput.value = '';
+                            return;
                         }
                         
-                        console.log('🖱️ Abriendo selector de archivos...');
-                        this.fileInput.click();
-                    } catch (error) {
-                        console.error('❌ Error al cambiar foto de perfil:', error);
-                        Notifications.error('Error al cambiar la foto de perfil');
+                        // Validar tipo de archivo
+                        if (!file.type.startsWith('image/')) {
+                            Notifications.error('Solo se permiten archivos de imagen');
+                            this.fileInput.value = '';
+                            return;
+                        }
+                        
+                        await this.subirFotoPerfil(file);
                     }
-                }
+                    // Limpiar el input para permitir seleccionar el mismo archivo
+                    this.fileInput.value = '';
+                };
+                
+                this.fileInput.addEventListener('change', this.handleFileChange);
+                document.body.appendChild(this.fileInput);
+            }
+            
+            console.log('🖱️ Abriendo selector de archivos...');
+            this.fileInput.click();
+        } catch (error) {
+            console.error('❌ Error al cambiar foto de perfil:', error);
+            Notifications.error('Error al cambiar la foto de perfil');
+        }
+    }
 
     // Subir foto de perfil
     async subirFotoPerfil(file) {
@@ -449,20 +449,30 @@ class Auth {
             console.log('📋 Enviando petición...');
             const response = await API.post(`/usuarios/${this.currentUser.id}/foto`, formData);
             
+            console.log('📋 Respuesta del servidor:', response);
+            
             if (response.foto_perfil) {
-                // Actualizar avatar en el panel
+                // Actualizar avatar en el panel de perfil
                 const profileAvatar = document.getElementById('profileAvatar');
                 const profileInitials = document.getElementById('profileInitials');
                 
-                profileAvatar.src = response.foto_perfil;
-                profileAvatar.style.display = 'block';
-                profileInitials.style.display = 'none';
+                if (profileAvatar && profileInitials) {
+                    profileAvatar.src = response.foto_perfil;
+                    profileAvatar.style.display = 'block';
+                    profileInitials.style.display = 'none';
+                    console.log('✅ Avatar actualizado en panel de perfil');
+                } else {
+                    console.warn('⚠️ Elementos de avatar no encontrados en el DOM');
+                }
                 
                 // Actualizar usuario en memoria
                 this.currentUser.foto_perfil = response.foto_perfil;
                 Storage.set('user', this.currentUser);
                 
                 Notifications.success('Foto de perfil actualizada correctamente');
+            } else {
+                console.error('❌ No se recibió foto_perfil en la respuesta');
+                Notifications.error('Error: No se recibió la URL de la foto');
             }
         } catch (error) {
             console.error('❌ Error al subir foto de perfil:', error);
