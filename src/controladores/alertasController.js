@@ -1,5 +1,4 @@
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
-import whatsappService from '../servicios/whatsappService.js';
 
 const alertasController = {
 
@@ -105,21 +104,10 @@ const alertasController = {
                 `);
                 
                 if (operadores.length > 0) {
-                    console.log(`📱 Enviando notificaciones a ${operadores.length} operadores disponibles`);
-                    
-                    // Enviar notificaciones en segundo plano (no bloquear la respuesta)
-                    setImmediate(async () => {
-                        try {
-                            const resultadoNotificaciones = await whatsappService.enviarNotificacionEmergencia(alerta, operadores);
-                            if (resultadoNotificaciones) {
-                                console.log(`✅ Notificaciones enviadas: ${resultadoNotificaciones.enviados} exitosas, ${resultadoNotificaciones.fallidas} fallidas`);
-                            }
-                        } catch (error) {
-                            console.error('❌ Error enviando notificaciones WhatsApp:', error);
-                        }
-                    });
+                    console.log(`📱 ${operadores.length} operadores disponibles para notificaciones`);
+                    // TODO: Implementar notificaciones por email y push
                 } else {
-                    console.log('ℹ️ No hay operadores disponibles con teléfono para notificar');
+                    console.log('ℹ️ No hay operadores disponibles para notificar');
                 }
                 
             } catch (error) {

@@ -18,7 +18,6 @@ import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
-import whatsappService from '../servicios/whatsappService.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -132,13 +131,7 @@ async function iniciarServidor() {
         // Actualizar campo email_verificado
         await actualizarCampoEmail();
         
-        // Inicializar servicio de WhatsApp (opcional)
-        try {
-            await whatsappService.initialize();
-            console.log('✅ WhatsApp Service inicializado');
-        } catch (error) {
-            console.warn('⚠️ WhatsApp Service no disponible:', error.message);
-        }
+
         
         console.log('✅ Base de datos inicializada correctamente');
         
