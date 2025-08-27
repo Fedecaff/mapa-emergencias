@@ -54,7 +54,14 @@ app.use((req, res, next) => {
     }
     
     // Para otras rutas, usar el parsing de JSON
-    express.json({ limit: '10mb' })(req, res, next);
+    express.json({ limit: '10mb' })(req, res, (err) => {
+        if (err) {
+            console.error('❌ Error parsing JSON:', err);
+            return res.status(400).json({ error: 'Error parsing JSON' });
+        }
+        console.log('✅ JSON parsed successfully, body:', req.body);
+        next();
+    });
 });
 
 // Middleware para URL encoded - solo para rutas que no sean de archivos
