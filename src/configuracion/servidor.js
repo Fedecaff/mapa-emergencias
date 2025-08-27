@@ -45,23 +45,13 @@ app.use(express.static(path.join(__dirname, '../../public')));
 
 // Middleware para JSON - solo para rutas que no sean de archivos
 app.use((req, res, next) => {
-    console.log('🔍 Middleware JSON - Path:', req.path, 'Method:', req.method);
-    
     // Si es una ruta de subida de archivos, saltar el parsing de JSON
     if (req.path.includes('/foto') && req.method === 'POST') {
-        console.log('🔄 Saltando parsing JSON para subida de archivo:', req.path);
         return next();
     }
     
     // Para otras rutas, usar el parsing de JSON
-    express.json({ limit: '10mb' })(req, res, (err) => {
-        if (err) {
-            console.error('❌ Error parsing JSON:', err);
-            return res.status(400).json({ error: 'Error parsing JSON' });
-        }
-        console.log('✅ JSON parsed successfully, body:', req.body);
-        next();
-    });
+    express.json({ limit: '10mb' })(req, res, next);
 });
 
 // Middleware para URL encoded - solo para rutas que no sean de archivos

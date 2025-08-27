@@ -66,12 +66,7 @@ router.delete('/:id', verificarAdmin, usuariosController.eliminar);
 router.put('/:id/disponibilidad', verificarDisponibilidad, usuariosController.cambiarDisponibilidad);
 
 // Rutas de perfil (permiten a usuarios actualizar su propio perfil)
-router.put('/:id/perfil', verificarDisponibilidad, (req, res, next) => {
-    console.log('🔍 Ruta de perfil - ID:', req.params.id);
-    console.log('🔍 Ruta de perfil - Body antes del controlador:', req.body);
-    console.log('🔍 Ruta de perfil - Headers:', req.headers['content-type']);
-    next();
-}, usuariosController.actualizarPerfil);
+router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizarPerfil);
 
 // Rutas de fotos de perfil
 router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), handleMulterError, (req, res, next) => {
