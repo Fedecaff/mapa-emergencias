@@ -17,6 +17,7 @@ import verificarRoles from '../modelos/verificarRoles.js';
 import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js';
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
+import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
 import whatsappService from '../servicios/whatsappService.js';
 
 // Importar rutas
@@ -127,6 +128,9 @@ async function iniciarServidor() {
         
         // Actualizar campo foto_perfil para permitir imágenes base64
         await actualizarCampoFoto();
+        
+        // Actualizar campo email_verificado
+        await actualizarCampoEmail();
         
         // Inicializar servicio de WhatsApp (opcional)
         try {

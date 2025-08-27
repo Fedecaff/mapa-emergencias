@@ -162,6 +162,15 @@
                             <label for="profilePhone">Teléfono:</label>
                             <input type="tel" id="profilePhone" placeholder="Tu número de teléfono">
                         </div>
+                        
+                        <div class="form-group">
+                            <label for="profileEmail">Email:</label>
+                            <input type="email" id="profileEmail" placeholder="Tu dirección de email">
+                            <div class="email-verification-status" id="emailVerificationStatus">
+                                <i class="fas fa-circle"></i>
+                                <span>Email no verificado</span>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="profile-actions">
@@ -182,6 +191,9 @@
                 </button>
                 <button id="createUserBtn" class="btn-admin">
                     <i class="fas fa-user-plus"></i> Crear Usuario
+                </button>
+                <button id="manageUsersBtn" class="btn-admin">
+                    <i class="fas fa-users-cog"></i> Gestionar Usuarios
                 </button>
                 <button id="viewHistoryBtn" class="btn-admin">
                     <i class="fas fa-history"></i> Ver Historial
@@ -372,6 +384,33 @@
             </div>
             <div class="modal-actions" id="pointDetailsActions">
                 <!-- Botones de acción -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de gestión de usuarios -->
+    <div id="manageUsersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-users-cog"></i> Gestionar Usuarios</h2>
+                <button class="close-btn" id="closeManageUsersModal">&times;</button>
+            </div>
+            <div class="manage-users-content">
+                <div class="users-filters">
+                    <select id="usersRoleFilter">
+                        <option value="">Todos los roles</option>
+                        <option value="administrador">Administradores</option>
+                        <option value="operador">Operadores</option>
+                    </select>
+                    <select id="usersStatusFilter">
+                        <option value="">Todos los estados</option>
+                        <option value="activo">Activos</option>
+                        <option value="inactivo">Inactivos</option>
+                    </select>
+                </div>
+                <div class="users-list" id="usersList">
+                    <!-- La lista de usuarios se cargará dinámicamente -->
+                </div>
             </div>
         </div>
     </div>

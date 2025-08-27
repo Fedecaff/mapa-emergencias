@@ -356,11 +356,24 @@ class Auth {
         const profileInstitution = document.getElementById('profileInstitution');
         const profileRole = document.getElementById('profileRole');
         const profilePhone = document.getElementById('profilePhone');
+        const profileEmail = document.getElementById('profileEmail');
+        const emailVerificationStatus = document.getElementById('emailVerificationStatus');
         
         if (profileName) profileName.value = userData.nombre || '';
         if (profileInstitution) profileInstitution.value = userData.institucion || '';
         if (profileRole) profileRole.value = userData.rol_institucion || '';
         if (profilePhone) profilePhone.value = userData.telefono || '';
+        if (profileEmail) profileEmail.value = userData.email || '';
+        
+        // Actualizar estado de verificación de email
+        if (emailVerificationStatus) {
+            const isVerified = userData.email_verificado || false;
+            emailVerificationStatus.className = `email-verification-status ${isVerified ? 'verified' : ''}`;
+            emailVerificationStatus.innerHTML = `
+                <i class="fas fa-circle"></i>
+                <span>${isVerified ? 'Email verificado' : 'Email no verificado'}</span>
+            `;
+        }
         
         // Configurar disponibilidad
         this.configurarDisponibilidad(userData.disponible || false);
@@ -557,6 +570,7 @@ class Auth {
             const institucion = document.getElementById('profileInstitution').value.trim();
             const rol_institucion = document.getElementById('profileRole').value.trim();
             const telefono = document.getElementById('profilePhone').value.trim();
+            const email = document.getElementById('profileEmail').value.trim();
             
             // Validar que al menos el nombre esté presente
             if (!nombre) {
@@ -571,6 +585,7 @@ class Auth {
             if (institucion) datosPerfil.institucion = institucion;
             if (rol_institucion) datosPerfil.rol_institucion = rol_institucion;
             if (telefono) datosPerfil.telefono = telefono;
+            if (email) datosPerfil.email = email;
             
             const response = await API.put(`/usuarios/${this.currentUser.id}/perfil`, datosPerfil);
             

@@ -19,6 +19,14 @@ class AdminManager {
             });
         }
         
+        // Botón de gestionar usuarios
+        const manageUsersBtn = document.getElementById('manageUsersBtn');
+        if (manageUsersBtn) {
+            manageUsersBtn.addEventListener('click', () => {
+                this.showManageUsers();
+            });
+        }
+        
         // Botón de ver historial
         const viewHistoryBtn = document.getElementById('viewHistoryBtn');
         if (viewHistoryBtn) {
@@ -52,6 +60,14 @@ class AdminManager {
             });
         }
         
+        // Cerrar modal de gestión de usuarios
+        const closeManageUsersModal = document.getElementById('closeManageUsersModal');
+        if (closeManageUsersModal) {
+            closeManageUsersModal.addEventListener('click', () => {
+                Modal.hide('manageUsersModal');
+            });
+        }
+        
         // Cerrar modal de historial
         const closeHistoryModal = document.getElementById('closeHistoryModal');
         if (closeHistoryModal) {
@@ -65,6 +81,22 @@ class AdminManager {
         if (pointCategory) {
             pointCategory.addEventListener('change', () => {
                 this.updateCustomFields();
+            });
+        }
+        
+        // Filtros de gestión de usuarios
+        const usersRoleFilter = document.getElementById('usersRoleFilter');
+        const usersStatusFilter = document.getElementById('usersStatusFilter');
+        
+        if (usersRoleFilter) {
+            usersRoleFilter.addEventListener('change', () => {
+                this.loadUsers();
+            });
+        }
+        
+        if (usersStatusFilter) {
+            usersStatusFilter.addEventListener('change', () => {
+                this.loadUsers();
             });
         }
         
@@ -379,6 +411,137 @@ class AdminManager {
             console.error('Error cargando estadísticas:', error);
             Notifications.error('Error cargando estadísticas');
         }
+    }
+    
+    // Métodos para gestión de usuarios
+    async showManageUsers() {
+        if (!window.auth.isAdmin()) {
+            Notifications.error('Solo los administradores pueden gestionar usuarios');
+            return;
+        }
+        
+        Modal.show('manageUsersModal');
+        await this.loadUsers();
+    }
+    
+    async loadUsers() {
+        try {
+            Loading.show();
+            
+            const roleFilter = document.getElementById('usersRoleFilter').value;
+            const statusFilter = document.getElementById('usersStatusFilter').value;
+            
+            let endpoint = '/usuarios';
+            const params = new URLSearchParams();
+            
+            if (roleFilter) {
+                params.append('rol', roleFilter);
+            }
+            
+            if (statusFilter) {
+                params.append('estado', statusFilter);
+            }
+            
+            if (params.toString()) {
+                endpoint += '?' + params.toString();
+            }
+            
+            const response = await API.get(endpoint);
+            const users = response.usuarios || [];
+            
+            this.displayUsers(users);
+            
+        } catch (error) {
+            console.error('Error cargando usuarios:', error);
+            Notifications.error('Error cargando usuarios');
+        } finally {
+            Loading.hide();
+        }
+    }
+    
+    displayUsers(users) {
+        const usersList = document.getElementById('usersList');
+        
+        if (users.length === 0) {
+            usersList.innerHTML = '<p class="no-data">No hay usuarios para mostrar</p>';
+            return;
+        }
+        
+        let html = '';
+        
+        users.forEach(user => {
+            const isCurrentUser = user.id === window.auth.currentUser?.id;
+            const isLastAdmin = user.rol === 'administrador' && this.isLastAdmin(users, user.id);
+            
+            html += `
+                <div class="user-item">
+                    <div class="user-info">
+                        <h4>${user.nombre}</h4>
+                        <p><strong>Email:</strong> ${user.email}</p>
+                        <p><strong>Teléfono:</strong> ${user.telefono || 'No especificado'}</p>
+                        <p><strong>Institución:</strong> ${user.institucion || 'No especificada'}</p>
+                        <span class="user-role ${user.rol}">${user.rol}</span>
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn-delete-user" 
+                                onclick="window.adminManager.deleteUser(${user.id})"
+                                ${isCurrentUser || isLastAdmin ? 'disabled' : ''}
+                                title="${isCurrentUser ? 'No puedes eliminar tu propia cuenta' : isLastAdmin ? 'No se puede eliminar el último administrador' : 'Eliminar usuario'}">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        
+        usersList.innerHTML = html;
+    }
+    
+    isLastAdmin(users, userId) {
+        const admins = users.filter(user => user.rol === 'administrador');
+        return admins.length === 1 && admins[0].id === userId;
+    }
+    
+    async deleteUser(userId) {
+        try {
+            const user = this.getUserById(userId);
+            if (!user) return;
+            
+            const isCurrentUser = userId === window.auth.currentUser?.id;
+            if (isCurrentUser) {
+                Notifications.error('No puedes eliminar tu propia cuenta');
+                return;
+            }
+            
+            const isLastAdmin = user.rol === 'administrador' && this.isLastAdmin(this.currentUsers, userId);
+            if (isLastAdmin) {
+                Notifications.error('No se puede eliminar el último administrador');
+                return;
+            }
+            
+            const confirmed = confirm(`¿Estás seguro de que quieres eliminar al usuario "${user.nombre}"?\n\nEsta acción no se puede deshacer.`);
+            
+            if (!confirmed) return;
+            
+            Loading.show();
+            
+            await API.delete(`/usuarios/${userId}`);
+            
+            Notifications.success('Usuario eliminado exitosamente');
+            
+            // Recargar lista de usuarios
+            await this.loadUsers();
+            
+        } catch (error) {
+            console.error('Error eliminando usuario:', error);
+            Notifications.error('Error eliminando usuario');
+        } finally {
+            Loading.hide();
+        }
+    }
+    
+    getUserById(userId) {
+        return this.currentUsers?.find(user => user.id === userId);
     }
 }
 

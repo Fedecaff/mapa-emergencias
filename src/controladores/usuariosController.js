@@ -222,10 +222,10 @@ const usuariosController = {
     async actualizarPerfil(req, res) {
         try {
             const { id } = req.params;
-            const { nombre, institucion, rol_institucion, telefono } = req.body;
+            const { nombre, institucion, rol_institucion, telefono, email } = req.body;
 
             console.log('📝 Actualizando perfil para usuario:', id);
-            console.log('📋 Datos recibidos:', { nombre, institucion, rol_institucion, telefono });
+            console.log('📋 Datos recibidos:', { nombre, institucion, rol_institucion, telefono, email });
 
             // Verificar si el usuario existe
             const usuarioExistente = await baseDeDatos.obtenerUno(
@@ -263,6 +263,28 @@ const usuariosController = {
             if (telefono !== undefined && telefono !== null && telefono.trim() !== '') {
                 updates.push(`telefono = $${paramCount}`);
                 values.push(telefono.trim());
+                paramCount++;
+            }
+
+            if (email !== undefined && email !== null && email.trim() !== '') {
+                // Validar formato de email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email.trim())) {
+                    return res.status(400).json({ error: 'Formato de email inválido' });
+                }
+                
+                // Verificar si el email ya existe (excluyendo el usuario actual)
+                const emailExistente = await baseDeDatos.obtenerUno(
+                    'SELECT id FROM usuarios WHERE email = $1 AND id != $2',
+                    [email.trim(), id]
+                );
+                
+                if (emailExistente) {
+                    return res.status(400).json({ error: 'El email ya está registrado por otro usuario' });
+                }
+                
+                updates.push(`email = $${paramCount}`);
+                values.push(email.trim());
                 paramCount++;
             }
 
