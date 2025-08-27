@@ -15,7 +15,7 @@ EMAIL_PASSWORD=tu_contraseña_de_aplicacion
 ### Paso 1: Activar Verificación en Dos Pasos
 1. Ve a tu cuenta de Google: https://myaccount.google.com/
 2. Seguridad > Verificación en dos pasos
-3. Activa la verificación en dos pasos
+3. Activa la verificación en dos pasoso 
 
 ### Paso 2: Generar Contraseña de Aplicación
 1. Seguridad > Contraseñas de aplicación

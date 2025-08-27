@@ -8,22 +8,33 @@ class EmailService {
 
     async initialize() {
         try {
-            // Configurar transporter para Gmail (puedes cambiar por otro proveedor)
+            console.log('📧 Iniciando configuración del servicio de email...');
+            console.log('📧 EMAIL_USER:', process.env.EMAIL_USER ? 'Configurado' : 'NO CONFIGURADO');
+            console.log('📧 EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD ? 'Configurado' : 'NO CONFIGURADO');
+            
+            if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+                throw new Error('Variables de entorno EMAIL_USER y EMAIL_PASSWORD no configuradas');
+            }
+
+            // Configurar transporter para Gmail
             this.transporter = nodemailer.createTransporter({
                 service: 'gmail',
                 auth: {
                     user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASSWORD // Contraseña de aplicación de Gmail
+                    pass: process.env.EMAIL_PASSWORD
                 }
             });
 
             // Verificar conexión
+            console.log('📧 Verificando conexión con Gmail...');
             await this.transporter.verify();
             this.isInitialized = true;
             console.log('✅ Servicio de email inicializado correctamente');
         } catch (error) {
-            console.error('❌ Error inicializando servicio de email:', error);
+            console.error('❌ Error inicializando servicio de email:', error.message);
+            console.error('❌ Detalles del error:', error);
             this.isInitialized = false;
+            throw error; // Re-lanzar el error para que el servidor lo maneje
         }
     }
 
