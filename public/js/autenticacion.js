@@ -16,7 +16,6 @@ class Auth {
         this.currentUser = Storage.get('user');
         
         if (this.token && this.currentUser) {
-            console.log('🔍 Token encontrado en localStorage, restaurando sesión...');
             // Restaurar sesión automáticamente sin verificar token
             this.updateUI();
             // NO cargar puntos automáticamente - esperar selección de categorías
@@ -117,10 +116,6 @@ class Auth {
         Storage.set('token', token);
         Storage.set('user', user);
         
-        // Verificar que se guardó correctamente
-        console.log('Token guardado:', token);
-        console.log('Usuario guardado:', user);
-        
         // Actualizar UI
         this.updateUI();
         
@@ -134,8 +129,6 @@ class Auth {
     }
     
     logout() {
-        console.log('🔐 Iniciando logout...');
-        
         this.token = null;
         this.currentUser = null;
         
@@ -143,14 +136,9 @@ class Auth {
         Storage.remove('token');
         Storage.remove('user');
         
-        console.log('🗑️ localStorage limpiado');
-        
         // Limpiar puntos del mapa cuando el usuario cierre sesión
         if (window.mapManager) {
-            console.log('🗺️ Limpiando marcadores del mapa...');
             window.mapManager.clearAllMarkers();
-        } else {
-            console.log('❌ mapManager no disponible');
         }
         
         // Actualizar UI
@@ -163,7 +151,6 @@ class Auth {
         window.dispatchEvent(new CustomEvent('userLogout'));
         
         Notifications.info('Sesión cerrada');
-        console.log('✅ Logout completado');
     }
     
     updateUI() {
@@ -250,8 +237,7 @@ class Auth {
     }
 
     onUserLogin(user) {
-        console.log('✅ Usuario logueado:', user);
-        
+
         // Mostrar información del usuario
         document.getElementById('userName').textContent = user.nombre;
         document.getElementById('userInfo').style.display = 'flex';
@@ -292,25 +278,20 @@ class Auth {
         
         // Iniciar actualización de operadores para administradores
         if (user.rol === 'administrador') {
-            console.log('👨‍💼 Usuario es administrador, esperando mapManager...');
             const waitForMapManager = () => {
                 if (window.mapManager) {
-                    console.log('✅ mapManager disponible, iniciando actualizaciones...');
                     window.mapManager.startOperatorUpdates();
-                    console.log('🔄 Llamando a cargarOperadoresEnPanel...');
                     this.cargarOperadoresEnPanel();
                     
                     // Iniciar polling automático del panel
                     this.startPanelPolling();
                 } else {
-                    console.log('⏳ mapManager no disponible aún, reintentando en 100ms...');
                     setTimeout(waitForMapManager, 100);
                 }
             };
             waitForMapManager();
         } else {
-            console.log('❌ Usuario no es administrador, rol:', user.rol);
-        }
+            }
         
         // Inicializar panel de perfil para operadores
         if (user.rol === 'operador') {
@@ -320,11 +301,8 @@ class Auth {
 
     // Inicializar panel de perfil para operadores
     inicializarPanelPerfil(user) {
-        console.log('👤 Inicializando panel de perfil para operador...');
-        
         // Solo mostrar panel de perfil para operadores
         if (user.rol !== 'operador') {
-            console.log('ℹ️ Panel de perfil solo disponible para operadores');
             return;
         }
         
@@ -349,8 +327,6 @@ class Auth {
         // Usar el usuario actual si no se proporciona uno
         const userData = user || this.currentUser;
         
-        console.log('📋 Cargando datos del perfil:', userData);
-        
         if (!userData) {
             console.error('❌ No hay datos de usuario disponibles');
             return;
@@ -358,8 +334,7 @@ class Auth {
         
         // Si no tenemos foto_perfil, mostrar iniciales
         if (!userData.foto_perfil) {
-            console.log('ℹ️ No hay foto de perfil, mostrando iniciales');
-        }
+            }
         
         // Avatar
         const profileAvatar = document.getElementById('profileAvatar');
@@ -369,14 +344,12 @@ class Auth {
             profileAvatar.src = userData.foto_perfil;
             profileAvatar.style.display = 'block';
             profileInitials.style.display = 'none';
-            console.log('✅ Foto de perfil cargada:', userData.foto_perfil);
-        } else {
+            } else {
             profileAvatar.style.display = 'none';
             profileInitials.style.display = 'flex';
             const iniciales = userData.nombre ? userData.nombre.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
             profileInitials.textContent = iniciales;
-            console.log('ℹ️ Mostrando iniciales:', iniciales);
-        }
+            }
         
         // Campos del formulario
         const profileName = document.getElementById('profileName');
@@ -448,8 +421,6 @@ class Auth {
 
     // Cambiar a modo ver información
     cambiarAModoVer() {
-        console.log('👁️ Cambiando a modo Ver Info...');
-        
         // Actualizar botones
         const viewInfoBtn = document.getElementById('viewInfoBtn');
         const editInfoBtn = document.getElementById('editInfoBtn');
@@ -471,8 +442,6 @@ class Auth {
     
     // Cambiar a modo editar información
     cambiarAModoEditar() {
-        console.log('✏️ Cambiando a modo Editar Info...');
-        
         // Actualizar botones
         const viewInfoBtn = document.getElementById('viewInfoBtn');
         const editInfoBtn = document.getElementById('editInfoBtn');
@@ -503,8 +472,6 @@ class Auth {
                 this.handleFileChange = async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                        console.log('📁 Archivo seleccionado:', file.name, file.size, file.type);
-                        
                         // Validar tamaño del archivo (10MB máximo)
                         const maxSize = 10 * 1024 * 1024; // 10MB
                         if (file.size > maxSize) {
@@ -530,7 +497,6 @@ class Auth {
                 document.body.appendChild(this.fileInput);
             }
             
-            console.log('🖱️ Abriendo selector de archivos...');
             this.fileInput.click();
         } catch (error) {
             console.error('❌ Error al cambiar foto de perfil:', error);
@@ -541,21 +507,15 @@ class Auth {
     // Subir foto de perfil
     async subirFotoPerfil(file) {
         try {
-            console.log('📤 Iniciando subida de archivo:', file.name, file.size, file.type);
-            
             const formData = new FormData();
             formData.append('foto', file);
             
             // Debug: verificar contenido del FormData
-            console.log('📋 FormData creado:');
             for (let [key, value] of formData.entries()) {
                 console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes)` : value);
             }
             
-            console.log('📋 Enviando petición...');
             const response = await API.post(`/usuarios/${this.currentUser.id}/foto`, formData);
-            
-            console.log('📋 Respuesta del servidor:', response);
             
             if (response.foto_perfil) {
                 // Actualizar avatar en el panel de perfil
@@ -566,8 +526,7 @@ class Auth {
                     profileAvatar.src = response.foto_perfil;
                     profileAvatar.style.display = 'block';
                     profileInitials.style.display = 'none';
-                    console.log('✅ Avatar actualizado en panel de perfil');
-                } else {
+                    } else {
                     console.warn('⚠️ Elementos de avatar no encontrados en el DOM');
                 }
                 
@@ -613,8 +572,6 @@ class Auth {
             if (rol_institucion) datosPerfil.rol_institucion = rol_institucion;
             if (telefono) datosPerfil.telefono = telefono;
             
-            console.log('📋 Enviando datos del perfil:', datosPerfil);
-            
             const response = await API.put(`/usuarios/${this.currentUser.id}/perfil`, datosPerfil);
             
             if (response.mensaje) {
@@ -637,8 +594,6 @@ class Auth {
         }
     }
 
-
-
     onUserLogout() {
         console.log('🔐 Iniciando logout...');
         
@@ -647,14 +602,11 @@ class Auth {
         if (checkbox && this.availabilityChangeHandler) {
             checkbox.removeEventListener('change', this.availabilityChangeHandler);
             this.availabilityChangeHandler = null;
-            console.log('🗑️ Event listener de disponibilidad removido');
-        }
+            }
         
         // Limpiar localStorage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        console.log('🗑️ localStorage limpiado');
-        
         // Limpiar marcadores del mapa
         if (window.mapaManager) {
             window.mapaManager.onUserLogout();
@@ -671,8 +623,7 @@ class Auth {
         const availabilityPanel = document.getElementById('availabilityPanel');
         if (availabilityPanel) {
             availabilityPanel.style.display = 'none';
-            console.log('✅ Panel de disponibilidad ocultado');
-        } else {
+            } else {
             console.log('⚠️ Panel de disponibilidad no encontrado');
         }
         
@@ -696,8 +647,7 @@ class Auth {
         // Detener polling del panel
         this.stopPanelPolling();
         
-        console.log('✅ Logout completado');
-    }
+        }
 
     configurarDisponibilidad(disponible) {
         const checkbox = document.getElementById('availabilityCheckbox');
@@ -758,8 +708,7 @@ class Auth {
                     window.Notifications.success(response.mensaje);
                 }
                 
-                console.log('✅ Disponibilidad actualizada:', disponible);
-            }
+                }
         } catch (error) {
             console.error('❌ Error cambiando disponibilidad:', error);
             if (window.Notifications) {
@@ -776,8 +725,7 @@ class Auth {
                     this.geolocalizacionManager = new GeolocalizacionManager();
                 }
                 this.geolocalizacionManager.init(userId);
-                console.log('📍 Geolocalización inicializada para usuario:', userId);
-            } else {
+                } else {
                 console.warn('⚠️ GeolocalizacionManager no disponible');
             }
         } catch (error) {
@@ -790,8 +738,7 @@ class Auth {
             if (this.geolocalizacionManager) {
                 this.geolocalizacionManager.stop();
                 this.geolocalizacionManager = null;
-                console.log('📍 Geolocalización detenida');
-            }
+                }
         } catch (error) {
             console.error('❌ Error deteniendo geolocalización:', error);
         }
@@ -800,17 +747,14 @@ class Auth {
     // Cargar operadores en el panel lateral
     async cargarOperadoresEnPanel() {
         try {
-            console.log('🔄 Cargando operadores en panel...');
             const response = await API.get('/usuarios/operadores-ubicacion');
             
             if (response.operadores) {
                 // Verificar si hay cambios antes de actualizar el panel
                 if (this.hasPanelChanges(response.operadores)) {
                     this.mostrarOperadoresEnPanel(response.operadores);
-                    console.log('✅ Operadores cargados en panel:', response.operadores.length);
-                } else {
-                    console.log('ℹ️ No hay cambios en panel de operadores, saltando actualización');
-                }
+                    } else {
+                    }
             }
         } catch (error) {
             console.error('❌ Error cargando operadores en panel:', error);
@@ -860,7 +804,6 @@ class Auth {
             isPolling: false
         };
 
-        console.log('🔄 Iniciando polling automático del panel de operadores...');
         this.startRobustPanelPolling();
     }
 
@@ -903,8 +846,6 @@ class Auth {
             this.panelPollingConfig.currentRetries++;
             
             if (this.panelPollingConfig.currentRetries <= this.panelPollingConfig.maxRetries) {
-                console.log(`🔄 Reintentando carga del panel (${this.panelPollingConfig.currentRetries}/${this.panelPollingConfig.maxRetries})...`);
-                
                 // Esperar antes del reintento
                 await new Promise(resolve => setTimeout(resolve, this.panelPollingConfig.retryDelay));
                 
@@ -922,8 +863,6 @@ class Auth {
         this.panelPollingConfig.currentRetries++;
         
         if (this.panelPollingConfig.currentRetries <= this.panelPollingConfig.maxRetries) {
-            console.log(`🔄 Reintentando polling del panel (${this.panelPollingConfig.currentRetries}/${this.panelPollingConfig.maxRetries})...`);
-            
             // Reintentar después de un delay
             setTimeout(() => {
                 this.startRobustPanelPolling();
@@ -951,8 +890,7 @@ class Auth {
             this.panelPollingConfig.currentRetries = 0;
         }
         
-        console.log('⏹️ Polling del panel detenido');
-    }
+        }
 
     // Mostrar operadores en el panel lateral
     mostrarOperadoresEnPanel(operadores) {

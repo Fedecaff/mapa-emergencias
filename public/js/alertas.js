@@ -11,8 +11,7 @@ class AlertasManager {
     init() {
         this.bindEvents();
         this.bindLogoutEvent();
-        console.log('🚨 AlertasManager inicializado');
-    }
+        }
 
     bindEvents() {
         // Botón de emergencia
@@ -78,20 +77,16 @@ class AlertasManager {
     bindLogoutEvent() {
         // Escuchar evento de logout para limpiar alertas
         window.addEventListener('userLogout', () => {
-            console.log('🚨 Evento de logout detectado, ocultando alertas...');
             this.limpiarAlertas();
         });
         
         // Escuchar evento de login para cargar alertas
         window.addEventListener('userLogin', () => {
-            console.log('🚨 Evento de login detectado, cargando alertas...');
             this.cargarYMostrarAlertas();
         });
     }
 
     iniciarProcesoEmergencia() {
-        console.log('🚨 Iniciando proceso de emergencia...');
-        
         // Verificar si el usuario está autenticado
         if (!window.auth.isAuthenticated()) {
             Notifications.error('Debes iniciar sesión para crear alertas de emergencia');
@@ -104,8 +99,6 @@ class AlertasManager {
     }
 
     mostrarFormularioEmergencia() {
-        console.log('📝 Mostrando formulario de emergencia...');
-        
         // Cerrar modal de confirmación
         Modal.hide('modalConfirmacionEmergencia');
         
@@ -133,8 +126,6 @@ class AlertasManager {
     }
 
     seleccionarUbicacion(latlng) {
-        console.log('📍 Ubicación seleccionada:', latlng);
-        
         this.selectedLocation = latlng;
         
         // Actualizar coordenadas en el formulario
@@ -247,7 +238,6 @@ class AlertasManager {
 
     async verFotosEmergencia(alertaId) {
         try {
-            console.log('📸 Verificando fotos para alerta:', alertaId);
             // Por ahora solo mostrar mensaje, implementar después
             Notifications.info('Funcionalidad de fotos para emergencias próximamente');
         } catch (error) {
@@ -258,7 +248,6 @@ class AlertasManager {
 
     async cambiarEstadoEmergencia(alertaId) {
         try {
-            console.log('🔄 Cambiando estado de alerta:', alertaId);
             // Por ahora solo mostrar mensaje, implementar después
             Notifications.info('Funcionalidad de cambio de estado próximamente');
         } catch (error) {
@@ -380,14 +369,8 @@ class AlertasManager {
                 concurrencia_solicitada: formData.get('concurrencia_solicitada') === 'todos' ? 'todos' : parseInt(formData.get('concurrencia_solicitada')) || 1
             };
             
-            console.log('📤 Enviando alerta:', alertaData);
-            console.log('🔍 Concurrencia solicitada:', alertaData.concurrencia_solicitada);
-            console.log('🔍 Tipo de concurrencia:', typeof alertaData.concurrencia_solicitada);
-            
             // Enviar alerta al servidor
             const response = await API.post('/alertas/crear', alertaData);
-            
-            console.log('✅ Alerta enviada:', response);
             
             // Remover marcador temporal
             if (this.emergencyMarker) {
@@ -460,8 +443,6 @@ class AlertasManager {
 
     // Método para cancelar formulario
     cancelarFormulario() {
-        console.log('❌ Cancelando formulario de emergencia...');
-        
         // Desactivar modo de selección de ubicación
         this.isSelectingLocation = false;
         
@@ -482,13 +463,10 @@ class AlertasManager {
             window.mapManager.map.getContainer().style.cursor = '';
         }
         
-        console.log('✅ Formulario cancelado');
-    }
+        }
 
     // Método para limpiar alertas cuando el usuario hace logout
     limpiarAlertas() {
-        console.log('🚨 Ocultando alertas de emergencia...');
-        
         // Remover marcador temporal si existe
         if (this.emergencyMarker) {
             if (window.mapManager && window.mapManager.map) {
@@ -502,7 +480,6 @@ class AlertasManager {
             window.mapManager.map.eachLayer((layer) => {
                 if (layer._icon && layer._icon.className && 
                     layer._icon.className.includes('emergency-marker')) {
-                    console.log('🚨 Ocultando marcador de emergencia:', layer);
                     window.mapManager.map.removeLayer(layer);
                 }
             });
@@ -513,27 +490,20 @@ class AlertasManager {
         this.selectedLocation = null;
         this.confirmacionStep = 0;
         
-        console.log('✅ Alertas de emergencia ocultadas');
-    }
+        }
 
     // Método para cargar y mostrar alertas activas al hacer login
     async cargarYMostrarAlertas() {
-        console.log('🚨 Cargando alertas activas...');
-        
         try {
             const alertas = await this.cargarAlertasActivas();
-            console.log('📊 Alertas encontradas:', alertas.length);
-            
             // Mostrar solo alertas activas
             alertas.forEach(alerta => {
                 if (alerta.estado === 'activa') {
-                    console.log('🚨 Mostrando alerta activa:', alerta.titulo);
                     this.crearMarcadorAlertaActiva(alerta);
                 }
             });
             
-            console.log('✅ Alertas activas cargadas');
-        } catch (error) {
+            } catch (error) {
             console.error('❌ Error cargando alertas:', error);
         }
     }
@@ -541,8 +511,6 @@ class AlertasManager {
     // Método para dar de baja una alerta (solo admin)
     async darDeBajaAlerta(alertaId) {
         try {
-            console.log('🗑️ Dando de baja alerta:', alertaId);
-            
             const response = await API.delete(`/alertas/${alertaId}`);
             
             if (response.mensaje) {

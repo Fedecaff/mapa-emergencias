@@ -20,8 +20,6 @@ class App {
     startApp() {
         if (this.isInitialized) return;
         
-        console.log('🚀 Iniciando Mapa de Emergencias...');
-        
         // Verificar que todos los componentes estén disponibles
         this.checkDependencies();
         
@@ -35,8 +33,7 @@ class App {
         this.showWelcomeMessage();
         
         this.isInitialized = true;
-        console.log('✅ Aplicación iniciada correctamente');
-    }
+        }
     
     checkDependencies() {
         const required = [
@@ -271,7 +268,6 @@ window.App = App;
 window.app = app;
 
 // Información de la aplicación
-console.log('🗺️ Mapa de Emergencias - Catamarca');
 console.log('Versión:', App.getVersion());
 console.log('Autor:', App.getInfo().author);
 

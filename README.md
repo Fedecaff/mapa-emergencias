@@ -1,290 +1,319 @@
-# 🗺️ Mapa de Emergencias - Catamarca
+# 🚒 Mapa de Emergencias - Catamarca
 
-Sistema completo de gestión de emergencias para bomberos de Catamarca, Argentina. Plataforma web interactiva para mapeo, alertas y coordinación de servicios de emergencia.
+Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. Permite la gestión de puntos de interés, geolocalización de operadores en tiempo real, y coordinación de emergencias.
 
-## 🎯 Características Principales
+## 🌟 Características Principales
 
-### 🗺️ **Sistema de Mapeo**
-- **Mapa Interactivo** con OpenStreetMap y Leaflet.js
-- **Puntos de Emergencia** categorizados (hidrantes, comisarías, hospitales, etc.)
-- **Marcado Directo** en el mapa para administradores
-- **Búsqueda y Filtros** avanzados
-- **Geolocalización** automática del usuario
+### 🔐 Autenticación y Gestión de Usuarios
+- **Sistema de login/logout** con JWT
+- **Roles diferenciados**: Administrador y Operador
+- **Persistencia de sesión** con "Mantener sesión"
+- **Gestión de perfiles** con foto y datos personales
 
-### 🚨 **Sistema de Alertas de Emergencia**
-- **Creación de Alertas** por administradores
-- **Tipos de Emergencia:** Incendio estructural, forestal, accidente vehicular, rescate, fuga de gas
-- **Niveles de Prioridad:** Baja, Media, Alta
-- **Concurrencia Solicitada:** Número específico o "Todos los disponibles"
-- **Persistencia de Alertas** hasta dar de baja
-- **Sonido de Sirena** para notificaciones
+### 🗺️ Mapa Interactivo
+- **Mapa base** centrado en Catamarca
+- **Marcadores dinámicos** para puntos de interés
+- **Filtros por categorías** (Bomberos, Hospitales, Policía, etc.)
+- **Información detallada** en popups
+- **Geolocalización** de operadores en tiempo real
 
-### 👥 **Gestión de Usuarios**
-- **Sistema de Roles:** Administrador y Operador
-- **Autenticación JWT** segura
-- **Panel de Disponibilidad** para operadores
-- **Gestión de Usuarios** por administradores
-- **Teléfonos de Contacto** para notificaciones
+### 👥 Gestión de Operadores
+- **Panel de disponibilidad** para operadores
+- **Geolocalización automática** cada 30 segundos
+- **Lista de operadores** con estado en tiempo real
+- **Perfiles completos** con foto e información personal
+- **Modos "Ver Info" y "Editar Info"** para perfiles
 
-### 📸 **Sistema de Fotos**
-- **Carga de Fotos** para puntos de emergencia
-- **Almacenamiento en Cloudinary** (nube)
-- **Visualización** en galerías
-- **Gestión** por administradores
+### 🚨 Sistema de Alertas
+- **Creación de emergencias** desde el mapa
+- **Formulario completo** con ubicación, descripción y fotos
+- **Gestión de alertas activas**
+- **Sistema de concurrencia** para múltiples unidades
 
-## 🏗️ Arquitectura del Sistema
+### 📸 Gestión de Fotos
+- **Subida de fotos** para puntos de interés
+- **Fotos de perfil** para operadores
+- **Visualización en galerías**
+- **Almacenamiento temporal** en Base64
+
+### 🔄 Actualizaciones en Tiempo Real
+- **Polling automático** cada 5 segundos
+- **Manejo de errores** y reintentos
+- **Detección de cambios** para optimizar actualizaciones
+- **Sincronización** de estado de operadores
+
+## 🛠️ Tecnologías Utilizadas
+
+### Backend
+- **Node.js** con Express
+- **PostgreSQL** como base de datos principal
+- **JWT** para autenticación
+- **bcrypt** para encriptación de contraseñas
+- **Multer** para manejo de archivos
+
+### Frontend
+- **HTML5** y **CSS3** con diseño responsive
+- **JavaScript ES6+** modular
+- **Leaflet.js** para mapas interactivos
+- **Font Awesome** para iconografía
+
+### Infraestructura
+- **Railway** para hosting y despliegue automático
+- **Git** para control de versiones
+- **GitHub** para repositorio remoto
+
+## 📁 Estructura del Proyecto
 
 ```
-mapa-emergencias/
-├── src/
-│   ├── configuracion/
-│   │   └── servidor.js                 # Configuración principal del servidor
-│   ├── controladores/
-│   │   ├── autenticacionController.js  # Gestión de usuarios y sesiones
-│   │   ├── puntosController.js         # CRUD de puntos en el mapa
-│   │   ├── categoriasController.js     # Gestión de categorías
-│   │   ├── fotosController.js          # Gestión de fotos con Cloudinary
-│   │   ├── alertasController.js        # Sistema de alertas de emergencia
-│   │   └── usuariosController.js       # Gestión de usuarios y disponibilidad
-│   ├── modelos/
-│   │   ├── baseDeDatosPostgres.js      # Conexión PostgreSQL
-│   │   ├── actualizarTablaFotos.js     # Scripts de migración
-│   │   ├── actualizarUsuarios.js       # Actualización de usuarios
-│   │   ├── actualizarTablaAlertas.js   # Migración de alertas
-│   │   ├── actualizarRoles.js          # Actualización de roles
-│   │   └── verificarRoles.js           # Diagnóstico de roles
-│   ├── rutas/
-│   │   ├── autenticacion.js            # Rutas de login/logout
-│   │   ├── puntos.js                   # API de puntos
-│   │   ├── categorias.js               # API de categorías
-│   │   ├── fotos.js                    # API de fotos
-│   │   ├── alertas.js                  # API de alertas
-│   │   └── usuarios.js                 # API de usuarios
-│   └── middleware/
-│       └── autenticacion.js            # JWT y control de acceso
+bombero/
 ├── public/
 │   ├── css/
-│   │   └── estilos.css                 # Estilos completos del sistema
+│   │   └── estilos.css          # Estilos principales
 │   ├── js/
-│   │   ├── app.js                      # Inicialización principal
-│   │   ├── mapa.js                     # Gestión del mapa interactivo
-│   │   ├── autenticacion.js            # Sistema de autenticación
-│   │   ├── fotos.js                    # Gestión de fotos frontend
-│   │   ├── alertas.js                  # Sistema de alertas frontend
-│   │   ├── usuarios.js                 # Gestión de usuarios frontend
-│   │   └── utilidades.js               # Funciones auxiliares
-│   └── index.html                      # Interfaz principal
-└── package.json
+│   │   ├── app.js              # Aplicación principal
+│   │   ├── autenticacion.js    # Gestión de usuarios
+│   │   ├── mapa.js             # Funcionalidad del mapa
+│   │   ├── alertas.js          # Sistema de emergencias
+│   │   ├── fotos.js            # Gestión de imágenes
+│   │   ├── usuarios.js         # Panel de administración
+│   │   ├── utilidades.js       # Funciones auxiliares
+│   │   └── geolocalizacion.js  # Geolocalización
+│   └── index.html              # Página principal
+├── src/
+│   ├── configuracion/
+│   │   └── servidor.js         # Configuración del servidor
+│   ├── controladores/
+│   │   ├── autenticacionController.js
+│   │   ├── usuariosController.js
+│   │   ├── puntosController.js
+│   │   ├── categoriasController.js
+│   │   ├── alertasController.js
+│   │   └── fotosController.js
+│   ├── modelos/
+│   │   ├── baseDeDatosPostgres.js
+│   │   ├── actualizarPerfilOperadores.js
+│   │   ├── actualizarGeolocalizacion.js
+│   │   └── actualizarCampoFoto.js
+│   ├── rutas/
+│   │   ├── autenticacion.js
+│   │   ├── usuarios.js
+│   │   ├── puntos.js
+│   │   ├── categorias.js
+│   │   ├── alertas.js
+│   │   └── fotos.js
+│   └── middleware/
+│       └── autenticacion.js
+├── package.json
+└── README.md
 ```
 
-## 🚀 Instalación y Despliegue
+## 🚀 Instalación y Configuración
 
-### **Requisitos Previos**
-- Node.js 18+
-- PostgreSQL (base de datos)
-- Cuenta en Cloudinary (fotos)
-- Cuenta en Railway (hosting)
+### Requisitos Previos
+- Node.js (versión 16 o superior)
+- PostgreSQL
+- Git
 
-### **Configuración Local**
-1. **Clonar el repositorio:**
+### Pasos de Instalación
+
+1. **Clonar el repositorio**
    ```bash
    git clone https://github.com/Fedecaff/mapa-emergencias.git
    cd mapa-emergencias
    ```
 
-2. **Instalar dependencias:**
+2. **Instalar dependencias**
    ```bash
    npm install
    ```
 
-3. **Configurar variables de entorno:**
-   ```env
-   DATABASE_URL=postgresql://usuario:password@localhost:5432/mapa_emergencias
-   JWT_SECRET=tu_jwt_secret_super_seguro
-   CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
+3. **Configurar variables de entorno**
+   Crear archivo `.env` con:
+   ```
+   DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/mapa_emergencias
+   JWT_SECRET=tu_clave_secreta_aqui
    PORT=3000
    ```
 
-4. **Inicializar base de datos:**
+4. **Inicializar la base de datos**
+   ```bash
+   npm run init-db
+   ```
+
+5. **Crear usuario administrador**
+   ```bash
+   npm run create-admin
+   ```
+
+6. **Iniciar el servidor**
    ```bash
    npm start
    ```
 
-5. **Acceder a la aplicación:**
-   ```
-   http://localhost:3000
-   ```
+## 📊 Base de Datos
 
-## 👤 Sistema de Usuarios
+### Tablas Principales
 
-### **Roles Implementados:**
-- **🔧 Administrador:** Control total del sistema
-- **👷 Operador:** Gestión de disponibilidad y visualización
+#### `usuarios`
+- `id`: Identificador único
+- `email`: Email del usuario
+- `contraseña`: Contraseña encriptada
+- `nombre`: Nombre completo
+- `rol`: 'administrador' o 'operador'
+- `foto_perfil`: Foto de perfil (Base64)
+- `institucion`: Institución del operador
+- `rol_institucion`: Rol dentro de la institución
+- `telefono`: Número de teléfono
+- `disponible`: Estado de disponibilidad
+- `fecha_creacion`: Fecha de registro
 
-### **Credenciales por Defecto:**
-- **Email:** `federico.gomez.sc@gmail.com`
-- **Contraseña:** `admin123`
-- **Rol:** Administrador
+#### `puntos`
+- `id`: Identificador único
+- `nombre`: Nombre del punto
+- `descripcion`: Descripción detallada
+- `latitud`: Coordenada latitud
+- `longitud`: Coordenada longitud
+- `categoria_id`: ID de la categoría
+- `fecha_creacion`: Fecha de creación
 
-## 🛠️ Tecnologías Implementadas
+#### `categorias`
+- `id`: Identificador único
+- `nombre`: Nombre de la categoría
+- `color`: Color del marcador
+- `icono`: Icono de Font Awesome
 
-### **Backend:**
-- **Node.js** + **Express.js** - Servidor web
-- **PostgreSQL** - Base de datos relacional
-- **JWT** - Autenticación segura
-- **bcrypt** - Encriptación de contraseñas
-- **Multer** - Manejo de archivos
-- **Cloudinary** - Almacenamiento de imágenes
+#### `alertas`
+- `id`: Identificador único
+- `titulo`: Título de la emergencia
+- `descripcion`: Descripción detallada
+- `latitud`: Coordenada latitud
+- `longitud`: Coordenada longitud
+- `estado`: Estado de la alerta
+- `concurrencia_solicitada`: Unidades solicitadas
+- `fecha_creacion`: Fecha de creación
 
-### **Frontend:**
-- **HTML5** + **CSS3** - Interfaz de usuario
-- **JavaScript ES6+** - Lógica del cliente
-- **Leaflet.js** - Mapas interactivos
-- **Font Awesome** - Iconografía
-- **Responsive Design** - Adaptable a dispositivos
+#### `geolocalizacion`
+- `id`: Identificador único
+- `usuario_id`: ID del usuario
+- `latitud`: Coordenada latitud
+- `longitud`: Coordenada longitud
+- `fecha_actualizacion`: Fecha de actualización
 
-### **Infraestructura:**
-- **Railway** - Hosting y base de datos
-- **Cloudinary** - CDN para imágenes
-- **GitHub** - Control de versiones
+## 🔧 Funcionalidades Detalladas
 
-## 📋 Funcionalidades por Rol
+### Panel de Operadores
+- **Visualización en tiempo real** de todos los operadores
+- **Filtrado por disponibilidad** (disponibles primero)
+- **Información completa**: nombre, institución, rol, foto
+- **Estado de disponibilidad** con indicadores visuales
+- **Geolocalización** actualizada automáticamente
 
-### 👷 **Operador**
-- ✅ Visualizar puntos en el mapa
-- ✅ Filtrar por categorías
-- ✅ Buscar ubicaciones
-- ✅ Ver detalles de puntos
-- ✅ Geolocalización automática
-- ✅ **Panel de Disponibilidad** (disponible/no disponible)
-- ✅ Visualizar alertas activas
-- ✅ Ver fotos de puntos
+### Gestión de Perfiles
+- **Subida de fotos de perfil** con validación
+- **Edición de datos personales**: nombre, institución, rol, teléfono
+- **Modos de visualización**: "Ver Info" (solo lectura) y "Editar Info"
+- **Persistencia de datos** después de reinicios del servidor
+- **Validación de campos** en frontend y backend
 
-### 🔧 **Administrador**
-- ✅ Todas las funciones de operador
-- ✅ **Crear Alertas de Emergencia** con prioridades
-- ✅ **Solicitar Concurrencia** (número específico o "todos")
-- ✅ Agregar puntos haciendo clic en el mapa
-- ✅ Editar información de puntos
-- ✅ Gestionar categorías
-- ✅ **Sistema de Fotos** completo
-- ✅ **Gestión de Usuarios** (crear, editar, eliminar)
-- ✅ **Dar de Baja Alertas** de emergencia
-- ✅ Ver historial de cambios
+### Sistema de Mapas
+- **Centrado automático** en Catamarca
+- **Zoom adaptativo** según el contenido
+- **Marcadores categorizados** con colores e iconos
+- **Popups informativos** con detalles completos
+- **Integración con geolocalización** de operadores
 
-## 🚨 Sistema de Alertas de Emergencia
+### Alertas de Emergencia
+- **Creación desde el mapa** con clic derecho
+- **Formulario completo** con validaciones
+- **Subida de fotos** para documentar la emergencia
+- **Sistema de concurrencia** para múltiples unidades
+- **Gestión de estado** (activa/inactiva)
 
-### **Tipos de Emergencia:**
-- 🔥 **Incendio Estructural** - Edificios y construcciones
-- 🌲 **Incendio Forestal** - Zonas rurales y bosques
-- 🚗 **Accidente Vehicular** - Colisiones y rescates
-- 🆘 **Rescate** - Personas en peligro
-- ⛽ **Fuga de Gas** - Emergencias químicas
-- ⚠️ **Otro** - Emergencias diversas
+## 🔄 API Endpoints
 
-### **Niveles de Prioridad:**
-- 🟢 **Baja** - Situaciones controladas
-- 🟡 **Media** - Requiere atención moderada
-- 🔴 **Alta** - Emergencia crítica
+### Autenticación
+- `POST /api/autenticacion/login` - Iniciar sesión
+- `POST /api/autenticacion/registro` - Registrar usuario (admin)
+- `GET /api/autenticacion/verificar` - Verificar token
 
-### **Flujo de Alerta:**
-1. **Administrador** crea alerta seleccionando ubicación
-2. **Sistema** valida datos y crea marcador
-3. **Alerta** se muestra en mapa con información completa
-4. **Sonido de sirena** notifica a usuarios
-5. **Alerta persiste** hasta que administrador la da de baja
+### Usuarios
+- `GET /api/usuarios` - Listar usuarios (admin)
+- `POST /api/usuarios` - Crear usuario (admin)
+- `PUT /api/usuarios/:id/perfil` - Actualizar perfil
+- `POST /api/usuarios/:id/foto` - Subir foto de perfil
+- `PUT /api/usuarios/:id/disponibilidad` - Actualizar disponibilidad
+- `POST /api/usuarios/:id/geolocalizacion` - Actualizar ubicación
 
-## 📸 Sistema de Gestión de Fotos
+### Puntos y Categorías
+- `GET /api/puntos` - Listar puntos
+- `POST /api/puntos` - Crear punto (admin)
+- `GET /api/categorias` - Listar categorías
+- `POST /api/categorias` - Crear categoría (admin)
 
-### **Características:**
-- ✅ **Carga múltiple** de fotos por punto
-- ✅ **Almacenamiento en la nube** (Cloudinary)
-- ✅ **Visualización en galerías** modales
-- ✅ **Eliminación segura** con respaldo
-- ✅ **Optimización automática** de imágenes
-- ✅ **Acceso controlado** por roles
+### Alertas
+- `GET /api/alertas` - Listar alertas
+- `POST /api/alertas` - Crear alerta
+- `PUT /api/alertas/:id` - Actualizar alerta
+- `DELETE /api/alertas/:id` - Eliminar alerta
 
-## 👥 Sistema de Tracking de Operadores
+### Fotos
+- `GET /api/fotos/punto/:puntoId` - Fotos de un punto
+- `POST /api/fotos/punto/:puntoId` - Subir foto a punto
 
-### **Características:**
-- ✅ **Geolocalización en tiempo real** de operadores
-- ✅ **Panel de operadores** con lista completa
-- ✅ **Fotos de perfil** o iniciales automáticas
-- ✅ **Estado de disponibilidad** (disponible/no disponible)
-- ✅ **Checkbox para mostrar/ocultar** operadores en mapa
-- ✅ **Actualizaciones automáticas** cada 30 segundos
-- ✅ **Sistema robusto de polling** con reintentos automáticos
-- ✅ **Detección de cambios** para optimizar actualizaciones
-- ✅ **Manejo de errores** y recuperación automática
+## 🚀 Despliegue en Railway
 
-### **Funcionalidades para Administradores:**
-- 📍 **Ver ubicación** de operadores disponibles en mapa
-- 👥 **Panel lateral** con todos los operadores
-- 🟢 **Indicadores visuales** de disponibilidad
-- 📱 **Información completa** (institución, rol, foto)
-- ⚙️ **Control de visibilidad** en mapa
+El proyecto está configurado para despliegue automático en Railway:
 
-### **Funcionalidades para Operadores:**
-- 📍 **Actualizar ubicación** automáticamente
-- 👤 **Editar perfil** con foto e información
-- 🟢 **Cambiar estado** de disponibilidad
-- 📱 **Ver solo su ubicación** en mapa
+1. **Conexión con GitHub**: El repositorio está conectado a Railway
+2. **Despliegue automático**: Cada push a `main` despliega automáticamente
+3. **Variables de entorno**: Configuradas en Railway dashboard
+4. **Base de datos**: PostgreSQL provisto por Railway
 
-## 🔒 Seguridad Implementada
+### Variables de Entorno en Railway
+- `DATABASE_URL`: URL de conexión a PostgreSQL
+- `JWT_SECRET`: Clave secreta para JWT
+- `PORT`: Puerto del servidor (configurado automáticamente)
 
-- ✅ **Autenticación JWT** con tokens seguros
-- ✅ **Encriptación bcrypt** para contraseñas
-- ✅ **Middleware de autorización** por roles
-- ✅ **Validación de datos** en frontend y backend
-- ✅ **Headers de seguridad** con Helmet
-- ✅ **CORS configurado** para producción
-- ✅ **Sanitización** de entradas de usuario
+## 🔒 Seguridad
+
+- **Autenticación JWT** con expiración configurable
+- **Encriptación de contraseñas** con bcrypt
+- **Validación de roles** en endpoints sensibles
+- **Sanitización de datos** en formularios
+- **Validación de archivos** en subidas
 
 ## 📱 Responsive Design
 
-La aplicación está completamente optimizada para:
-- 📱 **Dispositivos móviles** (Android/iOS)
-- 📱 **Tablets** (iPad, Android)
-- 💻 **Laptops** y computadoras
-- 🖥️ **Monitores grandes**
+El sistema está optimizado para:
+- **Desktop**: Pantallas grandes con todas las funcionalidades
+- **Tablet**: Adaptación de paneles y controles
+- **Mobile**: Navegación simplificada y controles táctiles
 
-## 🚀 Estado Actual del Proyecto
+## 🎯 Próximas Funcionalidades
 
-### **✅ Funcionalidades Completadas:**
-- Sistema de autenticación completo
-- Gestión de puntos en mapa
-- Sistema de alertas de emergencia
-- Panel de disponibilidad para operadores
-- Sistema de fotos con Cloudinary
-- Gestión de usuarios por roles
-- Persistencia de datos en PostgreSQL
-- Interfaz responsive completa
-- Despliegue en Railway
-- **Sistema de tracking de operadores en tiempo real**
-- **Panel de operadores con fotos de perfil**
-- **Checkbox para mostrar/ocultar operadores en mapa**
-- **Actualizaciones robustas con polling mejorado**
+### Fase 6: Filtros y Búsqueda
+- [ ] Filtros por institución y rol
+- [ ] Búsqueda de operadores
+- [ ] Estadísticas de disponibilidad
 
-### **🔄 En Desarrollo:**
-- Sistema de notificaciones por SMS/WhatsApp
-- Aplicación móvil nativa
-- Dashboard de estadísticas
-- Integración con sistemas externos
-- WebSocket para actualizaciones instantáneas
+### Fase 7: Comunicación
+- [ ] Notificaciones de emergencia
+- [ ] Chat interno entre operadores
+- [ ] Historial de ubicaciones
 
-### **📋 Próximas Mejoras:**
-- Notificaciones push en tiempo real
-- Geolocalización avanzada
-- Reportes y analytics
-- Integración con sistemas de emergencia oficiales
+### Fase 8: Optimización
+- [ ] Optimización de rendimiento del mapa
+- [ ] Cache de datos de operadores
+- [ ] Compresión de respuestas API
+- [ ] Carga lazy de marcadores
 
-## 🤝 Contribución
+## 👥 Contribución
 
 1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
@@ -292,13 +321,19 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 👨‍💻 Autor
 
-**Federico Caffettaro** - Desarrollador del Sistema de Mapeo de Emergencias
+**Federico Caffettaro**
+- Email: fedecaff@gmail.com
+- GitHub: [@Fedecaff](https://github.com/Fedecaff)
 
-**Contacto:** federico.gomez.sc@gmail.com
+## 🙏 Agradecimientos
+
+- **Bomberos de Catamarca** por su colaboración
+- **Railway** por el hosting gratuito
+- **Leaflet.js** por la librería de mapas
+- **Font Awesome** por los iconos
 
 ---
 
-*Desarrollado para mejorar la gestión y coordinación de servicios de emergencia en Catamarca, Argentina*
-
-**Versión:** 1.1.0  
-**Última actualización:** Enero 2025
+**Versión**: 1.0.0  
+**Última actualización**: Enero 2025  
+**Estado**: En desarrollo activo

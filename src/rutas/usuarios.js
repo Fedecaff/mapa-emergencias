@@ -5,8 +5,6 @@ import { verificarToken, verificarAdmin, verificarDisponibilidad } from '../midd
 
 // Middleware para manejar errores de multer
 const handleMulterError = (error, req, res, next) => {
-    console.log('🔍 Error de multer detectado:', error);
-    
     if (error instanceof multer.MulterError) {
         if (error.code === 'LIMIT_FILE_SIZE') {
             return res.status(400).json({ error: 'El archivo es demasiado grande. Máximo 10MB.' });
@@ -32,13 +30,10 @@ const upload = multer({
         fileSize: 10 * 1024 * 1024 // 10MB máximo
     },
     fileFilter: function (req, file, cb) {
-        console.log('🔍 Multer fileFilter - Archivo:', file.originalname, file.mimetype);
         // Solo permitir imágenes
         if (file.mimetype.startsWith('image/')) {
-            console.log('✅ Archivo de imagen válido');
             cb(null, true);
         } else {
-            console.log('❌ Archivo no válido:', file.mimetype);
             cb(new Error('Solo se permiten archivos de imagen'), false);
         }
     }
@@ -70,15 +65,8 @@ router.put('/:id/perfil', verificarDisponibilidad, usuariosController.actualizar
 
 // Rutas de fotos de perfil
 router.post('/:id/foto', verificarDisponibilidad, upload.single('foto'), handleMulterError, (req, res, next) => {
-    console.log('🔍 Middleware de archivos - req.file:', req.file);
-    console.log('🔍 Middleware de archivos - req.body:', req.body);
-    console.log('🔍 Middleware de archivos - Content-Type:', req.headers['content-type']);
-    
     // Verificar que se subió un archivo
     if (!req.file) {
-        console.log('❌ No se proporcionó archivo');
-        console.log('📋 Content-Type recibido:', req.headers['content-type']);
-        console.log('📋 Body recibido:', req.body);
         return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
     }
     
@@ -95,5 +83,4 @@ router.delete('/:id/foto', verificarDisponibilidad, usuariosController.eliminarF
 router.put('/:id/ubicacion', verificarDisponibilidad, usuariosController.actualizarUbicacion);
 
 export default router;
-
 

@@ -170,11 +170,9 @@ class API {
         
         // Si es FormData, no usar JSON.stringify y no establecer Content-Type
         if (data instanceof FormData) {
-            console.log('📤 Enviando FormData...');
             options.body = data;
             // El navegador establecerá automáticamente el Content-Type con el boundary
         } else {
-            console.log('📤 Enviando JSON...');
             options.body = JSON.stringify(data);
             options.headers = {
                 'Content-Type': 'application/json'
@@ -209,8 +207,6 @@ class Geolocation {
                 reject(new Error('Geolocalización no soportada'));
                 return;
             }
-            
-            console.log('🌍 Iniciando geolocalización...');
             
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -252,9 +248,7 @@ class Geolocation {
             );
         });
     }
-    
 
-    
     static async reverseGeocode(lat, lng) {
         try {
             const response = await fetch(

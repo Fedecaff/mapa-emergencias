@@ -102,9 +102,7 @@ class MapManager {
         
         // Filtros de categorías
         this.bindCategoryFilters();
-        
 
-        
         // Eventos de autenticación
         window.addEventListener('userLogin', () => {
             this.onUserLogin();
@@ -247,7 +245,6 @@ class MapManager {
         
         // Si no hay categorías seleccionadas, NO cargar puntos
         if (selectedCategories.length === 0) {
-            console.log('🚫 No hay categorías seleccionadas - NO cargando puntos');
             this.clearPointMarkers();
             return;
         }
@@ -271,22 +268,15 @@ class MapManager {
                 endpoint += '?' + params.toString();
             }
             
-            console.log('🔍 Cargando puntos con categorías:', selectedCategories);
-            console.log('📡 Endpoint:', endpoint);
-            
             const response = await API.get(endpoint);
             const points = response.puntos || [];
-            
-            console.log('📊 Puntos recibidos:', points.length);
             
             // Limpiar marcadores de puntos
             this.clearPointMarkers();
             
             this.addMarkers(points);
             
-            console.log('✅ Marcadores agregados:', this.markers.length);
-            
-        } catch (error) {
+            } catch (error) {
             console.error('Error cargando puntos:', error);
             Notifications.error('Error cargando puntos');
         } finally {
@@ -295,13 +285,10 @@ class MapManager {
     }
     
     addMarkers(points) {
-        console.log('📍 Agregando marcadores:', points.length);
         points.forEach(point => {
-            console.log('📍 Agregando punto:', point.nombre);
             this.addMarker(point);
         });
-        console.log('✅ Marcadores agregados:', this.markers.length);
-    }
+        }
     
     addMarker(point) {
         const category = this.categories.find(c => c.id === point.categoria_id);
@@ -378,9 +365,6 @@ class MapManager {
     }
     
     clearMarkers() {
-        console.log('🗑️ clearMarkers() ejecutado');
-        console.log('📊 Marcadores a limpiar:', this.markers.length);
-        
         this.markers.forEach(marker => {
             this.map.removeLayer(marker);
         });
@@ -388,50 +372,37 @@ class MapManager {
         
         // También limpiar marcadores de búsqueda y usuario
         if (this.searchMarker) {
-            console.log('🔍 Limpiando searchMarker en clearMarkers()');
             this.map.removeLayer(this.searchMarker);
             this.searchMarker = null;
         }
         if (this.userMarker) {
-            console.log('👤 Limpiando userMarker en clearMarkers()');
             this.map.removeLayer(this.userMarker);
             this.userMarker = null;
         }
         
-        console.log('✅ clearMarkers() completado');
-    }
+        }
     
     clearPointMarkers() {
-        console.log('🗑️ Limpiando marcadores de puntos...');
-        console.log('📊 Marcadores a limpiar:', this.markers.length);
-        
         // Solo limpiar marcadores de puntos, mantener usuario y búsqueda
         this.markers.forEach(marker => {
-            console.log('🗑️ Removiendo marcador:', marker.pointData?.nombre || 'Sin nombre');
             this.map.removeLayer(marker);
         });
         this.markers = [];
         
-        console.log('✅ Limpieza de marcadores de puntos completada');
-    }
+        }
 
     clearAllMarkers() {
-        console.log('🗑️ Iniciando limpieza de marcadores...');
-        console.log('📊 Marcadores antes de limpiar:', this.markers.length);
-        
         // Limpiar todos los marcadores (puntos, usuario y búsqueda)
         this.clearMarkers();
         
         // Limpiar marcador de búsqueda
         if (this.searchMarker) {
-            console.log('🔍 Limpiando marcador de búsqueda');
             this.map.removeLayer(this.searchMarker);
             this.searchMarker = null;
         }
         
         // Limpiar marcador del usuario
         if (this.userMarker) {
-            console.log('👤 Limpiando marcador del usuario');
             this.map.removeLayer(this.userMarker);
             this.userMarker = null;
         }
@@ -445,7 +416,6 @@ class MapManager {
         
         // Limpiar marcadores de alertas de emergencia
         if (window.alertasManager && window.alertasManager.emergencyMarker) {
-            console.log('🚨 Limpiando marcador de emergencia');
             this.map.removeLayer(window.alertasManager.emergencyMarker);
             window.alertasManager.emergencyMarker = null;
         }
@@ -455,25 +425,20 @@ class MapManager {
             if (layer._icon && layer._icon.className && 
                 layer._icon.className.includes('emergency-marker') && 
                 !layer._icon.className.includes('emergency-marker-active')) {
-                console.log('🚨 Limpiando marcador temporal de emergencia');
                 this.map.removeLayer(layer);
             }
         });
         
-        console.log('✅ Limpieza de marcadores completada');
-    }
+        }
     
     filterMarkers() {
         const selectedCategories = Array.from(
             document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked')
         ).map(cb => parseInt(cb.value));
         
-        console.log('🔍 Categorías seleccionadas:', selectedCategories);
-        
         // Si no hay categorías seleccionadas, limpiar todos los marcadores
         if (selectedCategories.length === 0) {
             this.clearPointMarkers();
-            console.log('🚫 No hay categorías seleccionadas - limpiando marcadores');
             return;
         }
         
@@ -553,8 +518,6 @@ class MapManager {
             const position = await Geolocation.getCurrentPosition();
             this.currentLocation = position;
             
-            console.log('📍 Ubicación del usuario:', position);
-            
             // Crear o actualizar marcador de usuario
             if (this.userMarker) {
                 this.map.removeLayer(this.userMarker);
@@ -584,8 +547,6 @@ class MapManager {
             }
             
             // NO cargar puntos automáticamente - respetar filtros de categorías
-            console.log('📍 Ubicación centrada - esperando selección de categorías');
-            
             Notifications.success(`Ubicación centrada (precisión: ±${Math.round(position.accuracy)}m)`);
             
         } catch (error) {
@@ -908,8 +869,7 @@ class MapManager {
         // Limpiar marcadores temporales y resetear estado
         this.stopAddingPoint();
         // NO cargar puntos cuando el usuario hace logout
-        console.log('🚫 Usuario hizo logout - no cargando puntos');
-    }
+        }
     
     async handleEditPoint() {
         try {
@@ -1023,8 +983,6 @@ class MapManager {
             
             // Verificar si hay cambios reales antes de actualizar
             if (this.hasOperatorChanges(operadores)) {
-                console.log('🔄 Cambios detectados en operadores, actualizando mapa...');
-                
                 // Limpiar marcadores anteriores
                 this.clearOperatorMarkers();
                 
@@ -1038,10 +996,8 @@ class MapManager {
                 // Guardar estado actual para comparaciones futuras
                 this.lastOperatorState = this.getOperatorState(operadores);
                 
-                console.log(`✅ ${operadores.length} operadores cargados en el mapa`);
-            } else {
-                console.log('ℹ️ No hay cambios en operadores, saltando actualización');
-            }
+                } else {
+                }
             
         } catch (error) {
             console.error('❌ Error cargando operadores:', error);
@@ -1186,8 +1142,7 @@ class MapManager {
         // Iniciar polling robusto
         this.startRobustPolling();
         
-        console.log('🔄 Actualización automática de operadores iniciada (esperando checkbox)');
-    }
+        }
 
     // Polling robusto con manejo de errores y reintentos
     async startRobustPolling() {
@@ -1228,8 +1183,6 @@ class MapManager {
             this.pollingConfig.currentRetries++;
             
             if (this.pollingConfig.currentRetries <= this.pollingConfig.maxRetries) {
-                console.log(`🔄 Reintentando carga de operadores (${this.pollingConfig.currentRetries}/${this.pollingConfig.maxRetries})...`);
-                
                 // Esperar antes del reintento
                 await new Promise(resolve => setTimeout(resolve, this.pollingConfig.retryDelay));
                 
@@ -1248,8 +1201,6 @@ class MapManager {
         this.pollingConfig.currentRetries++;
         
         if (this.pollingConfig.currentRetries <= this.pollingConfig.maxRetries) {
-            console.log(`🔄 Reintentando polling (${this.pollingConfig.currentRetries}/${this.pollingConfig.maxRetries})...`);
-            
             // Reintentar después de un delay
             setTimeout(() => {
                 this.startRobustPolling();
@@ -1279,8 +1230,7 @@ class MapManager {
         }
         
         this.clearOperatorMarkers();
-        console.log('⏹️ Actualización automática de operadores detenida');
-    }
+        }
 
     // Formatear fecha y hora
     formatDateTime(dateString) {

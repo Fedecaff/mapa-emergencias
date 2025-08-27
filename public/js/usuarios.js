@@ -93,8 +93,7 @@ class UsuariosManager {
                 // Limpiar formulario
                 document.getElementById('createUserForm').reset();
                 
-                console.log('✅ Usuario creado:', response.usuario);
-            }
+                }
         } catch (error) {
             Notifications.error(error.message || 'Error creando usuario');
             console.error('❌ Error creando usuario:', error);
@@ -221,5 +220,4 @@ if (document.readyState === 'loading') {
 } else {
     window.usuariosManager = new UsuariosManager();
 }
-
 
