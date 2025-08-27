@@ -595,12 +595,13 @@ class Auth {
                 return;
             }
             
-            const datosPerfil = {
-                nombre: nombre,
-                institucion: institucion,
-                rol_institucion: rol_institucion,
-                telefono: telefono
-            };
+            // Solo incluir campos que tengan valor
+            const datosPerfil = {};
+            
+            if (nombre) datosPerfil.nombre = nombre;
+            if (institucion) datosPerfil.institucion = institucion;
+            if (rol_institucion) datosPerfil.rol_institucion = rol_institucion;
+            if (telefono) datosPerfil.telefono = telefono;
             
             console.log('📋 Enviando datos del perfil:', datosPerfil);
             

@@ -267,7 +267,12 @@ const usuariosController = {
             }
 
             if (updates.length === 0) {
-                return res.status(400).json({ error: 'No se proporcionaron campos válidos para actualizar' });
+                console.log('❌ No hay campos válidos para actualizar');
+                console.log('📋 Campos recibidos:', req.body);
+                return res.status(400).json({ 
+                    error: 'No se proporcionaron campos válidos para actualizar',
+                    detalles: 'Todos los campos están vacíos o no se proporcionaron'
+                });
             }
 
             // Agregar el ID como último parámetro
