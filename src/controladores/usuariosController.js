@@ -42,22 +42,12 @@ const usuariosController = {
                 return res.status(400).json({ error: 'El teléfono ya está registrado' });
             }
 
-            // Verificar si el email está verificado
-            const emailVerificado = await baseDeDatos.obtenerUno(`
-                SELECT id FROM codigos_verificacion 
-                WHERE email = $1 AND usado = true 
-                ORDER BY fecha_creacion DESC 
-                LIMIT 1
-            `, [email]);
 
-            if (!emailVerificado) {
-                return res.status(400).json({ error: 'El email debe estar verificado antes de crear el usuario' });
-            }
 
             // Encriptar contraseña
             const passwordHash = await bcrypt.hash(password, 10);
 
-            // Insertar usuario con email verificado
+            // Insertar usuario
             const resultado = await baseDeDatos.ejecutar(
                 'INSERT INTO usuarios (nombre, email, password, telefono, rol, institucion, rol_institucion, email_verificado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
                 [nombre, email, passwordHash, telefono, rol, institucion || null, rol_institucion || null, true]

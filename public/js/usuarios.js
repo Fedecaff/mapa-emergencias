@@ -87,12 +87,10 @@ class UsuariosManager {
         }
 
         try {
-            // Primero verificar disponibilidad
             const response = await API.get(`/usuarios/verificar-email?email=${encodeURIComponent(email)}`);
             
             if (response.disponible) {
-                // Si está disponible, mostrar opción de verificación
-                this.mostrarOpcionVerificacion(email);
+                this.mostrarEmailDisponible(email);
             } else {
                 this.mostrarEmailNoDisponible(email);
             }
@@ -102,122 +100,8 @@ class UsuariosManager {
         }
     }
 
-    mostrarOpcionVerificacion(email) {
-        const emailInput = document.getElementById('newUserEmail');
-        const emailStatus = document.getElementById('emailStatus');
-        
-        if (emailInput) {
-            emailInput.style.borderColor = '#ffc107';
-            emailInput.classList.remove('email-valid', 'email-invalid');
-        }
-        
-        if (emailStatus) {
-            emailStatus.innerHTML = `
-                <div style="margin-top: 10px;">
-                    <i class="fas fa-info-circle" style="color: #ffc107;"></i>
-                    <span style="color: #ffc107;">Email disponible</span>
-                    <button type="button" class="btn-verificar-email" onclick="window.usuariosManager.enviarCodigoVerificacion('${email}')">
-                        <i class="fas fa-envelope"></i> Verificar Email
-                    </button>
-                </div>
-            `;
-            emailStatus.style.display = 'block';
-        }
-    }
-
-    async enviarCodigoVerificacion(email) {
-        try {
-            Loading.show();
-            
-            const response = await API.post('/verificacion/enviar-codigo', { email });
-            
-            if (response.mensaje) {
-                Notifications.success('Código de verificación enviado a tu email');
-                this.mostrarFormularioCodigo(email);
-            }
-        } catch (error) {
-            Notifications.error(error.message || 'Error enviando código de verificación');
-            console.error('❌ Error enviando código:', error);
-        } finally {
-            Loading.hide();
-        }
-    }
-
-    mostrarFormularioCodigo(email) {
-        const emailStatus = document.getElementById('emailStatus');
-        
-        if (emailStatus) {
-            emailStatus.innerHTML = `
-                <div style="margin-top: 10px;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                    <span style="color: #28a745;">Código enviado a ${email}</span>
-                    <div style="margin-top: 10px;">
-                        <input type="text" id="codigoVerificacion" placeholder="Ingresa el código de 6 dígitos" 
-                               maxlength="6" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <button type="button" class="btn-verificar-codigo" onclick="window.usuariosManager.verificarCodigo('${email}')">
-                            <i class="fas fa-check"></i> Verificar
-                        </button>
-                        <button type="button" class="btn-reenviar-codigo" onclick="window.usuariosManager.enviarCodigoVerificacion('${email}')">
-                            <i class="fas fa-redo"></i> Reenviar
-                        </button>
-                    </div>
-                </div>
-            `;
-            emailStatus.style.display = 'block';
-        }
-    }
-
-    async verificarCodigo(email) {
-        const codigoInput = document.getElementById('codigoVerificacion');
-        const codigo = codigoInput ? codigoInput.value.trim() : '';
-
-        if (!codigo || codigo.length !== 6) {
-            Notifications.error('Por favor ingresa un código válido de 6 dígitos');
-            return;
-        }
-
-        try {
-            Loading.show();
-            
-            const response = await API.post('/verificacion/verificar-codigo', { email, codigo });
-            
-            if (response.verificado) {
-                Notifications.success('Email verificado exitosamente');
-                this.mostrarEmailVerificado(email);
-            }
-        } catch (error) {
-            Notifications.error(error.message || 'Código inválido');
-            console.error('❌ Error verificando código:', error);
-        } finally {
-            Loading.hide();
-        }
-    }
-
-    mostrarEmailVerificado(email) {
-        const emailInput = document.getElementById('newUserEmail');
-        const emailStatus = document.getElementById('emailStatus');
-        
-        if (emailInput) {
-            emailInput.style.borderColor = '#28a745';
-            emailInput.classList.add('email-valid');
-            emailInput.classList.remove('email-invalid');
-        }
-        
-        if (emailStatus) {
-            emailStatus.innerHTML = `
-                <i class="fas fa-check-circle" style="color: #28a745;"></i>
-                <span style="color: #28a745;">Email verificado exitosamente</span>
-            `;
-            emailStatus.style.display = 'block';
-        }
-        
-        // Verificar si todos los campos están completos para habilitar el botón
-        this.verificarCamposCompletos();
-    }
-
     mostrarEmailDisponible(email) {
         const emailInput = document.getElementById('newUserEmail');
-        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
         const emailStatus = document.getElementById('emailStatus');
         
         if (emailInput) {
@@ -240,18 +124,12 @@ class UsuariosManager {
 
     mostrarEmailNoDisponible(email) {
         const emailInput = document.getElementById('newUserEmail');
-        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
         const emailStatus = document.getElementById('emailStatus');
         
         if (emailInput) {
             emailInput.style.borderColor = '#dc3545';
             emailInput.classList.add('email-invalid');
             emailInput.classList.remove('email-valid');
-        }
-        
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Email ya registrado';
         }
         
         if (emailStatus) {
@@ -265,17 +143,11 @@ class UsuariosManager {
 
     mostrarErrorVerificacion() {
         const emailInput = document.getElementById('newUserEmail');
-        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
         const emailStatus = document.getElementById('emailStatus');
         
         if (emailInput) {
             emailInput.style.borderColor = '#ffc107';
             emailInput.classList.remove('email-valid', 'email-invalid');
-        }
-        
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Verificar email';
         }
         
         if (emailStatus) {
@@ -289,17 +161,11 @@ class UsuariosManager {
 
     resetEmailVerification() {
         const emailInput = document.getElementById('newUserEmail');
-        const submitBtn = document.querySelector('#createUserForm button[type="submit"]');
         const emailStatus = document.getElementById('emailStatus');
         
         if (emailInput) {
             emailInput.style.borderColor = '';
             emailInput.classList.remove('email-valid', 'email-invalid');
-        }
-        
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-save"></i> Crear Usuario';
         }
         
         if (emailStatus) {
@@ -318,12 +184,11 @@ class UsuariosManager {
         
         const submitBtn = form.querySelector('button[type="submit"]');
         
-        // Solo habilitar si todos los campos están completos Y el email está verificado
+        // Solo habilitar si todos los campos están completos
         const camposCompletos = nombre && email && telefono && password && rol;
-        const emailVerificado = email && document.getElementById('newUserEmail').classList.contains('email-valid');
         
         if (submitBtn) {
-            submitBtn.disabled = !(camposCompletos && emailVerificado);
+            submitBtn.disabled = !camposCompletos;
         }
     }
 

@@ -18,8 +18,7 @@ import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
-import actualizarCodigosVerificacion from '../modelos/actualizarCodigosVerificacion.js';
-import emailService from '../servicios/emailService.js';
+
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -30,7 +29,7 @@ import rutasUsuarios from '../rutas/usuarios.js';
 import rutasFotos from '../rutas/fotos.js';
 import rutasAlertas from '../rutas/alertas.js';
 import rutasPerfil from '../rutas/perfil.js';
-import rutasVerificacion from '../rutas/verificacion.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,7 +78,7 @@ app.use('/api/usuarios', rutasUsuarios);
 app.use('/api/fotos', rutasFotos);
 app.use('/api/alertas', rutasAlertas);
 app.use('/api/perfil', rutasPerfil);
-app.use('/api/verificacion', rutasVerificacion);
+
 
 // Ruta principal
 app.get('/', (req, res) => {
@@ -135,17 +134,7 @@ async function iniciarServidor() {
         // Actualizar campo email_verificado
         await actualizarCampoEmail();
         
-        // Actualizar tabla de códigos de verificación
-        await actualizarCodigosVerificacion();
-        
-        // Inicializar servicio de email (opcional)
-        console.log('📧 Inicializando servicio de email...');
-        try {
-            await emailService.initialize();
-        } catch (error) {
-            console.warn('⚠️ Servicio de email no disponible:', error.message);
-            console.log('ℹ️ El sistema funcionará sin envío de emails');
-        }
+
         
         console.log('✅ Base de datos inicializada correctamente');
         
