@@ -16,6 +16,7 @@ import actualizarRoles from '../modelos/actualizarRoles.js';
 import verificarRoles from '../modelos/verificarRoles.js';
 import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js';
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
+import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -123,6 +124,9 @@ async function iniciarServidor() {
         // await verificarRoles();
         await actualizarPerfilOperadores();
         await actualizarGeolocalizacion();
+        
+        // Actualizar campo foto_perfil para permitir imágenes base64
+        await actualizarCampoFoto();
         
         console.log('✅ Base de datos inicializada correctamente');
         
