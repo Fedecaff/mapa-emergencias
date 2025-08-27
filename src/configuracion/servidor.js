@@ -19,6 +19,7 @@ import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
 import actualizarCodigosVerificacion from '../modelos/actualizarCodigosVerificacion.js';
+import emailService from '../servicios/emailService.js';
 
 // Importar rutas
 import rutasAutenticacion from '../rutas/autenticacion.js';
@@ -137,7 +138,9 @@ async function iniciarServidor() {
         // Actualizar tabla de códigos de verificación
         await actualizarCodigosVerificacion();
         
-
+        // Inicializar servicio de email
+        console.log('📧 Inicializando servicio de email...');
+        await emailService.initialize();
         
         console.log('✅ Base de datos inicializada correctamente');
         
