@@ -259,7 +259,12 @@ class WebSocketClient {
                 console.log('🔍 Marcador de emergencia encontrado:', {
                     _alertaId: layer._alertaId,
                     _notificationId: layer._notificationId,
-                    alertId: alertId
+                    alertId: alertId,
+                    tipos: {
+                        _alertaId_tipo: typeof layer._alertaId,
+                        alertId_tipo: typeof alertId,
+                        son_iguales: layer._alertaId === alertId
+                    }
                 });
                 
                 // Buscar marcadores por alertId o notificationId
