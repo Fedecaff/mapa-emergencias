@@ -7,13 +7,17 @@ const usuariosController = {
         try {
             const { nombre, email, password, telefono, rol = 'operador', institucion, rol_institucion } = req.body;
 
+            console.log('📝 Datos recibidos para crear usuario:', { nombre, email, telefono, rol, institucion, rol_institucion });
+
             // Validaciones
             if (!nombre || !email || !password || !telefono) {
+                console.log('❌ Campos faltantes:', { nombre: !!nombre, email: !!email, password: !!password, telefono: !!telefono });
                 return res.status(400).json({ error: 'Todos los campos son requeridos' });
             }
 
             // Validar formato de teléfono argentino
             const telefonoRegex = /^\+54\s9\s\d{4}\s\d{6}$/;
+            console.log('📞 Validando teléfono:', telefono, 'Regex test:', telefonoRegex.test(telefono));
             if (!telefonoRegex.test(telefono)) {
                 return res.status(400).json({ error: 'Formato de teléfono inválido. Use: +54 9 XXXX XXXXXX' });
             }
