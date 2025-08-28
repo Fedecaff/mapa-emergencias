@@ -162,9 +162,29 @@ class WebSocketClient {
     }
 
     openAlertInMap(notification) {
+        console.log('🗺️ Abriendo alerta en mapa:', notification);
+        
+        // Validar que las coordenadas existan
+        if (!notification.latitud || !notification.longitud) {
+            console.error('❌ Coordenadas faltantes en notificación:', notification);
+            Notifications.error('No se pueden mostrar las coordenadas de la alerta');
+            return;
+        }
+        
+        // Convertir a números si son strings
+        const lat = parseFloat(notification.latitud);
+        const lng = parseFloat(notification.longitud);
+        
+        if (isNaN(lat) || isNaN(lng)) {
+            console.error('❌ Coordenadas inválidas:', notification.latitud, notification.longitud);
+            Notifications.error('Coordenadas de la alerta inválidas');
+            return;
+        }
+        
         // Centrar el mapa en la ubicación de la alerta
         if (window.mapManager && window.mapManager.map) {
-            window.mapManager.map.setView([notification.latitud, notification.longitud], 15);
+            window.mapManager.map.setView([lat, lng], 15);
+            console.log('✅ Mapa centrado en:', lat, lng);
         }
         
         // Mostrar la alerta en el mapa (si existe la funcionalidad)
