@@ -229,7 +229,7 @@ class WebSocketClient {
                     .bindPopup(popupContent, { maxWidth: 400 });
                 
                 // Guardar referencia para poder eliminarlo después
-                marker._notificationId = notification.id;
+                marker._alertaId = notification.alertId;
                 
                 console.log('✅ Alerta mostrada en mapa en tiempo real:', lat, lng);
             } else {
@@ -267,8 +267,8 @@ class WebSocketClient {
                     }
                 });
                 
-                // Buscar marcadores por alertId o notificationId
-                if (layer._alertaId === alertId || layer._notificationId === alertId) {
+                // Buscar marcadores por alertId
+                if (layer._alertaId === alertId) {
                     window.mapManager.map.removeLayer(layer);
                     console.log('✅ Alerta removida del mapa:', alertId);
                     encontrada = true;
