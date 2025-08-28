@@ -241,14 +241,38 @@ class WebSocketClient {
 
     // Remover alerta del mapa cuando se da de baja
     removerAlertaDelMapa(alertId) {
-        if (window.mapManager && window.mapManager.map) {
-            window.mapManager.map.eachLayer((layer) => {
+        console.log('🔍 Buscando alerta para remover del mapa:', alertId);
+        
+        if (!window.mapManager || !window.mapManager.map) {
+            console.log('❌ MapManager no disponible');
+            return;
+        }
+        
+        let encontrada = false;
+        let totalLayers = 0;
+        
+        window.mapManager.map.eachLayer((layer) => {
+            totalLayers++;
+            
+            // Verificar si es un marcador de emergencia
+            if (layer._icon && layer._icon.className && layer._icon.className.includes('emergency-marker')) {
+                console.log('🔍 Marcador de emergencia encontrado:', {
+                    _alertaId: layer._alertaId,
+                    _notificationId: layer._notificationId,
+                    alertId: alertId
+                });
+                
                 // Buscar marcadores por alertId o notificationId
                 if (layer._alertaId === alertId || layer._notificationId === alertId) {
                     window.mapManager.map.removeLayer(layer);
                     console.log('✅ Alerta removida del mapa:', alertId);
+                    encontrada = true;
                 }
-            });
+            }
+        });
+        
+        if (!encontrada) {
+            console.log(`⚠️ No se encontró la alerta ${alertId} en el mapa (${totalLayers} layers revisadas)`);
         }
     }
 
