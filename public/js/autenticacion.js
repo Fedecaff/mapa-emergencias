@@ -305,6 +305,26 @@ class Auth {
         if (user.rol === 'operador') {
             this.inicializarPanelPerfil(user);
         }
+        
+        // Cargar alertas activas en el mapa
+        this.cargarAlertasEnMapa();
+    }
+
+    // Cargar alertas activas en el mapa
+    async cargarAlertasEnMapa() {
+        try {
+            // Esperar a que el AlertasManager esté disponible
+            const waitForAlertasManager = () => {
+                if (window.alertasManager) {
+                    window.alertasManager.cargarYMostrarAlertas();
+                } else {
+                    setTimeout(waitForAlertasManager, 100);
+                }
+            };
+            waitForAlertasManager();
+        } catch (error) {
+            console.error('❌ Error cargando alertas en mapa:', error);
+        }
     }
 
     // Inicializar panel de perfil para operadores

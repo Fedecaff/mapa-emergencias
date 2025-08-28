@@ -75,12 +75,12 @@ class WebSocketService {
         };
 
         // Enviar a todos los usuarios conectados excepto al creador
-        this.io.sockets.sockets.forEach((socket) => {
+        for (const socket of this.io.sockets.sockets.values()) {
             const socketUserId = this.getUserIdBySocketId(socket.id);
             if (socketUserId && socketUserId !== creatorId) {
                 socket.emit('newAlert', notification);
             }
-        });
+        }
         
         console.log(`📢 Notificación de alerta enviada a todos los usuarios (excepto creador ${creatorId})`);
         
