@@ -83,6 +83,11 @@ class WebSocketClient {
             console.log('📢 Notificación recibida:', notification);
             this.handleNotification(notification);
         });
+
+        this.socket.on('alertDeleted', (notification) => {
+            console.log('🗑️ Alerta eliminada recibida:', notification);
+            this.handleAlertDeleted(notification);
+        });
     }
 
     handleNewAlert(notification) {
@@ -101,6 +106,22 @@ class WebSocketClient {
     }
 
     handleNotification(notification) {
+        this.notifications.unshift({
+            ...notification,
+            read: false,
+            receivedAt: new Date()
+        });
+        this.updateNotificationsPanel();
+    }
+
+    handleAlertDeleted(notification) {
+        // Remover la alerta del mapa
+        this.removerAlertaDelMapa(notification.alertId);
+        
+        // Mostrar notificación
+        Notifications.info('Una alerta ha sido dada de baja');
+        
+        // Agregar a la lista de notificaciones
         this.notifications.unshift({
             ...notification,
             read: false,
@@ -216,6 +237,19 @@ class WebSocketClient {
             }
         };
         waitForMapManager();
+    }
+
+    // Remover alerta del mapa cuando se da de baja
+    removerAlertaDelMapa(alertId) {
+        if (window.mapManager && window.mapManager.map) {
+            window.mapManager.map.eachLayer((layer) => {
+                // Buscar marcadores por alertId o notificationId
+                if (layer._alertaId === alertId || layer._notificationId === alertId) {
+                    window.mapManager.map.removeLayer(layer);
+                    console.log('✅ Alerta removida del mapa:', alertId);
+                }
+            });
+        }
     }
 
     openAlertInMap(notification) {

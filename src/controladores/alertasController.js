@@ -285,6 +285,22 @@ const alertasController = {
 
             console.log(`🗑️ Alerta eliminada: ${id}`);
 
+            // Enviar notificación WebSocket a todos los usuarios
+            try {
+                const notificationData = {
+                    id: id,
+                    type: 'alertDeleted',
+                    title: '🗑️ Alerta Eliminada',
+                    message: 'Una alerta ha sido dada de baja',
+                    alertId: id
+                };
+                
+                websocketService.sendAlertDeletedNotification(notificationData);
+                console.log('📢 Notificación de eliminación WebSocket enviada');
+            } catch (error) {
+                console.error('❌ Error enviando notificación de eliminación WebSocket:', error);
+            }
+
             res.json({
                 mensaje: 'Alerta eliminada exitosamente'
             });

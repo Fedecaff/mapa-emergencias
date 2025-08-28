@@ -133,6 +133,25 @@ class WebSocketService {
     isUserConnected(userId) {
         return this.connectedUsers.has(userId);
     }
+
+    // Enviar notificación de alerta eliminada a todos los usuarios
+    sendAlertDeletedNotification(notificationData) {
+        const notification = {
+            id: Date.now(),
+            type: 'alertDeleted',
+            title: notificationData.title,
+            message: notificationData.message,
+            alertId: notificationData.alertId,
+            timestamp: new Date().toISOString()
+        };
+
+        // Enviar a todos los usuarios conectados
+        this.io.emit('alertDeleted', notification);
+        
+        console.log(`📢 Notificación de alerta eliminada enviada a todos los usuarios`);
+        
+        return notification;
+    }
 }
 
 export default new WebSocketService();
