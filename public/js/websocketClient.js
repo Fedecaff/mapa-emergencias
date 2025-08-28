@@ -7,19 +7,30 @@ class WebSocketClient {
         this.init();
     }
 
+    getCurrentUser() {
+        // Preferir instancia de auth si existe
+        if (window.auth && window.auth.currentUser) return window.auth.currentUser;
+        // Respaldo: leer de Storage/localStorage
+        try {
+            return Storage ? Storage.get('user') : JSON.parse(localStorage.getItem('user'));
+        } catch (_) {
+            return null;
+        }
+    }
+
     init() {
-        // Solo inicializar si el usuario está autenticado
-        if (!window.auth || !window.auth.getUser()) {
+        const user = this.getCurrentUser();
+        if (!user) {
+            // Si aún no está listo auth/usuario, reintentar pronto
+            setTimeout(() => this.init(), 500);
             return;
         }
-
         this.connect();
         this.setupEventListeners();
     }
 
     connect() {
         try {
-            // Conectar al WebSocket del servidor
             this.socket = io();
             
             this.socket.on('connect', () => {
@@ -44,11 +55,10 @@ class WebSocketClient {
     }
 
     authenticate() {
-        if (!this.socket || !window.auth || !window.auth.getUser()) {
-            return;
-        }
+        if (!this.socket) return;
+        const user = this.getCurrentUser();
+        if (!user) return;
 
-        const user = window.auth.getUser();
         this.socket.emit('authenticate', {
             userId: user.id,
             rol: user.rol
@@ -64,13 +74,11 @@ class WebSocketClient {
     setupEventListeners() {
         if (!this.socket) return;
 
-        // Escuchar nuevas alertas
         this.socket.on('newAlert', (notification) => {
             console.log('🚨 Nueva alerta recibida:', notification);
             this.handleNewAlert(notification);
         });
 
-        // Escuchar notificaciones generales
         this.socket.on('notification', (notification) => {
             console.log('📢 Notificación recibida:', notification);
             this.handleNotification(notification);
@@ -78,86 +86,50 @@ class WebSocketClient {
     }
 
     handleNewAlert(notification) {
-        // Agregar a la lista de notificaciones
         this.notifications.unshift({
             ...notification,
             read: false,
             receivedAt: new Date()
         });
-
-        // Mostrar notificación del navegador
         this.showBrowserNotification(notification);
-
-        // Actualizar el panel de notificaciones si existe
         this.updateNotificationsPanel();
-
-        // Reproducir sonido de alerta
         this.playAlertSound();
-
-        // Mostrar notificación en la UI
         this.showInAppNotification(notification);
     }
 
     handleNotification(notification) {
-        // Agregar a la lista de notificaciones
         this.notifications.unshift({
             ...notification,
             read: false,
             receivedAt: new Date()
         });
-
-        // Actualizar el panel de notificaciones
         this.updateNotificationsPanel();
     }
 
     showBrowserNotification(notification) {
-        // Verificar si el navegador soporta notificaciones
-        if (!('Notification' in window)) {
-            console.log('⚠️ Este navegador no soporta notificaciones');
-            return;
-        }
+        if (!('Notification' in window)) return;
 
-        // Verificar si tenemos permisos
         if (Notification.permission === 'granted') {
             const browserNotification = new Notification(notification.title, {
                 body: `${notification.message}\nUbicación: ${notification.location}`,
-                icon: '/img/alert-icon.png', // Icono de alerta
+                icon: '/img/alert-icon.png',
                 badge: '/img/badge-icon.png',
                 tag: `alert-${notification.alertId}`,
-                requireInteraction: true,
-                actions: [
-                    {
-                        action: 'view',
-                        title: 'Ver en mapa'
-                    },
-                    {
-                        action: 'dismiss',
-                        title: 'Cerrar'
-                    }
-                ]
+                requireInteraction: true
             });
-
-            // Manejar clicks en la notificación
             browserNotification.onclick = (event) => {
                 event.preventDefault();
-                if (event.action === 'view') {
-                    this.openAlertInMap(notification);
-                }
+                this.openAlertInMap(notification);
                 browserNotification.close();
             };
-
         } else if (Notification.permission !== 'denied') {
-            // Solicitar permisos
             Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    this.showBrowserNotification(notification);
-                }
+                if (permission === 'granted') this.showBrowserNotification(notification);
             });
         }
     }
 
     showInAppNotification(notification) {
-        // Crear notificación en la UI de la aplicación
         const notificationElement = document.createElement('div');
         notificationElement.className = 'in-app-notification';
         notificationElement.innerHTML = `
@@ -171,86 +143,49 @@ class WebSocketClient {
                     <p class="notification-location">📍 ${notification.location}</p>
                 </div>
                 <div class="notification-actions">
-                    <button class="btn btn-primary btn-sm" onclick="websocketClient.openAlertInMap(${JSON.stringify(notification)})">
-                        Ver en mapa
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="websocketClient.markAsRead(${notification.id})">
-                        Marcar como leída
-                    </button>
+                    <button class="btn btn-primary btn-sm" onclick='websocketClient.openAlertInMap(${JSON.stringify(notification)})'>Ver en mapa</button>
+                    <button class="btn btn-secondary btn-sm" onclick="websocketClient.markAsRead(${notification.id})">Marcar como leída</button>
                 </div>
             </div>
         `;
-
-        // Agregar al contenedor de notificaciones
         const container = document.getElementById('notificationsContainer') || document.body;
         container.appendChild(notificationElement);
-
-        // Auto-remover después de 10 segundos
-        setTimeout(() => {
-            if (notificationElement.parentElement) {
-                notificationElement.remove();
-            }
-        }, 10000);
+        setTimeout(() => { if (notificationElement.parentElement) notificationElement.remove(); }, 10000);
     }
 
     playAlertSound() {
         try {
-            // Crear audio element para sonido de alerta
-            const audio = new Audio('/sounds/alert.mp3'); // Archivo de sonido de alerta
+            const audio = new Audio('/sounds/alert.mp3');
             audio.volume = 0.5;
-            audio.play().catch(error => {
-                console.log('⚠️ No se pudo reproducir sonido de alerta:', error);
-            });
-        } catch (error) {
-            console.log('⚠️ Error reproduciendo sonido:', error);
-        }
+            audio.play().catch(() => {});
+        } catch (_) {}
     }
 
     openAlertInMap(notification) {
-        // Centrar el mapa en la ubicación de la alerta
         if (window.mapa && window.mapa.centerOnLocation) {
             window.mapa.centerOnLocation(notification.latitud, notification.longitud);
         }
-
-        // Mostrar la alerta en el mapa (si existe la funcionalidad)
         if (window.mapa && window.mapa.showAlert) {
             window.mapa.showAlert(notification);
         }
-
-        // Marcar como leída
         this.markAsRead(notification.id);
     }
 
     markAsRead(notificationId) {
-        // Marcar como leída localmente
         const notification = this.notifications.find(n => n.id === notificationId);
-        if (notification) {
-            notification.read = true;
-        }
-
-        // Enviar al servidor
-        if (this.socket) {
-            this.socket.emit('markNotificationRead', notificationId);
-        }
-
-        // Actualizar UI
+        if (notification) notification.read = true;
+        if (this.socket) this.socket.emit('markNotificationRead', notificationId);
         this.updateNotificationsPanel();
     }
 
     updateNotificationsPanel() {
-        // Actualizar el panel de notificaciones si existe
         const panel = document.getElementById('notificationsPanel');
-        if (panel) {
-            this.renderNotificationsPanel(panel);
-        }
-
-        // Actualizar contador de notificaciones
+        if (panel) this.renderNotificationsPanel(panel);
         this.updateNotificationCounter();
     }
 
     renderNotificationsPanel(container) {
         const unreadCount = this.notifications.filter(n => !n.read).length;
-        
         container.innerHTML = `
             <div class="notifications-header">
                 <h3>🔔 Notificaciones (${unreadCount} no leídas)</h3>
@@ -270,7 +205,7 @@ class WebSocketClient {
                         </div>
                         <div class="notification-actions">
                             ${!notification.read ? `<button class="btn btn-sm btn-outline-primary" onclick="websocketClient.markAsRead(${notification.id})">Marcar como leída</button>` : ''}
-                            <button class="btn btn-sm btn-primary" onclick="websocketClient.openAlertInMap(${JSON.stringify(notification)})">Ver en mapa</button>
+                            <button class="btn btn-sm btn-primary" onclick='websocketClient.openAlertInMap(${JSON.stringify(notification)})'>Ver en mapa</button>
                         </div>
                     </div>
                 `).join('')}
@@ -280,17 +215,14 @@ class WebSocketClient {
 
     updateNotificationCounter() {
         const counter = document.getElementById('notificationCounter');
-        if (counter) {
-            const unreadCount = this.notifications.filter(n => !n.read).length;
-            counter.textContent = unreadCount;
-            counter.style.display = unreadCount > 0 ? 'block' : 'none';
-        }
+        if (!counter) return;
+        const unreadCount = this.notifications.filter(n => !n.read).length;
+        counter.textContent = unreadCount;
+        counter.style.display = unreadCount > 0 ? 'block' : 'none';
     }
 
     markAllAsRead() {
-        this.notifications.forEach(notification => {
-            notification.read = true;
-        });
+        this.notifications.forEach(n => n.read = true);
         this.updateNotificationsPanel();
     }
 
@@ -300,7 +232,6 @@ class WebSocketClient {
         const minutes = Math.floor(diff / 60000);
         const hours = Math.floor(diff / 3600000);
         const days = Math.floor(diff / 86400000);
-
         if (minutes < 1) return 'Ahora mismo';
         if (minutes < 60) return `Hace ${minutes} min`;
         if (hours < 24) return `Hace ${hours} h`;
@@ -316,7 +247,6 @@ class WebSocketClient {
     }
 }
 
-// Inicializar WebSocket client cuando el DOM esté listo
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.websocketClient = new WebSocketClient();
