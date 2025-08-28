@@ -75,11 +75,26 @@ class WebSocketService {
         };
 
         // Enviar a todos los usuarios conectados excepto al creador
-        this.io.emit('newAlert', notification);
+        this.io.sockets.sockets.forEach((socket) => {
+            const socketUserId = this.getUserIdBySocketId(socket.id);
+            if (socketUserId && socketUserId !== creatorId) {
+                socket.emit('newAlert', notification);
+            }
+        });
         
         console.log(`📢 Notificación de alerta enviada a todos los usuarios (excepto creador ${creatorId})`);
         
         return notification;
+    }
+
+    // Obtener userId por socketId
+    getUserIdBySocketId(socketId) {
+        for (const [userId, id] of this.connectedUsers.entries()) {
+            if (id === socketId) {
+                return userId;
+            }
+        }
+        return null;
     }
 
     // Enviar notificación específica a un usuario

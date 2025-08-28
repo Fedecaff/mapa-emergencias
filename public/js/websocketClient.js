@@ -162,12 +162,17 @@ class WebSocketClient {
     }
 
     openAlertInMap(notification) {
-        if (window.mapa && window.mapa.centerOnLocation) {
-            window.mapa.centerOnLocation(notification.latitud, notification.longitud);
+        // Centrar el mapa en la ubicación de la alerta
+        if (window.mapManager && window.mapManager.map) {
+            window.mapManager.map.setView([notification.latitud, notification.longitud], 15);
         }
-        if (window.mapa && window.mapa.showAlert) {
-            window.mapa.showAlert(notification);
+        
+        // Mostrar la alerta en el mapa (si existe la funcionalidad)
+        if (window.mapManager && window.mapManager.showAlert) {
+            window.mapManager.showAlert(notification);
         }
+        
+        // Marcar como leída
         this.markAsRead(notification.id);
     }
 
