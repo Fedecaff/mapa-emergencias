@@ -44,7 +44,7 @@ async function actualizarUsuarios() {
             const passwordHash = await bcrypt.hash('admin123', 10);
             
             await baseDeDatos.ejecutar(`
-                INSERT INTO usuarios (nombre, email, contraseña, telefono, rol)
+                INSERT INTO usuarios (nombre, email, password, telefono, rol)
                 VALUES ($1, $2, $3, $4, $5)
             `, ['Federico G.', 'federico.gomez.sc@gmail.com', passwordHash, '+54 9 383 427-6843', 'admin']);
         } else {
