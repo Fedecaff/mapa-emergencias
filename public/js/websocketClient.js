@@ -230,6 +230,7 @@ class WebSocketClient {
                 
                 // Guardar referencia para poder eliminarlo después
                 marker._alertaId = notification.alertId;
+                console.log('📍 Marcador WebSocket creado con _alertaId:', notification.alertId, 'tipo:', typeof notification.alertId);
                 
                 console.log('✅ Alerta mostrada en mapa en tiempo real:', lat, lng);
             } else {
@@ -263,7 +264,8 @@ class WebSocketClient {
                     tipos: {
                         _alertaId_tipo: typeof layer._alertaId,
                         alertId_tipo: typeof alertId,
-                        son_iguales: layer._alertaId === alertId
+                        son_iguales: layer._alertaId === alertId,
+                        valores_iguales: layer._alertaId == alertId
                     }
                 });
                 

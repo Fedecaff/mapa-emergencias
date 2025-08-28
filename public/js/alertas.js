@@ -186,6 +186,7 @@ class AlertasManager {
         
         // Guardar el ID de la alerta en el marcador para poder eliminarlo después
         marker._alertaId = alerta.id;
+        console.log('📍 Marcador creado con _alertaId:', alerta.id, 'tipo:', typeof alerta.id);
         
         // Agregar event listener para cuando se abra el popup
         marker.on('popupopen', () => {
