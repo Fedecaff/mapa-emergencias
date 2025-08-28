@@ -1,4 +1,5 @@
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
+import websocketService from '../servicios/websocketService.js';
 
 const alertasController = {
 
@@ -120,6 +121,26 @@ const alertasController = {
                 mensaje: 'Alerta de emergencia creada exitosamente',
                 alerta
             });
+            
+            // Enviar notificación WebSocket a todos los usuarios excepto al creador
+            try {
+                const notificationData = {
+                    id: alerta.id,
+                    tipo: alerta.tipo,
+                    titulo: alerta.titulo,
+                    descripcion: alerta.descripcion,
+                    ubicacion: alerta.direccion || `${alerta.latitud}, ${alerta.longitud}`,
+                    categoria: alerta.tipo,
+                    prioridad: alerta.prioridad,
+                    latitud: alerta.latitud,
+                    longitud: alerta.longitud
+                };
+                
+                websocketService.sendAlertNotification(notificationData, req.usuario.id);
+                console.log('📢 Notificación WebSocket enviada');
+            } catch (error) {
+                console.error('❌ Error enviando notificación WebSocket:', error);
+            }
             
             console.log('✅ Respuesta enviada exitosamente');
 

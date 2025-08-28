@@ -50,6 +50,14 @@ class Auth {
                 this.logout();
             });
         }
+
+        // Botón de notificaciones
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        if (notificationsBtn) {
+            notificationsBtn.addEventListener('click', () => {
+                this.toggleNotificationsPanel();
+            });
+        }
         
         // Formulario de login
         const loginForm = document.getElementById('loginForm');
@@ -662,7 +670,33 @@ class Auth {
         // Detener polling del panel
         this.stopPanelPolling();
         
+        // Ocultar panel de notificaciones
+        const notificationsPanel = document.getElementById('notificationsPanel');
+        if (notificationsPanel) {
+            notificationsPanel.style.display = 'none';
         }
+        
+        // Desconectar WebSocket
+        if (window.websocketClient) {
+            window.websocketClient.disconnect();
+        }
+        
+        }
+
+    toggleNotificationsPanel() {
+        const panel = document.getElementById('notificationsPanel');
+        const isVisible = panel.style.display !== 'none';
+        
+        if (isVisible) {
+            panel.style.display = 'none';
+        } else {
+            panel.style.display = 'block';
+            // Actualizar el panel con las notificaciones actuales
+            if (window.websocketClient) {
+                window.websocketClient.updateNotificationsPanel();
+            }
+        }
+    }
 
     configurarDisponibilidad(disponible) {
         const checkbox = document.getElementById('availabilityCheckbox');

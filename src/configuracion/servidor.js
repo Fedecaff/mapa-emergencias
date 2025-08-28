@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createServer } from 'http';
 
 // Importar base de datos
 import baseDeDatos from '../modelos/baseDeDatosPostgres.js';
@@ -19,6 +20,7 @@ import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
 import corregirEstructuraUsuarios from '../modelos/corregirEstructuraUsuarios.js';
+import websocketService from '../servicios/websocketService.js';
 
 
 // Importar rutas
@@ -36,6 +38,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = createServer(app);
 const PUERTO = process.env.PUERTO || 8080;
 
 // Configuración de seguridad
@@ -138,14 +141,16 @@ async function iniciarServidor() {
         // Corregir estructura de tabla usuarios (contraseña -> password)
         await corregirEstructuraUsuarios();
         
-
+        // Inicializar WebSocket
+        websocketService.initialize(server);
         
         console.log('✅ Base de datos inicializada correctamente');
         
         // Iniciar servidor
-        app.listen(PUERTO, '0.0.0.0', () => {
+        server.listen(PUERTO, '0.0.0.0', () => {
             console.log(`🚀 Servidor iniciado en puerto ${PUERTO}`);
             console.log(`📱 Aplicación disponible en: http://localhost:${PUERTO}`);
+            console.log(`🔌 WebSocket disponible en: ws://localhost:${PUERTO}`);
         });
     } catch (error) {
         console.error('❌ Error inicializando servidor:', error);
