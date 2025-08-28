@@ -71,7 +71,9 @@ class WebSocketService {
             location: alertData.ubicacion,
             category: alertData.categoria,
             timestamp: new Date().toISOString(),
-            alertId: alertData.id
+            alertId: alertData.id,
+            latitud: alertData.latitud,
+            longitud: alertData.longitud
         };
 
         // Enviar a todos los usuarios conectados excepto al creador

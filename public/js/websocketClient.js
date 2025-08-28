@@ -95,6 +95,9 @@ class WebSocketClient {
         this.updateNotificationsPanel();
         this.playAlertSound();
         this.showInAppNotification(notification);
+        
+        // Mostrar la alerta en el mapa en tiempo real
+        this.mostrarAlertaEnMapa(notification);
     }
 
     handleNotification(notification) {
@@ -159,6 +162,60 @@ class WebSocketClient {
             audio.volume = 0.5;
             audio.play().catch(() => {});
         } catch (_) {}
+    }
+
+    // Mostrar alerta en el mapa cuando llega una notificación
+    mostrarAlertaEnMapa(notification) {
+        // Validar que las coordenadas existan
+        if (!notification.latitud || !notification.longitud) {
+            console.error('❌ Coordenadas faltantes para mostrar en mapa:', notification);
+            return;
+        }
+        
+        // Convertir a números
+        const lat = parseFloat(notification.latitud);
+        const lng = parseFloat(notification.longitud);
+        
+        if (isNaN(lat) || isNaN(lng)) {
+            console.error('❌ Coordenadas inválidas para mostrar en mapa:', notification.latitud, notification.longitud);
+            return;
+        }
+        
+        // Esperar a que el mapa esté disponible
+        const waitForMapManager = () => {
+            if (window.mapManager && window.mapManager.map) {
+                // Crear marcador de emergencia
+                const emergencyIcon = L.divIcon({
+                    className: 'emergency-marker-active',
+                    html: `<i class="fas fa-fire" style="color: #e74c3c; font-size: 24px;"></i>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+                
+                // Crear contenido del popup
+                const popupContent = `
+                    <div class="emergency-popup">
+                        <h4>🚨 ${notification.title}</h4>
+                        <p><strong>Descripción:</strong> ${notification.message}</p>
+                        <p><strong>Ubicación:</strong> ${notification.location}</p>
+                        <p><strong>Prioridad:</strong> ${notification.category || 'Media'}</p>
+                        <button class="btn btn-primary btn-sm" onclick="websocketClient.openAlertInMap(${JSON.stringify(notification)})">Ver detalles</button>
+                    </div>
+                `;
+                
+                const marker = L.marker([lat, lng], { icon: emergencyIcon })
+                    .addTo(window.mapManager.map)
+                    .bindPopup(popupContent, { maxWidth: 400 });
+                
+                // Guardar referencia para poder eliminarlo después
+                marker._notificationId = notification.id;
+                
+                console.log('✅ Alerta mostrada en mapa en tiempo real:', lat, lng);
+            } else {
+                setTimeout(waitForMapManager, 100);
+            }
+        };
+        waitForMapManager();
     }
 
     openAlertInMap(notification) {
