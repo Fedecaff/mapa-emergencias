@@ -18,6 +18,7 @@ import actualizarPerfilOperadores from '../modelos/actualizarPerfilOperadores.js
 import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
+import corregirEstructuraUsuarios from '../modelos/corregirEstructuraUsuarios.js';
 
 
 // Importar rutas
@@ -133,6 +134,9 @@ async function iniciarServidor() {
         
         // Actualizar campo email_verificado
         await actualizarCampoEmail();
+        
+        // Corregir estructura de tabla usuarios (contraseña -> password)
+        await corregirEstructuraUsuarios();
         
 
         
