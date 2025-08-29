@@ -255,6 +255,9 @@ class WebSocketClient {
         let totalLayers = 0;
         let marcadoresEncontrados = [];
         
+        // Convertir alertId a número para comparación consistente
+        const alertIdNum = parseInt(alertId);
+        
         window.mapManager.map.eachLayer((layer) => {
             totalLayers++;
             
@@ -270,16 +273,18 @@ class WebSocketClient {
                     _alertaId: layer._alertaId,
                     _notificationId: layer._notificationId,
                     alertId: alertId,
+                    alertIdNum: alertIdNum,
                     tipos: {
                         _alertaId_tipo: typeof layer._alertaId,
                         alertId_tipo: typeof alertId,
-                        son_iguales: layer._alertaId === alertId,
-                        valores_iguales: layer._alertaId == alertId
+                        alertIdNum_tipo: typeof alertIdNum,
+                        son_iguales: layer._alertaId === alertIdNum,
+                        valores_iguales: layer._alertaId == alertIdNum
                     }
                 });
                 
-                // Buscar marcadores por alertId
-                if (layer._alertaId === alertId) {
+                // Buscar marcadores por alertId (comparando como números)
+                if (layer._alertaId === alertIdNum) {
                     window.mapManager.map.removeLayer(layer);
                     console.log('✅ Alerta removida del mapa:', alertId);
                     encontrada = true;
