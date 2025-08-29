@@ -1,6 +1,6 @@
 # 🚒 Mapa de Emergencias - Catamarca
 
-Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. Permite la gestión de puntos de interés, geolocalización de operadores en tiempo real, y coordinación de emergencias.
+Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. Permite la gestión de puntos de interés, geolocalización de operadores en tiempo real, coordinación de emergencias y notificaciones instantáneas.
 
 ## 🌟 Características Principales
 
@@ -9,6 +9,9 @@ Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. 
 - **Roles diferenciados**: Administrador y Operador
 - **Persistencia de sesión** con "Mantener sesión"
 - **Gestión de perfiles** con foto y datos personales
+- **Panel de gestión de usuarios** para administradores
+- **Creación, edición y eliminación** de usuarios
+- **Filtros por rol y estado** de disponibilidad
 
 ### 🗺️ Mapa Interactivo
 - **Mapa base** centrado en Catamarca
@@ -16,6 +19,7 @@ Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. 
 - **Filtros por categorías** (Bomberos, Hospitales, Policía, etc.)
 - **Información detallada** en popups
 - **Geolocalización** de operadores en tiempo real
+- **Alertas de emergencia** con marcadores especiales
 
 ### 👥 Gestión de Operadores
 - **Panel de disponibilidad** para operadores
@@ -23,24 +27,31 @@ Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. 
 - **Lista de operadores** con estado en tiempo real
 - **Perfiles completos** con foto e información personal
 - **Modos "Ver Info" y "Editar Info"** para perfiles
+- **Subida de fotos de perfil** con persistencia
 
-### 🚨 Sistema de Alertas
-- **Creación de emergencias** desde el mapa
-- **Formulario completo** con ubicación, descripción y fotos
-- **Gestión de alertas activas**
-- **Sistema de concurrencia** para múltiples unidades
+### 🚨 Sistema de Alertas y Notificaciones
+- **Creación de emergencias** desde el mapa (solo administradores)
+- **Formulario completo** con ubicación, descripción y prioridad
+- **Notificaciones en tiempo real** via WebSocket
+- **Alertas push del navegador** para operadores
+- **Notificaciones emergentes** en la aplicación
+- **Sincronización automática** de alertas en el mapa
+- **Eliminación en tiempo real** cuando se da de baja una alerta
+- **Panel de notificaciones** con historial
 
 ### 📸 Gestión de Fotos
 - **Subida de fotos** para puntos de interés
 - **Fotos de perfil** para operadores
 - **Visualización en galerías**
-- **Almacenamiento temporal** en Base64
+- **Almacenamiento en Base64** con persistencia
+- **Validación de archivos** y tamaños
 
 ### 🔄 Actualizaciones en Tiempo Real
-- **Polling automático** cada 5 segundos
-- **Manejo de errores** y reintentos
-- **Detección de cambios** para optimizar actualizaciones
-- **Sincronización** de estado de operadores
+- **WebSocket** para comunicación bidireccional
+- **Notificaciones instantáneas** de nuevas alertas
+- **Sincronización de mapas** entre usuarios
+- **Actualización automática** de estado de operadores
+- **Manejo de errores** y reconexión automática
 
 ## 🛠️ Tecnologías Utilizadas
 
@@ -50,12 +61,15 @@ Sistema integral de mapeo de emergencias para bomberos de Catamarca, Argentina. 
 - **JWT** para autenticación
 - **bcrypt** para encriptación de contraseñas
 - **Multer** para manejo de archivos
+- **Socket.IO** para comunicación en tiempo real
 
 ### Frontend
 - **HTML5** y **CSS3** con diseño responsive
 - **JavaScript ES6+** modular
 - **Leaflet.js** para mapas interactivos
 - **Font Awesome** para iconografía
+- **Socket.IO Client** para WebSocket
+- **Notifications API** para alertas del navegador
 
 ### Infraestructura
 - **Railway** para hosting y despliegue automático
@@ -77,7 +91,8 @@ bombero/
 │   │   ├── fotos.js            # Gestión de imágenes
 │   │   ├── usuarios.js         # Panel de administración
 │   │   ├── utilidades.js       # Funciones auxiliares
-│   │   └── geolocalizacion.js  # Geolocalización
+│   │   ├── geolocalizacion.js  # Geolocalización
+│   │   └── websocketClient.js  # Cliente WebSocket
 │   └── index.html              # Página principal
 ├── src/
 │   ├── configuracion/
@@ -93,7 +108,9 @@ bombero/
 │   │   ├── baseDeDatosPostgres.js
 │   │   ├── actualizarPerfilOperadores.js
 │   │   ├── actualizarGeolocalizacion.js
-│   │   └── actualizarCampoFoto.js
+│   │   ├── actualizarCampoFoto.js
+│   │   ├── actualizarCampoEmail.js
+│   │   └── corregirEstructuraUsuarios.js
 │   ├── rutas/
 │   │   ├── autenticacion.js
 │   │   ├── usuarios.js
@@ -101,6 +118,8 @@ bombero/
 │   │   ├── categorias.js
 │   │   ├── alertas.js
 │   │   └── fotos.js
+│   ├── servicios/
+│   │   └── websocketService.js  # Servidor WebSocket
 │   └── middleware/
 │       └── autenticacion.js
 ├── package.json
@@ -157,7 +176,7 @@ bombero/
 #### `usuarios`
 - `id`: Identificador único
 - `email`: Email del usuario
-- `contraseña`: Contraseña encriptada
+- `password`: Contraseña encriptada
 - `nombre`: Nombre completo
 - `rol`: 'administrador' o 'operador'
 - `foto_perfil`: Foto de perfil (Base64)
@@ -189,7 +208,13 @@ bombero/
 - `latitud`: Coordenada latitud
 - `longitud`: Coordenada longitud
 - `estado`: Estado de la alerta
+- `tipo`: Tipo de emergencia
+- `prioridad`: Prioridad de la alerta
+- `direccion`: Dirección de la emergencia
+- `personas_afectadas`: Número de personas afectadas
+- `riesgos_especificos`: Riesgos específicos
 - `concurrencia_solicitada`: Unidades solicitadas
+- `usuario_id`: ID del usuario que creó la alerta
 - `fecha_creacion`: Fecha de creación
 
 #### `geolocalizacion`
@@ -214,6 +239,7 @@ bombero/
 - **Modos de visualización**: "Ver Info" (solo lectura) y "Editar Info"
 - **Persistencia de datos** después de reinicios del servidor
 - **Validación de campos** en frontend y backend
+- **Interfaz intuitiva** con botones de cambio de modo
 
 ### Sistema de Mapas
 - **Centrado automático** en Catamarca
@@ -221,13 +247,34 @@ bombero/
 - **Marcadores categorizados** con colores e iconos
 - **Popups informativos** con detalles completos
 - **Integración con geolocalización** de operadores
+- **Marcadores de emergencia** con iconos especiales
 
 ### Alertas de Emergencia
-- **Creación desde el mapa** con clic derecho
+- **Creación desde el mapa** con clic derecho (solo administradores)
 - **Formulario completo** con validaciones
-- **Subida de fotos** para documentar la emergencia
+- **Tipos de emergencia**: Incendio estructural, forestal, accidente vehicular, rescate, fuga de gas, otros
+- **Niveles de prioridad**: Alta, Media, Baja
 - **Sistema de concurrencia** para múltiples unidades
 - **Gestión de estado** (activa/inactiva)
+- **Eliminación con confirmación** (solo administradores)
+
+### Sistema de Notificaciones
+- **Notificaciones en tiempo real** via WebSocket
+- **Alertas push del navegador** para operadores
+- **Notificaciones emergentes** en la aplicación
+- **Panel de notificaciones** con historial
+- **Marcar como leída** individual y masiva
+- **Sonido de alerta** para nuevas emergencias
+- **Sincronización automática** con el mapa
+
+### Gestión de Usuarios (Administradores)
+- **Panel de gestión** con lista de usuarios
+- **Filtros por rol** (administrador/operador)
+- **Filtros por estado** (disponible/no disponible)
+- **Creación de usuarios** con validación
+- **Edición de datos** de usuarios existentes
+- **Eliminación de usuarios** con confirmación
+- **Protección contra eliminación** del último administrador
 
 ## 🔄 API Endpoints
 
@@ -243,6 +290,7 @@ bombero/
 - `POST /api/usuarios/:id/foto` - Subir foto de perfil
 - `PUT /api/usuarios/:id/disponibilidad` - Actualizar disponibilidad
 - `POST /api/usuarios/:id/geolocalizacion` - Actualizar ubicación
+- `DELETE /api/usuarios/:id` - Eliminar usuario (admin)
 
 ### Puntos y Categorías
 - `GET /api/puntos` - Listar puntos
@@ -251,14 +299,20 @@ bombero/
 - `POST /api/categorias` - Crear categoría (admin)
 
 ### Alertas
-- `GET /api/alertas` - Listar alertas
-- `POST /api/alertas` - Crear alerta
+- `GET /api/alertas/listar` - Listar alertas
+- `POST /api/alertas/crear` - Crear alerta
 - `PUT /api/alertas/:id` - Actualizar alerta
 - `DELETE /api/alertas/:id` - Eliminar alerta
 
 ### Fotos
 - `GET /api/fotos/punto/:puntoId` - Fotos de un punto
 - `POST /api/fotos/punto/:puntoId` - Subir foto a punto
+
+### WebSocket Events
+- `authenticate` - Autenticación de usuario
+- `newAlert` - Nueva alerta creada
+- `alertDeleted` - Alerta eliminada
+- `notification` - Notificación general
 
 ## 🚀 Despliegue en Railway
 
@@ -281,6 +335,8 @@ El proyecto está configurado para despliegue automático en Railway:
 - **Validación de roles** en endpoints sensibles
 - **Sanitización de datos** en formularios
 - **Validación de archivos** en subidas
+- **Protección CSRF** en formularios
+- **Validación de tipos** en WebSocket
 
 ## 📱 Responsive Design
 
@@ -288,6 +344,39 @@ El sistema está optimizado para:
 - **Desktop**: Pantallas grandes con todas las funcionalidades
 - **Tablet**: Adaptación de paneles y controles
 - **Mobile**: Navegación simplificada y controles táctiles
+
+## 🎯 Funcionalidades Implementadas
+
+### ✅ Fase 1: Base del Sistema
+- [x] Autenticación y autorización
+- [x] Gestión de usuarios y roles
+- [x] Mapa base con Leaflet.js
+- [x] Geolocalización de operadores
+
+### ✅ Fase 2: Gestión de Puntos
+- [x] CRUD de puntos de interés
+- [x] Categorización de puntos
+- [x] Subida y gestión de fotos
+- [x] Filtros por categorías
+
+### ✅ Fase 3: Sistema de Alertas
+- [x] Creación de emergencias
+- [x] Formularios completos
+- [x] Gestión de estado de alertas
+- [x] Marcadores especiales en mapa
+
+### ✅ Fase 4: Perfiles y Gestión
+- [x] Perfiles de usuario completos
+- [x] Subida de fotos de perfil
+- [x] Edición de datos personales
+- [x] Modos de visualización
+
+### ✅ Fase 5: Notificaciones en Tiempo Real
+- [x] Sistema WebSocket completo
+- [x] Notificaciones push del navegador
+- [x] Panel de notificaciones
+- [x] Sincronización automática de mapas
+- [x] Gestión de usuarios para administradores
 
 ## 🎯 Próximas Funcionalidades
 
@@ -297,9 +386,9 @@ El sistema está optimizado para:
 - [ ] Estadísticas de disponibilidad
 
 ### Fase 7: Comunicación
-- [ ] Notificaciones de emergencia
 - [ ] Chat interno entre operadores
 - [ ] Historial de ubicaciones
+- [ ] Reportes de actividad
 
 ### Fase 8: Optimización
 - [ ] Optimización de rendimiento del mapa
@@ -331,9 +420,27 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 - **Railway** por el hosting gratuito
 - **Leaflet.js** por la librería de mapas
 - **Font Awesome** por los iconos
+- **Socket.IO** por la comunicación en tiempo real
 
 ---
 
-**Versión**: 1.0.0  
+**Versión**: 2.0.0  
 **Última actualización**: Enero 2025  
-**Estado**: En desarrollo activo
+**Estado**: Sistema completo y funcional
+
+### 🚨 Notas de la Versión 2.0.0
+
+**Nuevas Funcionalidades:**
+- ✅ Sistema de notificaciones en tiempo real
+- ✅ Gestión completa de usuarios para administradores
+- ✅ Sincronización automática de alertas en mapas
+- ✅ Panel de notificaciones con historial
+- ✅ Corrección de problemas de persistencia de datos
+- ✅ Mejoras en la interfaz de usuario
+
+**Correcciones:**
+- ✅ Problema de doble ventana en subida de fotos
+- ✅ Visualización de fotos de perfil
+- ✅ Persistencia de datos después de reinicios
+- ✅ Sincronización de eliminación de alertas
+- ✅ Validación de tipos en WebSocket

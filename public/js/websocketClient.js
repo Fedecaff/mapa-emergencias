@@ -232,7 +232,6 @@ class WebSocketClient {
                 
                 // Guardar referencia para poder eliminarlo después
                 marker._alertaId = notification.alertId;
-                console.log('📍 Marcador WebSocket creado con _alertaId:', notification.alertId, 'tipo:', typeof notification.alertId);
                 
                 console.log('✅ Alerta mostrada en mapa en tiempo real:', lat, lng);
             } else {
@@ -244,58 +243,23 @@ class WebSocketClient {
 
     // Remover alerta del mapa cuando se da de baja
     removerAlertaDelMapa(alertId) {
-        console.log('🔍 Buscando alerta para remover del mapa:', alertId);
-        
         if (!window.mapManager || !window.mapManager.map) {
-            console.log('❌ MapManager no disponible');
             return;
         }
-        
-        let encontrada = false;
-        let totalLayers = 0;
-        let marcadoresEncontrados = [];
         
         // Convertir alertId a número para comparación consistente
         const alertIdNum = parseInt(alertId);
         
         window.mapManager.map.eachLayer((layer) => {
-            totalLayers++;
-            
             // Verificar si es un marcador de emergencia
             if (layer._icon && layer._icon.className && layer._icon.className.includes('emergency-marker')) {
-                marcadoresEncontrados.push({
-                    _alertaId: layer._alertaId,
-                    _notificationId: layer._notificationId,
-                    tipo: typeof layer._alertaId
-                });
-                
-                console.log('🔍 Marcador de emergencia encontrado:', {
-                    _alertaId: layer._alertaId,
-                    _notificationId: layer._notificationId,
-                    alertId: alertId,
-                    alertIdNum: alertIdNum,
-                    tipos: {
-                        _alertaId_tipo: typeof layer._alertaId,
-                        alertId_tipo: typeof alertId,
-                        alertIdNum_tipo: typeof alertIdNum,
-                        son_iguales: layer._alertaId === alertIdNum,
-                        valores_iguales: layer._alertaId == alertIdNum
-                    }
-                });
-                
                 // Buscar marcadores por alertId (comparando como números)
                 if (layer._alertaId === alertIdNum) {
                     window.mapManager.map.removeLayer(layer);
                     console.log('✅ Alerta removida del mapa:', alertId);
-                    encontrada = true;
                 }
             }
         });
-        
-        if (!encontrada) {
-            console.log(`⚠️ No se encontró la alerta ${alertId} en el mapa (${totalLayers} layers revisadas)`);
-            console.log('📋 Marcadores de emergencia encontrados:', marcadoresEncontrados);
-        }
     }
 
     openAlertInMap(notification) {
@@ -411,14 +375,12 @@ class WebSocketClient {
     // Cargar alertas activas cuando se autentica
     async cargarAlertasActivas() {
         try {
-            console.log('📋 Cargando alertas activas para operador...');
             const response = await API.get('/alertas/listar');
             const alertas = response.alertas || [];
             
             // Mostrar solo alertas activas
             alertas.forEach(alerta => {
                 if (alerta.estado === 'activa') {
-                    console.log('📍 Cargando alerta activa:', alerta.id, alerta.titulo);
                     this.mostrarAlertaEnMapa({
                         alertId: alerta.id,
                         title: `🚨 ${alerta.titulo}`,
