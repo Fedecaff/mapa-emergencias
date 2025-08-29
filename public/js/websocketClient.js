@@ -67,6 +67,8 @@ class WebSocketClient {
         this.socket.on('authenticated', (data) => {
             if (data.success) {
                 console.log('✅ Autenticado en WebSocket');
+                // Cargar alertas activas después de autenticarse
+                this.cargarAlertasActivas();
             }
         });
     }
@@ -251,12 +253,19 @@ class WebSocketClient {
         
         let encontrada = false;
         let totalLayers = 0;
+        let marcadoresEncontrados = [];
         
         window.mapManager.map.eachLayer((layer) => {
             totalLayers++;
             
             // Verificar si es un marcador de emergencia
             if (layer._icon && layer._icon.className && layer._icon.className.includes('emergency-marker')) {
+                marcadoresEncontrados.push({
+                    _alertaId: layer._alertaId,
+                    _notificationId: layer._notificationId,
+                    tipo: typeof layer._alertaId
+                });
+                
                 console.log('🔍 Marcador de emergencia encontrado:', {
                     _alertaId: layer._alertaId,
                     _notificationId: layer._notificationId,
@@ -280,6 +289,7 @@ class WebSocketClient {
         
         if (!encontrada) {
             console.log(`⚠️ No se encontró la alerta ${alertId} en el mapa (${totalLayers} layers revisadas)`);
+            console.log('📋 Marcadores de emergencia encontrados:', marcadoresEncontrados);
         }
     }
 
@@ -390,6 +400,35 @@ class WebSocketClient {
             this.socket.disconnect();
             this.socket = null;
             this.isConnected = false;
+        }
+    }
+
+    // Cargar alertas activas cuando se autentica
+    async cargarAlertasActivas() {
+        try {
+            console.log('📋 Cargando alertas activas para operador...');
+            const response = await API.get('/alertas/listar');
+            const alertas = response.alertas || [];
+            
+            // Mostrar solo alertas activas
+            alertas.forEach(alerta => {
+                if (alerta.estado === 'activa') {
+                    console.log('📍 Cargando alerta activa:', alerta.id, alerta.titulo);
+                    this.mostrarAlertaEnMapa({
+                        alertId: alerta.id,
+                        title: `🚨 ${alerta.titulo}`,
+                        message: alerta.descripcion || 'Sin descripción',
+                        location: alerta.direccion || 'Sin dirección',
+                        latitud: alerta.latitud,
+                        longitud: alerta.longitud,
+                        category: alerta.prioridad
+                    });
+                }
+            });
+            
+            console.log(`✅ Cargadas ${alertas.filter(a => a.estado === 'activa').length} alertas activas`);
+        } catch (error) {
+            console.error('❌ Error cargando alertas activas:', error);
         }
     }
 }
