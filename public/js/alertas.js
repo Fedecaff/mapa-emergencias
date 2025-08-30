@@ -204,6 +204,14 @@ class AlertasManager {
             });
         }
         
+        // Event listener para botón "Indicaciones"
+        const btnDirecciones = document.querySelector('.btn-direcciones-emergencia');
+        if (btnDirecciones) {
+            btnDirecciones.addEventListener('click', () => {
+                this.seleccionarAlertaParaIndicaciones(alerta);
+            });
+        }
+        
         // Event listener para botón "Cambiar Estado" (solo admin)
         const btnCambiarEstado = document.querySelector('.btn-cambiar-estado');
         if (btnCambiarEstado) {
@@ -256,6 +264,39 @@ class AlertasManager {
         }
     }
 
+    // Seleccionar alerta para indicaciones
+    seleccionarAlertaParaIndicaciones(alerta) {
+        try {
+            // Notificar al DireccionesManager
+            if (window.direccionesManager) {
+                window.direccionesManager.selectPoint({
+                    id: `alerta_${alerta.id}`,
+                    nombre: `Alerta: ${alerta.titulo}`,
+                    latitud: alerta.latitud,
+                    longitud: alerta.longitud,
+                    categoria: 'Alerta de Emergencia'
+                });
+                
+                // Cerrar el popup
+                if (window.mapManager && window.mapManager.map) {
+                    window.mapManager.map.closePopup();
+                }
+                
+                // Mostrar notificación
+                Notifications.success(`Alerta "${alerta.titulo}" seleccionada para indicaciones`);
+                
+                console.log('🎯 Alerta seleccionada para indicaciones:', alerta);
+            } else {
+                console.error('❌ DireccionesManager no disponible');
+                Notifications.error('Sistema de indicaciones no disponible');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error seleccionando alerta para indicaciones:', error);
+            Notifications.error('Error al seleccionar alerta');
+        }
+    }
+
     crearPopupAlerta(alerta) {
         const prioridadColor = {
             'alta': '#e74c3c',
@@ -300,6 +341,9 @@ class AlertasManager {
                      <button class="btn-ver-fotos-emergencia" data-alerta-id="${alerta.id}" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
                          <i class="fas fa-camera"></i> Ver Fotos
                      </button>
+                     <button class="btn-direcciones-emergencia" data-alerta-id="${alerta.id}" style="background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+                         <i class="fas fa-route"></i> Indicaciones
+                     </button>
                      ${window.auth.isAdmin() ? `
                          <button class="btn-cambiar-estado" data-alerta-id="${alerta.id}" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">
                              <i class="fas fa-edit"></i> Cambiar Estado
@@ -308,6 +352,7 @@ class AlertasManager {
                              <i class="fas fa-trash"></i> Dar de Baja
                          </button>
                      ` : ''}
+
                  </div>
             </div>
         `;
@@ -530,6 +575,20 @@ class AlertasManager {
         } catch (error) {
             console.error('❌ Error dando de baja alerta:', error);
             Notifications.error('Error dando de baja la alerta');
+            return false;
+        }
+    }
+
+    isUserAdmin() {
+        // Verificar si auth está disponible y el usuario es admin
+        try {
+            if (!window.auth || !window.auth.isAuthenticated()) {
+                return false;
+            }
+            
+            return window.auth.isAdmin();
+        } catch (error) {
+            console.warn('⚠️ Error verificando si es admin:', error);
             return false;
         }
     }

@@ -47,6 +47,8 @@ class MapManager {
             if (this.isAddingPoint && window.auth.isAdmin()) {
                 this.handleMapClick(e);
             }
+            // Removido: selección de punto del mapa para indicaciones
+            // Las indicaciones solo estarán disponibles para elementos estáticos
         });
         
         // Forzar un refresh del mapa
@@ -307,6 +309,14 @@ class MapManager {
             .addTo(this.map)
             .bindPopup(this.createPopupContent(point, category));
         
+        // Agregar event listener para seleccionar punto para indicaciones al hacer clic
+        marker.on('click', () => {
+            // Seleccionar el punto para indicaciones (habilita el botón "Mostrar Ruta")
+            this.selectPointForDirections(point.id);
+            
+            // El popup se mostrará automáticamente por el bindPopup
+        });
+        
         // Guardar referencia al marcador
         marker.pointData = point;
         this.markers.push(marker);
@@ -489,9 +499,19 @@ class MapManager {
                 iconAnchor: [15, 15]
             });
             
-            this.searchMarker = L.marker([lat, lon], { icon: searchIcon })
-                .addTo(this.map)
-                .bindPopup(`<b>Búsqueda:</b> ${location.display_name}`);
+                         this.searchMarker = L.marker([lat, lon], { icon: searchIcon })
+                 .addTo(this.map)
+                 .bindPopup(`
+                     <div class="popup-content">
+                         <h3><i class="fas fa-search" style="color: #e74c3c;"></i> Búsqueda</h3>
+                         <p><strong>Ubicación:</strong> ${location.display_name}</p>
+                         <div class="popup-actions">
+                             <button class="popup-btn directions-btn" onclick="mapManager.selectSearchLocationForDirections(${lat}, ${lon}, '${location.display_name}')">
+                                 <i class="fas fa-route"></i> Indicaciones
+                             </button>
+                         </div>
+                     </div>
+                 `);
             
             // Cargar puntos cercanos a la ubicación encontrada
             this.loadPoints({
@@ -641,6 +661,9 @@ class MapManager {
         // Mostrar modal de agregar punto
         Modal.show('addPointModal');
     }
+
+    // Método removido: handleMapClickForDirections
+    // Las indicaciones solo estarán disponibles para elementos estáticos
     
     async showPointDetails(pointId) {
         try {
@@ -1247,6 +1270,99 @@ class MapManager {
             });
         } catch (error) {
             return 'Fecha inválida';
+        }
+    }
+
+    // Seleccionar punto para indicaciones
+    selectPointForDirections(pointId) {
+        try {
+            // Buscar el punto en los marcadores cargados
+            const marker = this.markers.find(m => m.pointData && m.pointData.id === pointId);
+            
+            if (!marker || !marker.pointData) {
+                console.error('❌ Punto no encontrado:', pointId);
+                Notifications.error('Punto no encontrado');
+                return;
+            }
+            
+            const point = marker.pointData;
+
+            // Notificar al DireccionesManager
+            if (window.direccionesManager) {
+                window.direccionesManager.selectPoint({
+                    id: point.id,
+                    nombre: point.nombre,
+                    latitud: point.latitud,
+                    longitud: point.longitud,
+                    categoria: point.categoria
+                });
+                
+                // NO cerrar el popup - dejarlo abierto para que el usuario vea los botones
+                // this.map.closePopup();
+                
+                // Mostrar notificación sutil
+                console.log('🎯 Punto seleccionado para indicaciones:', point);
+            } else {
+                console.error('❌ DireccionesManager no disponible');
+                Notifications.error('Sistema de indicaciones no disponible');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error seleccionando punto para indicaciones:', error);
+            Notifications.error('Error al seleccionar punto');
+        }
+    }
+
+    // Seleccionar ubicación de búsqueda para indicaciones
+    selectSearchLocationForDirections(lat, lon, displayName) {
+        try {
+            // Notificar al DireccionesManager
+            if (window.direccionesManager) {
+                window.direccionesManager.selectPoint({
+                    id: 'search',
+                    nombre: displayName,
+                    latitud: lat,
+                    longitud: lon,
+                    categoria: 'Búsqueda'
+                });
+                
+                // Cerrar el popup
+                this.map.closePopup();
+                
+                // Mostrar notificación
+                Notifications.success(`Ubicación "${displayName}" seleccionada para indicaciones`);
+                
+                console.log('🎯 Ubicación de búsqueda seleccionada para indicaciones:', { lat, lon, displayName });
+            } else {
+                console.error('❌ DireccionesManager no disponible');
+                Notifications.error('Sistema de indicaciones no disponible');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error seleccionando ubicación de búsqueda para indicaciones:', error);
+            Notifications.error('Error al seleccionar ubicación');
+        }
+    }
+
+    // Método removido: selectMapLocationForDirections
+    // Las indicaciones solo estarán disponibles para elementos estáticos
+    
+    // Asegurar que la ubicación del usuario esté disponible
+    async ensureUserLocation() {
+        try {
+            // Verificar si ya tenemos ubicación
+            if (window.geolocalizacionManager && window.geolocalizacionManager.currentLocation) {
+                console.log('📍 Ubicación ya disponible');
+                return;
+            }
+            
+            // Si no hay ubicación, obtenerla
+            console.log('📍 Obteniendo ubicación del usuario...');
+            await this.centerOnUserLocation();
+            
+        } catch (error) {
+            console.error('❌ Error obteniendo ubicación:', error);
+            Notifications.warning('No se pudo obtener tu ubicación. Las indicaciones pueden no funcionar correctamente.');
         }
     }
 }

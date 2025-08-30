@@ -7,6 +7,7 @@
     
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.css" />
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -69,6 +70,22 @@
                     <button id="searchBtn">
                         <i class="fas fa-search"></i>
                     </button>
+                </div>
+            </div>
+
+            <!-- Panel de indicaciones -->
+            <div class="directions-panel">
+                <h3><i class="fas fa-route"></i> Indicaciones</h3>
+                <div class="directions-controls">
+                    <button id="directionsBtn" class="btn-directions" disabled>
+                        <i class="fas fa-map-marker-alt"></i> Mostrar Ruta
+                    </button>
+                    <button id="clearDirectionsBtn" class="btn-clear-directions" style="display: none;">
+                        <i class="fas fa-times"></i> Limpiar Ruta
+                    </button>
+                </div>
+                <div class="directions-info" id="directionsInfo">
+                    <p class="text-muted">Selecciona un punto en el mapa para mostrar indicaciones</p>
                 </div>
             </div>
 
@@ -732,6 +749,7 @@
     
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.js"></script>
     <script src="js/config.js"></script>
     <script src="js/utilidades.js"></script>
     <script src="js/autenticacion.js"></script>
@@ -741,6 +759,7 @@
     <script src="js/usuarios.js"></script>
     <script src="js/fotos.js"></script>
     <script src="js/alertas.js"></script>
+    <script src="js/direcciones.js"></script>
     <script src="js/app.js"></script>
     <script src="js/websocketClient.js"></script>
 

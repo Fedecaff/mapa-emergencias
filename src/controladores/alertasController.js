@@ -6,8 +6,9 @@ const alertasController = {
     // Crear nueva alerta de emergencia
     async crear(req, res) {
         try {
-            console.log('📤 Datos recibidos para crear alerta:', req.body);
-            console.log('👤 Usuario autenticado:', req.usuario);
+            console.log('🚨 === INICIO CREACIÓN ALERTA ===');
+            console.log('📤 Datos recibidos:', req.body);
+            console.log('👤 Usuario:', req.usuario);
             
             const {
                 tipo,
@@ -22,139 +23,94 @@ const alertasController = {
                 concurrencia_solicitada = 1
             } = req.body;
 
-            // Validaciones
+            // Validaciones básicas
             if (!tipo || !titulo || !latitud || !longitud) {
+                console.log('❌ Validación fallida: campos requeridos');
                 return res.status(400).json({
                     error: 'Tipo, título, latitud y longitud son requeridos'
                 });
             }
 
-            // Validar coordenadas
-            if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
-                return res.status(400).json({
-                    error: 'Coordenadas inválidas'
+            console.log('✅ Validaciones pasadas');
+            console.log('🔍 Verificando conexión a BD...');
+
+            // Verificar conexión a base de datos
+            try {
+                await baseDeDatos.ejecutar('SELECT 1');
+                console.log('✅ Conexión a BD verificada');
+            } catch (dbError) {
+                console.error('❌ Error de conexión a BD:', dbError);
+                return res.status(500).json({
+                    error: 'Error de conexión a base de datos',
+                    details: dbError.message
                 });
             }
 
-            // Validar prioridad
-            const prioridadesValidas = ['baja', 'media', 'alta'];
-            if (!prioridadesValidas.includes(prioridad)) {
-                return res.status(400).json({
-                    error: 'Prioridad inválida'
-                });
-            }
-
-            // Validar concurrencia solicitada
-            console.log('🔍 Validando concurrencia:', concurrencia_solicitada);
-            console.log('🔍 Tipo de concurrencia:', typeof concurrencia_solicitada);
+            console.log('🔍 Insertando alerta...');
             
-            if (concurrencia_solicitada !== 'todos' && (isNaN(concurrencia_solicitada) || concurrencia_solicitada < 1)) {
-                console.log('❌ Concurrencia inválida:', concurrencia_solicitada);
-                return res.status(400).json({
-                    error: 'La concurrencia solicitada debe ser un número mayor a 0 o "todos"'
-                });
-            }
-            
-            console.log('✅ Concurrencia válida:', concurrencia_solicitada);
-
-            // Insertar alerta
-            console.log('🗄️ Intentando insertar alerta en la base de datos...');
-            console.log('📊 Datos a insertar:', {
-                tipo, prioridad, titulo, descripcion, latitud, longitud,
-                direccion, personas_afectadas, riesgos_especificos,
-                concurrencia_solicitada, usuario_id: req.usuario.id
-            });
-            
+            // Query con ID explícito usando nextval
             const resultado = await baseDeDatos.ejecutar(`
                 INSERT INTO alertas_emergencia (
-                    tipo, prioridad, titulo, descripcion, latitud, longitud, 
+                    id, tipo, prioridad, titulo, descripcion, latitud, longitud, 
                     direccion, personas_afectadas, riesgos_especificos, 
                     concurrencia_solicitada, usuario_id
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
+                ) VALUES (nextval('alertas_emergencia_id_seq'), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) 
                 RETURNING id
             `, [
                 tipo, prioridad, titulo, descripcion, latitud, longitud,
                 direccion, personas_afectadas, riesgos_especificos,
                 concurrencia_solicitada, req.usuario.id
             ]);
-            
-            console.log('✅ Alerta insertada correctamente, ID:', resultado.rows[0].id);
 
-            // Obtener la alerta creada
-            const alerta = await baseDeDatos.obtenerUno(`
+            console.log('✅ Alerta insertada, ID:', resultado.rows[0].id);
+
+            // Obtener la alerta completa con información del usuario
+            const alertaCompleta = await baseDeDatos.obtenerUno(`
                 SELECT a.*, u.nombre as usuario_nombre, u.telefono as usuario_telefono
                 FROM alertas_emergencia a
                 JOIN usuarios u ON a.usuario_id = u.id
                 WHERE a.id = $1
             `, [resultado.rows[0].id]);
 
-            console.log(`🚨 Alerta creada: ${titulo} (ID: ${resultado.rows[0].id})`);
-            
-            // Enviar notificaciones WhatsApp a operadores disponibles
-            try {
-                console.log('📱 Iniciando envío de notificaciones WhatsApp...');
-                
-                // Obtener operadores disponibles con teléfono
-                const operadores = await baseDeDatos.obtenerTodos(`
-                    SELECT id, nombre, telefono, disponible, institucion
-                    FROM usuarios 
-                    WHERE rol = 'operador' 
-                    AND disponible = true 
-                    AND telefono IS NOT NULL 
-                    AND telefono != ''
-                `);
-                
-                if (operadores.length > 0) {
-                    console.log(`📱 ${operadores.length} operadores disponibles para notificaciones`);
-                    // TODO: Implementar notificaciones por email y push
-                } else {
-                    console.log('ℹ️ No hay operadores disponibles para notificar');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error obteniendo operadores para notificación:', error);
-            }
-            
-            console.log('📤 Enviando respuesta al cliente...');
-
+            // Respuesta con alerta completa
             res.status(201).json({
-                mensaje: 'Alerta de emergencia creada exitosamente',
-                alerta
+                mensaje: 'Alerta creada exitosamente',
+                alerta: alertaCompleta
             });
-            
+
             // Enviar notificación WebSocket a todos los usuarios excepto al creador
             try {
                 const notificationData = {
-                    id: alerta.id,
-                    tipo: alerta.tipo,
-                    titulo: alerta.titulo,
-                    descripcion: alerta.descripcion,
-                    ubicacion: alerta.direccion || `${alerta.latitud}, ${alerta.longitud}`,
-                    categoria: alerta.tipo,
-                    prioridad: alerta.prioridad,
-                    latitud: alerta.latitud,
-                    longitud: alerta.longitud
+                    id: alertaCompleta.id,
+                    type: 'alert',
+                    title: '🚨 Nueva Alerta',
+                    message: alertaCompleta.descripcion || 'Sin descripción',
+                    location: alertaCompleta.direccion || 'Sin dirección',
+                    category: alertaCompleta.prioridad,
+                    timestamp: new Date().toISOString(),
+                    alertId: alertaCompleta.id,
+                    latitud: alertaCompleta.latitud,
+                    longitud: alertaCompleta.longitud
                 };
                 
                 websocketService.sendAlertNotification(notificationData, req.usuario.id);
                 console.log('📢 Notificación WebSocket enviada');
-            } catch (error) {
-                console.error('❌ Error enviando notificación WebSocket:', error);
+            } catch (wsError) {
+                console.error('❌ Error enviando notificación WebSocket:', wsError);
             }
-            
-            console.log('✅ Respuesta enviada exitosamente');
+
+            console.log('🚨 === FIN CREACIÓN ALERTA ===');
 
         } catch (error) {
-            console.error('❌ Error creando alerta:', error);
-            console.error('📊 Datos que causaron el error:', {
-                tipo, prioridad, titulo, descripcion, latitud, longitud,
-                direccion, personas_afectadas, riesgos_especificos,
-                concurrencia_solicitada, usuario_id: req.usuario.id
-            });
-            res.status(500).json({
-                error: 'Error interno del servidor',
-                details: error.message
-            });
+            console.error('❌ Error en crear alerta:', error);
+            console.error('📊 Stack trace:', error.stack);
+            
+            if (!res.headersSent) {
+                res.status(500).json({
+                    error: 'Error interno del servidor',
+                    details: error.message
+                });
+            }
         }
     },
 
@@ -285,7 +241,7 @@ const alertasController = {
 
             console.log(`🗑️ Alerta eliminada: ${id}`);
 
-            // Enviar notificación WebSocket a todos los usuarios
+            // Enviar notificación WebSocket a todos los usuarios excepto al que elimina
             try {
                 const notificationData = {
                     id: id,
@@ -295,7 +251,7 @@ const alertasController = {
                     alertId: id
                 };
                 
-                websocketService.sendAlertDeletedNotification(notificationData);
+                websocketService.sendAlertDeletedNotification(notificationData, req.usuario.id);
                 console.log('📢 Notificación de eliminación WebSocket enviada');
             } catch (error) {
                 console.error('❌ Error enviando notificación de eliminación WebSocket:', error);

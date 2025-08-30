@@ -200,7 +200,12 @@ class Auth {
     }
     
     isAdmin() {
-        return this.isAuthenticated() && this.currentUser.rol === 'administrador';
+        try {
+            return this.isAuthenticated() && this.currentUser && this.currentUser.rol === 'administrador';
+        } catch (error) {
+            console.warn('⚠️ Error verificando rol de administrador:', error);
+            return false;
+        }
     }
     
     getCurrentUser() {
@@ -245,7 +250,9 @@ class Auth {
     }
 
     onUserLogin(user) {
-
+        // Actualizar usuario actual
+        this.currentUser = user;
+        
         // Mostrar información del usuario
         document.getElementById('userName').textContent = user.nombre;
         document.getElementById('userInfo').style.display = 'flex';
@@ -282,6 +289,18 @@ class Auth {
         // Inicializar geolocalización para operadores
         if (user.rol === 'operador') {
             this.inicializarGeolocalizacion(user.id);
+        }
+
+        // Actualizar popups de alertas si existen
+        if (window.alertasManager) {
+            setTimeout(() => {
+                window.alertasManager.actualizarPopupsExistentes();
+            }, 500);
+            
+            // Forzar actualización adicional después de un tiempo
+            setTimeout(() => {
+                window.alertasManager.forzarActualizacionPopups();
+            }, 1000);
         }
         
         // Iniciar actualización de operadores para administradores
@@ -696,9 +715,14 @@ class Auth {
             notificationsPanel.style.display = 'none';
         }
         
-        // Desconectar WebSocket
+        // Desconectar WebSocket completamente
         if (window.websocketClient) {
             window.websocketClient.disconnect();
+        }
+        
+        // Limpiar panel de indicaciones
+        if (window.direccionesManager) {
+            window.direccionesManager.clearSelection();
         }
         
         }
@@ -794,7 +818,19 @@ class Auth {
                     this.geolocalizacionManager = new GeolocalizacionManager();
                 }
                 this.geolocalizacionManager.init(userId);
-                } else {
+                
+                // Verificar si el DireccionesManager está disponible y notificar ubicación inicial
+                setTimeout(() => {
+                    if (window.direccionesManager && this.geolocalizacionManager.currentPosition) {
+                        const position = this.geolocalizacionManager.currentPosition;
+                        window.direccionesManager.setUserLocation({
+                            latitud: position.coords.latitude,
+                            longitud: position.coords.longitude
+                        });
+                        console.log('📍 Ubicación inicial notificada al DireccionesManager');
+                    }
+                }, 2000); // Esperar 2 segundos para que se obtenga la ubicación
+            } else {
                 console.warn('⚠️ GeolocalizacionManager no disponible');
             }
         } catch (error) {

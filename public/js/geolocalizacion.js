@@ -38,6 +38,12 @@ class GeolocalizacionManager {
             const position = await this.getCurrentPosition();
             this.currentPosition = position;
             
+            console.log('📍 Ubicación obtenida:', {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+                accuracy: position.coords.accuracy
+            });
+            
             // Enviar ubicación al servidor
             await this.enviarUbicacion(position.coords.latitude, position.coords.longitude);
             
@@ -123,6 +129,16 @@ class GeolocalizacionManager {
             if (response.ok) {
                 console.log(`✅ Ubicación enviada: ${latitud}, ${longitud}`);
                 this.actualizarIndicadorUbicacion(true);
+                
+                // Notificar al DireccionesManager sobre la nueva ubicación
+                if (window.direccionesManager) {
+                    const userLocation = {
+                        latitud: parseFloat(latitud),
+                        longitud: parseFloat(longitud)
+                    };
+                    window.direccionesManager.setUserLocation(userLocation);
+                    console.log('📍 Ubicación notificada al DireccionesManager:', userLocation);
+                }
             } else {
                 const error = await response.json();
                 console.error('❌ Error enviando ubicación:', error);

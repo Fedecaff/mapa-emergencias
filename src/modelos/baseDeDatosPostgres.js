@@ -20,7 +20,7 @@ class BaseDeDatosPostgres {
                 ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
                 max: 20, // Máximo número de conexiones
                 idleTimeoutMillis: 30000,
-                connectionTimeoutMillis: 2000,
+                connectionTimeoutMillis: 10000,
             };
             
             // Si tenemos DATABASE_URL, usarla (Railway la proporciona)
@@ -30,7 +30,7 @@ class BaseDeDatosPostgres {
                     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
                     max: 20,
                     idleTimeoutMillis: 30000,
-                    connectionTimeoutMillis: 2000,
+                    connectionTimeoutMillis: 10000,
                 });
             } else {
                 this.pool = new Pool(config);
@@ -60,12 +60,16 @@ class BaseDeDatosPostgres {
 
     async ejecutar(query, parametros = []) {
         if (!this.isConnected) {
+            console.log('🔌 Reconectando a la base de datos...');
             await this.conectar();
         }
 
         try {
+            console.log('🔍 Obteniendo cliente de la pool...');
             const client = await this.pool.connect();
+            console.log('🔍 Ejecutando query con cliente...');
             const resultado = await client.query(query, parametros);
+            console.log('✅ Query ejecutado exitosamente');
             client.release();
             return resultado;
         } catch (error) {

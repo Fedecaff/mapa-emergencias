@@ -20,6 +20,9 @@ import actualizarGeolocalizacion from '../modelos/actualizarGeolocalizacion.js';
 import actualizarCampoFoto from '../modelos/actualizarCampoFoto.js';
 import actualizarCampoEmail from '../modelos/actualizarCampoEmail.js';
 import corregirEstructuraUsuarios from '../modelos/corregirEstructuraUsuarios.js';
+import corregirSecuenciaAlertas from '../modelos/corregirSecuenciaAlertas.js';
+import diagnosticarAlertas from '../modelos/diagnosticoAlertas.js';
+import recrearTablaAlertas from '../modelos/recrearTablaAlertas.js';
 import websocketService from '../servicios/websocketService.js';
 
 
@@ -112,6 +115,19 @@ app.use('*', (req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
 });
 
+// Manejo de errores no capturados
+process.on('uncaughtException', (error) => {
+    console.error('❌ Error no capturado (uncaughtException):', error);
+    console.error('📊 Stack trace:', error.stack);
+    // NO cerrar el proceso inmediatamente, solo loggear el error
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Promesa rechazada no manejada (unhandledRejection):', reason);
+    console.error('📊 Promise:', promise);
+    // NO cerrar el proceso inmediatamente, solo loggear el error
+});
+
 // Inicializar base de datos y servidor
 async function iniciarServidor() {
     try {
@@ -140,6 +156,15 @@ async function iniciarServidor() {
         
         // Corregir estructura de tabla usuarios (contraseña -> password)
         await corregirEstructuraUsuarios();
+        
+        // Corregir secuencia de alertas
+        await corregirSecuenciaAlertas();
+        
+        // Diagnosticar tabla de alertas
+        await diagnosticarAlertas();
+        
+        // Recrear tabla de alertas (solo si hay problemas)
+        // await recrearTablaAlertas();
         
         // Inicializar WebSocket
         websocketService.initialize(server);

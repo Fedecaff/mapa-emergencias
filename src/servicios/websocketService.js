@@ -24,32 +24,40 @@ class WebSocketService {
 
             // Usuario se autentica
             socket.on('authenticate', (userData) => {
-                const { userId, rol } = userData;
-                
-                // Guardar conexión del usuario
-                this.connectedUsers.set(userId, socket.id);
-                
-                // Unir a sala según rol
-                socket.join(rol);
-                socket.join(`user_${userId}`);
-                
-                console.log(`✅ Usuario ${userId} (${rol}) autenticado en WebSocket`);
-                
-                // Confirmar autenticación
-                socket.emit('authenticated', { success: true });
+                try {
+                    const { userId, rol } = userData;
+                    
+                    // Guardar conexión del usuario
+                    this.connectedUsers.set(userId, socket.id);
+                    
+                    // Unir a sala según rol
+                    socket.join(rol);
+                    socket.join(`user_${userId}`);
+                    
+                    console.log(`✅ Usuario ${userId} (${rol}) autenticado en WebSocket`);
+                    
+                    // Confirmar autenticación
+                    socket.emit('authenticated', { success: true });
+                } catch (error) {
+                    console.error('❌ Error en autenticación WebSocket:', error);
+                }
             });
 
             // Usuario se desconecta
             socket.on('disconnect', () => {
-                console.log('🔌 Usuario desconectado:', socket.id);
-                
-                // Remover de usuarios conectados
-                for (const [userId, socketId] of this.connectedUsers.entries()) {
-                    if (socketId === socket.id) {
-                        this.connectedUsers.delete(userId);
-                        console.log(`✅ Usuario ${userId} removido de conexiones`);
-                        break;
+                try {
+                    console.log('🔌 Usuario desconectado:', socket.id);
+                    
+                    // Remover de usuarios conectados
+                    for (const [userId, socketId] of this.connectedUsers.entries()) {
+                        if (socketId === socket.id) {
+                            this.connectedUsers.delete(userId);
+                            console.log(`✅ Usuario ${userId} removido de conexiones`);
+                            break;
+                        }
                     }
+                } catch (error) {
+                    console.error('❌ Error en desconexión WebSocket:', error);
                 }
             });
 
@@ -63,30 +71,42 @@ class WebSocketService {
 
     // Enviar notificación de alerta a todos los usuarios excepto al creador
     sendAlertNotification(alertData, creatorId) {
-        const notification = {
-            id: Date.now(),
-            type: 'alert',
-            title: '🚨 Nueva Alerta',
-            message: alertData.descripcion,
-            location: alertData.ubicacion,
-            category: alertData.categoria,
-            timestamp: new Date().toISOString(),
-            alertId: alertData.id,
-            latitud: alertData.latitud,
-            longitud: alertData.longitud
-        };
+        try {
+            const notification = {
+                id: Date.now(),
+                type: 'alert',
+                title: alertData.title || '🚨 Nueva Alerta',
+                message: alertData.message || alertData.descripcion || 'Sin descripción',
+                location: alertData.location || alertData.ubicacion || 'Sin dirección',
+                category: alertData.category || alertData.categoria || 'Media',
+                timestamp: new Date().toISOString(),
+                alertId: alertData.alertId || alertData.id,
+                latitud: alertData.latitud,
+                longitud: alertData.longitud
+            };
 
-        // Enviar a todos los usuarios conectados excepto al creador
-        for (const socket of this.io.sockets.sockets.values()) {
-            const socketUserId = this.getUserIdBySocketId(socket.id);
-            if (socketUserId && socketUserId !== creatorId) {
-                socket.emit('newAlert', notification);
-            }
+            // Enviar a todos los usuarios conectados excepto al creador
+            let sentCount = 0;
+            this.io.sockets.sockets.forEach((socket, socketId) => {
+                try {
+                    const socketUserId = this.getUserIdBySocketId(socketId);
+                    if (socketUserId && socketUserId !== creatorId) {
+                        socket.emit('newAlert', notification);
+                        sentCount++;
+                        console.log(`📢 Notificación enviada a usuario ${socketUserId}`);
+                    }
+                } catch (socketError) {
+                    console.warn(`⚠️ Error enviando notificación a socket ${socketId}:`, socketError);
+                }
+            });
+            
+            console.log(`📢 Notificación de alerta enviada a ${sentCount} usuarios (excepto creador ${creatorId})`);
+            
+            return notification;
+        } catch (error) {
+            console.error('❌ Error en sendAlertNotification:', error);
+            throw error;
         }
-        
-        console.log(`📢 Notificación de alerta enviada a todos los usuarios (excepto creador ${creatorId})`);
-        
-        return notification;
     }
 
     // Obtener userId por socketId
@@ -134,8 +154,8 @@ class WebSocketService {
         return this.connectedUsers.has(userId);
     }
 
-    // Enviar notificación de alerta eliminada a todos los usuarios
-    sendAlertDeletedNotification(notificationData) {
+    // Enviar notificación de alerta eliminada a todos los usuarios excepto al que elimina
+    sendAlertDeletedNotification(notificationData, excludeUserId = null) {
         const notification = {
             id: Date.now(),
             type: 'alertDeleted',
@@ -145,10 +165,27 @@ class WebSocketService {
             timestamp: new Date().toISOString()
         };
 
-        // Enviar a todos los usuarios conectados
-        this.io.emit('alertDeleted', notification);
-        
-        console.log(`📢 Notificación de alerta eliminada enviada a todos los usuarios`);
+        if (excludeUserId) {
+            // Enviar a todos los usuarios conectados excepto al que elimina
+            let sentCount = 0;
+            this.io.sockets.sockets.forEach((socket, socketId) => {
+                try {
+                    const socketUserId = this.getUserIdBySocketId(socketId);
+                    if (socketUserId && socketUserId !== excludeUserId) {
+                        socket.emit('alertDeleted', notification);
+                        sentCount++;
+                    }
+                } catch (socketError) {
+                    console.warn(`⚠️ Error enviando notificación de eliminación a socket ${socketId}:`, socketError);
+                }
+            });
+            
+            console.log(`📢 Notificación de alerta eliminada enviada a ${sentCount} usuarios (excepto usuario ${excludeUserId})`);
+        } else {
+            // Enviar a todos los usuarios conectados
+            this.io.emit('alertDeleted', notification);
+            console.log(`📢 Notificación de alerta eliminada enviada a todos los usuarios`);
+        }
         
         return notification;
     }
