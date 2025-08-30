@@ -276,40 +276,34 @@ class WebSocketClient {
             return;
         }
         
-        // Esperar a que el mapa esté disponible
-        const waitForMapManager = () => {
-            if (window.mapManager && window.mapManager.map) {
-                // Crear marcador de emergencia
-                const emergencyIcon = L.divIcon({
-                    className: 'emergency-marker-active',
-                    html: `<i class="fas fa-fire" style="color: #e74c3c; font-size: 24px;"></i>`,
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                });
+        // Esperar a que alertasManager esté disponible y usar su función
+        const waitForAlertasManager = () => {
+            if (window.alertasManager) {
+                // Crear objeto de alerta compatible con alertasManager
+                const alertaData = {
+                    id: notification.alertId,
+                    titulo: notification.title || 'Nueva Alerta',
+                    descripcion: notification.message || 'Sin descripción',
+                    direccion: notification.location || 'Sin ubicación',
+                    prioridad: notification.category || 'media',
+                    tipo: 'otro',
+                    latitud: lat,
+                    longitud: lng,
+                    fecha_creacion: new Date().toISOString(),
+                    usuario_nombre: 'Usuario',
+                    concurrencia_solicitada: '1',
+                    estado: 'activa'
+                };
                 
-                // Crear contenido del popup
-                const popupContent = `
-                    <div class="emergency-popup">
-                        <h4>🚨 ${notification.title || 'Alerta'}</h4>
-                        <p><strong>Descripción:</strong> ${notification.message || 'Sin descripción'}</p>
-                        <p><strong>Ubicación:</strong> ${notification.location || 'Sin ubicación'}</p>
-                        <p><strong>Prioridad:</strong> ${notification.category || 'Media'}</p>
-                    </div>
-                `;
+                // Usar la función de alertasManager para crear el marcador con popup completo
+                window.alertasManager.crearMarcadorAlertaActiva(alertaData);
                 
-                const marker = L.marker([lat, lng], { icon: emergencyIcon })
-                    .addTo(window.mapManager.map)
-                    .bindPopup(popupContent, { maxWidth: 400 });
-                
-                // Guardar referencia para poder eliminarlo después
-                marker._alertaId = notification.alertId;
-                
-                console.log('✅ Alerta mostrada en mapa en tiempo real:', lat, lng);
+                console.log('✅ Alerta mostrada en mapa en tiempo real usando alertasManager:', lat, lng);
             } else {
-                setTimeout(waitForMapManager, 100);
+                setTimeout(waitForAlertasManager, 100);
             }
         };
-        waitForMapManager();
+        waitForAlertasManager();
     }
 
     // Remover alerta del mapa cuando se da de baja

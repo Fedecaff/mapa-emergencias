@@ -294,8 +294,13 @@ class Auth {
         // Actualizar popups de alertas si existen
         if (window.alertasManager) {
             setTimeout(() => {
-                window.alertasManager.cargarYMostrarAlertas();
+                window.alertasManager.actualizarPopupsExistentes();
             }, 500);
+            
+            // Forzar actualización adicional después de un tiempo
+            setTimeout(() => {
+                window.alertasManager.forzarActualizacionPopups();
+            }, 1000);
         }
         
         // Iniciar actualización de operadores para administradores

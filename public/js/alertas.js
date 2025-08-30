@@ -196,37 +196,40 @@ class AlertasManager {
     }
 
     bindPopupEvents(alerta) {
-        // Event listener para botón "Ver Fotos"
-        const btnVerFotos = document.querySelector('.btn-ver-fotos-emergencia');
-        if (btnVerFotos) {
-            btnVerFotos.addEventListener('click', () => {
-                this.verFotosEmergencia(alerta.id);
-            });
-        }
-        
-        // Event listener para botón "Indicaciones"
-        const btnDirecciones = document.querySelector('.btn-direcciones-emergencia');
-        if (btnDirecciones) {
-            btnDirecciones.addEventListener('click', () => {
-                this.seleccionarAlertaParaIndicaciones(alerta);
-            });
-        }
-        
-        // Event listener para botón "Cambiar Estado" (solo admin)
-        const btnCambiarEstado = document.querySelector('.btn-cambiar-estado');
-        if (btnCambiarEstado) {
-            btnCambiarEstado.addEventListener('click', () => {
-                this.cambiarEstadoEmergencia(alerta.id);
-            });
-        }
-        
-        // Event listener para botón "Dar de Baja" (solo admin)
-        const btnDarBaja = document.querySelector('.btn-dar-baja');
-        if (btnDarBaja) {
-            btnDarBaja.addEventListener('click', () => {
-                this.confirmarDarDeBaja(alerta.id, alerta.titulo);
-            });
-        }
+        // Usar setTimeout para asegurar que el DOM esté listo
+        setTimeout(() => {
+            // Event listener para botón "Ver Fotos"
+            const btnVerFotos = document.querySelector('.btn-ver-fotos-emergencia');
+            if (btnVerFotos) {
+                btnVerFotos.addEventListener('click', () => {
+                    this.verFotosEmergencia(alerta.id);
+                });
+            }
+            
+            // Event listener para botón "Indicaciones"
+            const btnDirecciones = document.querySelector('.btn-direcciones-emergencia');
+            if (btnDirecciones) {
+                btnDirecciones.addEventListener('click', () => {
+                    this.seleccionarAlertaParaIndicaciones(alerta);
+                });
+            }
+            
+            // Event listener para botón "Cambiar Estado" (solo admin)
+            const btnCambiarEstado = document.querySelector('.btn-cambiar-estado');
+            if (btnCambiarEstado) {
+                btnCambiarEstado.addEventListener('click', () => {
+                    this.cambiarEstadoEmergencia(alerta.id);
+                });
+            }
+            
+            // Event listener para botón "Dar de Baja" (solo admin)
+            const btnDarBaja = document.querySelector('.btn-dar-baja');
+            if (btnDarBaja) {
+                btnDarBaja.addEventListener('click', () => {
+                    this.confirmarDarDeBaja(alerta.id, alerta.titulo);
+                });
+            }
+        }, 100);
     }
 
     // Método para confirmar dar de baja
@@ -591,6 +594,27 @@ class AlertasManager {
             console.warn('⚠️ Error verificando si es admin:', error);
             return false;
         }
+    }
+
+    // Método para actualizar popups existentes (para operadores)
+    actualizarPopupsExistentes() {
+        console.log('🔄 Actualizando popups existentes...');
+        
+        // Recargar alertas activas para actualizar popups
+        this.cargarYMostrarAlertas();
+    }
+
+    // Método para forzar actualización de popups
+    forzarActualizacionPopups() {
+        console.log('🔄 Forzando actualización de popups...');
+        
+        // Limpiar alertas existentes
+        this.limpiarAlertas();
+        
+        // Recargar alertas activas
+        setTimeout(() => {
+            this.cargarYMostrarAlertas();
+        }, 200);
     }
 }
 
