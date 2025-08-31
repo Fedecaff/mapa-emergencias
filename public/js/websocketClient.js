@@ -248,7 +248,20 @@ class WebSocketClient {
         `;
         const container = document.getElementById('notificationsContainer') || document.body;
         container.appendChild(notificationElement);
-        setTimeout(() => { if (notificationElement.parentElement) notificationElement.remove(); }, 10000);
+        
+        // Determinar duración basada en el tipo de notificación
+        let duration = 10000; // Por defecto 10 segundos
+        if (notification.type === 'alertDeleted' || notification.title?.includes('🗑️ Alerta Eliminada')) {
+            duration = 3000; // 3 segundos para notificaciones de eliminación
+        } else if (notification.type === 'alert') {
+            duration = 10000; // 10 segundos para alertas de emergencia
+        } else {
+            duration = 5000; // 5 segundos para otras notificaciones
+        }
+        
+        setTimeout(() => { 
+            if (notificationElement.parentElement) notificationElement.remove(); 
+        }, duration);
     }
 
     playAlertSound() {

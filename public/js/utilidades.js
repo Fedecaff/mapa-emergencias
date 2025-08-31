@@ -5,7 +5,7 @@ const API_BASE_URL = window.CONFIG ? window.CONFIG.API_URL : '/api';
 
 // Clase para manejar notificaciones
 class Notifications {
-    static show(message, type = 'success', duration = 5000) {
+    static show(message, type = 'success', duration = null) {
         const notifications = document.getElementById('notifications');
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -17,6 +17,26 @@ class Notifications {
         `;
         
         notifications.appendChild(notification);
+        
+        // Determinar duración basada en el tipo si no se especifica
+        if (duration === null) {
+            switch (type) {
+                case 'info':
+                    duration = 2000; // 2 segundos para notificaciones informativas
+                    break;
+                case 'success':
+                    duration = 3000; // 3 segundos para notificaciones de éxito
+                    break;
+                case 'warning':
+                    duration = 4000; // 4 segundos para advertencias
+                    break;
+                case 'error':
+                    duration = 5000; // 5 segundos para errores
+                    break;
+                default:
+                    duration = 3000;
+            }
+        }
         
         // Auto-remover después del tiempo especificado
         setTimeout(() => {
@@ -36,19 +56,19 @@ class Notifications {
         return icons[type] || 'info-circle';
     }
     
-    static success(message, duration) {
+    static success(message, duration = null) {
         return this.show(message, 'success', duration);
     }
     
-    static error(message, duration) {
+    static error(message, duration = null) {
         return this.show(message, 'error', duration);
     }
     
-    static warning(message, duration) {
+    static warning(message, duration = null) {
         return this.show(message, 'warning', duration);
     }
     
-    static info(message, duration) {
+    static info(message, duration = null) {
         return this.show(message, 'info', duration);
     }
 }
