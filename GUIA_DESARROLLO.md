@@ -103,6 +103,30 @@ document.getElementById('btnNuevo').addEventListener('click', async () => {
 
 ---
 
+## 🔔 **SISTEMA DE NOTIFICACIONES**
+
+### **Configuración de Duración**
+```javascript
+// Duración automática basada en tipo
+Notifications.info('Mensaje informativo');     // 2 segundos
+Notifications.success('Operación exitosa');    // 3 segundos
+Notifications.warning('Advertencia');          // 4 segundos
+Notifications.error('Error');                  // 5 segundos
+
+// Duración personalizada
+Notifications.info('Mensaje', 5000);           // 5 segundos específicos
+```
+
+### **Notificaciones de Alertas (WebSocket)**
+```javascript
+// Duración específica para alertas
+- Alertas de emergencia: 10 segundos
+- Notificaciones de eliminación: 3 segundos
+- Otras notificaciones: 5 segundos
+```
+
+---
+
 ## 🔧 **CONVENCIONES DE CÓDIGO**
 
 ### **Nomenclatura**
@@ -248,16 +272,16 @@ socket.on('eventoProcesado', (data) => {
 
 ---
 
-## 🗄️ **PATRÓN PARA BASE DE DATOS**
+## 🗄️ **BASE DE DATOS**
 
 ### **Crear Nueva Tabla**
 ```sql
--- Script de migración
+-- Script SQL para nueva tabla
 CREATE TABLE nueva_tabla (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -328,6 +352,7 @@ git push origin main
 - [ ] **Frontend:** CSS estilizado
 - [ ] **Base de datos:** Tablas creadas (si aplica)
 - [ ] **WebSocket:** Eventos configurados (si aplica)
+- [ ] **Notificaciones:** Duración apropiada configurada
 - [ ] **Testing:** Funcionalidad probada
 - [ ] **Documentación:** Actualizada
 
@@ -353,7 +378,17 @@ console.error()          # Logs de error
 
 ---
 
+## 📋 **ARCHIVOS DE DOCUMENTACIÓN**
+
+- **`README.md`** - Documentación principal del proyecto
+- **`GUIA_DESARROLLO.md`** - Esta guía de desarrollo
+- **`MAPA_ARQUITECTURA.md`** - Arquitectura del sistema
+- **`REFERENCIA_CODIGO.md`** - Referencia detallada del código
+- **`VENTAJAS_APP_MOVIL.md`** - Ventajas de la aplicación móvil
+
+---
+
 *Guía de desarrollo para el Sistema de Mapeo de Emergencias*
-*Versión: 2.0.0*
+*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
 
 

@@ -14,6 +14,10 @@
 ├── datos/                  # Datos de ejemplo
 ├── package.json            # Dependencias y scripts
 ├── README.md               # Documentación principal
+├── GUIA_DESARROLLO.md      # Guía de desarrollo
+├── MAPA_ARQUITECTURA.md    # Arquitectura del sistema
+├── REFERENCIA_CODIGO.md    # Esta referencia
+├── VENTAJAS_APP_MOVIL.md   # Ventajas de la app móvil
 └── Procfile                # Configuración Railway
 ```
 
@@ -98,163 +102,226 @@
   "bcrypt": "^5.1.1",            // Encriptación
   "jsonwebtoken": "^9.0.2",      // JWT
   "multer": "^1.4.5-lts.1",      // Subida de archivos
-  "cloudinary": "^2.7.0",        // Almacenamiento de imágenes
-  "cors": "^2.8.5",              // CORS
+  "cloudinary": "^1.41.0",       // Almacenamiento de imágenes
   "helmet": "^7.1.0",            // Seguridad
-  "proj4": "^2.19.10"            // Proyecciones geográficas
+  "cors": "^2.8.5",              // CORS
+  "dotenv": "^16.3.1"            // Variables de entorno
 }
 ```
 
 ### **Frontend (CDN)**
-- **Leaflet.js** - Mapa interactivo
-- **Socket.IO Client** - WebSocket cliente
-- **Font Awesome** - Iconos
+```html
+<!-- index.html -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://kit.fontawesome.com/your-kit.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+```
 
 ---
 
-## 🗺️ **FUNCIONALIDADES PRINCIPALES**
+## 🔔 **SISTEMA DE NOTIFICACIONES**
 
-### **1. Sistema de Mapa**
-- **Archivo:** `public/js/mapa.js` (47KB, 1281 líneas)
-- **Tecnología:** Leaflet.js + OpenStreetMap
-- **Funciones:** Marcadores, capas, geolocalización
+### **Clase Notifications (utilidades.js)**
+```javascript
+class Notifications {
+    static show(message, type = 'success', duration = null) {
+        // Duración automática basada en tipo
+        if (duration === null) {
+            switch (type) {
+                case 'info': duration = 2000; break;      // 2 segundos
+                case 'success': duration = 3000; break;   // 3 segundos
+                case 'warning': duration = 4000; break;   // 4 segundos
+                case 'error': duration = 5000; break;     // 5 segundos
+                default: duration = 3000;
+            }
+        }
+        // Mostrar notificación y auto-remover
+    }
+    
+    static info(message, duration = null) { return this.show(message, 'info', duration); }
+    static success(message, duration = null) { return this.show(message, 'success', duration); }
+    static warning(message, duration = null) { return this.show(message, 'warning', duration); }
+    static error(message, duration = null) { return this.show(message, 'error', duration); }
+}
+```
 
-### **2. Autenticación y Usuarios**
-- **Archivo:** `public/js/autenticacion.js` (38KB, 1039 líneas)
-- **Funciones:** Login, registro, gestión de perfil
-- **Backend:** `src/controladores/usuariosController.js`
-
-### **3. Alertas en Tiempo Real**
-- **Archivo:** `public/js/alertas.js` (21KB, 545 líneas)
-- **WebSocket:** `public/js/websocketClient.js` (16KB, 410 líneas)
-- **Backend:** `src/controladores/alertasController.js`
-
-### **4. Administración**
-- **Archivo:** `public/js/administracion.js` (19KB, 559 líneas)
-- **Funciones:** Gestión de usuarios, estadísticas
-
-### **5. Utilidades y API**
-- **Archivo:** `public/js/utilidades.js` (13KB, 434 líneas)
-- **Funciones:** Llamadas API, geolocalización, helpers
-
----
-
-## 🔌 **APIs Y ENDPOINTS**
-
-### **Autenticación**
-- `POST /api/autenticacion/login` - Login
-- `POST /api/autenticacion/registro` - Registro
-- `POST /api/autenticacion/logout` - Logout
-
-### **Usuarios**
-- `GET /api/usuarios` - Listar usuarios
-- `POST /api/usuarios` - Crear usuario
-- `PUT /api/usuarios/:id` - Actualizar usuario
-- `DELETE /api/usuarios/:id` - Eliminar usuario
-- `GET /api/usuarios/perfil` - Obtener perfil
-- `PUT /api/usuarios/perfil` - Actualizar perfil
-
-### **Alertas**
-- `GET /api/alertas` - Listar alertas
-- `POST /api/alertas` - Crear alerta
-- `PUT /api/alertas/:id` - Actualizar alerta
-- `DELETE /api/alertas/:id` - Eliminar alerta
-
-### **Puntos**
-- `GET /api/puntos` - Listar puntos
-- `POST /api/puntos` - Crear punto
-- `PUT /api/puntos/:id` - Actualizar punto
-- `DELETE /api/puntos/:id` - Eliminar punto
-
-### **Fotos**
-- `POST /api/fotos` - Subir foto
-- `GET /api/fotos/:id` - Obtener foto
-- `DELETE /api/fotos/:id` - Eliminar foto
+### **Notificaciones WebSocket (websocketClient.js)**
+```javascript
+showInAppNotification(notification) {
+    // Duración específica para alertas
+    let duration = 10000; // Por defecto 10 segundos
+    if (notification.type === 'alertDeleted') {
+        duration = 3000; // 3 segundos para eliminación
+    } else if (notification.type === 'alert') {
+        duration = 10000; // 10 segundos para alertas
+    } else {
+        duration = 5000; // 5 segundos para otras
+    }
+    // Mostrar y auto-remover
+}
+```
 
 ---
 
 ## 🗄️ **BASE DE DATOS**
 
-### **Tecnología:** PostgreSQL
-### **Tablas Principales:**
-- `usuarios` - Usuarios del sistema
-- `alertas` - Alertas de emergencia
-- `puntos` - Puntos en el mapa
-- `categorias` - Categorías de puntos
-- `fotos` - Fotos subidas
-- `historial` - Historial de actividades
+### **Tablas Principales**
+```sql
+-- Usuarios del sistema
+CREATE TABLE usuarios (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    rol VARCHAR(50) DEFAULT 'operador',
+    foto_perfil TEXT,
+    disponible BOOLEAN DEFAULT true,
+    ultima_ubicacion JSONB,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
----
+-- Alertas de emergencia
+CREATE TABLE alertas (
+    id SERIAL PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    tipo VARCHAR(100),
+    prioridad VARCHAR(50) DEFAULT 'media',
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
+    direccion TEXT,
+    estado VARCHAR(50) DEFAULT 'activa',
+    usuario_id INTEGER REFERENCES usuarios(id),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-## 🔄 **PATRONES DE CÓDIGO**
-
-### **Frontend**
-- **Modular:** Cada funcionalidad en archivo separado
-- **Event-driven:** Uso extensivo de event listeners
-- **API calls:** Centralizadas en `utilidades.js`
-- **WebSocket:** Para comunicación en tiempo real
-
-### **Backend**
-- **MVC:** Modelo-Vista-Controlador
-- **RESTful:** APIs REST estándar
-- **Middleware:** Para autenticación y validación
-- **Async/Await:** Manejo asíncrono
-
----
-
-## 🚀 **SCRIPTS DE DESARROLLO**
-
-```bash
-npm start          # Iniciar servidor
-npm run dev        # Desarrollo con nodemon
-npm run init-db    # Inicializar base de datos
-npm run migrate    # Ejecutar migraciones
+-- Puntos en el mapa
+CREATE TABLE puntos (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    categoria_id INTEGER REFERENCES categorias(id),
+    latitud DECIMAL(10, 8) NOT NULL,
+    longitud DECIMAL(11, 8) NOT NULL,
+    direccion TEXT,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ---
 
-## 📍 **PUNTOS CLAVE PARA MODIFICACIONES**
+## 🔄 **WEBSOCKET**
 
-### **Para agregar funcionalidades al mapa:**
-- **Archivo principal:** `public/js/mapa.js`
-- **APIs:** `src/controladores/puntosController.js`
-- **Rutas:** `src/rutas/puntos.js`
+### **Eventos Principales**
+```javascript
+// Cliente → Servidor
+socket.emit('authenticate', { userId, rol });
+socket.emit('markNotificationRead', notificationId);
 
-### **Para modificar autenticación:**
-- **Frontend:** `public/js/autenticacion.js`
-- **Backend:** `src/controladores/autenticacionController.js`
-- **Rutas:** `src/rutas/autenticacion.js`
+// Servidor → Cliente
+socket.on('newAlert', (notification) => { /* Procesar nueva alerta */ });
+socket.on('alertDeleted', (notification) => { /* Procesar eliminación */ });
+socket.on('notification', (notification) => { /* Notificación general */ });
+socket.on('authenticated', (data) => { /* Confirmación de auth */ });
+```
 
-### **Para agregar alertas/notificaciones:**
-- **Frontend:** `public/js/alertas.js` + `websocketClient.js`
-- **Backend:** `src/controladores/alertasController.js`
-- **WebSocket:** `src/servicios/websocketService.js`
+### **Configuración WebSocket**
+```javascript
+// Cliente (websocketClient.js)
+this.socket = io({
+    timeout: 20000,
+    forceNew: true
+});
 
-### **Para modificar usuarios:**
-- **Frontend:** `public/js/usuarios.js` + `administracion.js`
-- **Backend:** `src/controladores/usuariosController.js`
-- **Rutas:** `src/rutas/usuarios.js`
+// Servidor (websocketService.js)
+io.on('connection', (socket) => {
+    socket.on('authenticate', (data) => {
+        // Autenticar usuario
+    });
+});
+```
 
 ---
 
-## 🔧 **CONFIGURACIÓN DE DESARROLLO**
+## 🎯 **FUNCIONES PRINCIPALES**
 
-### **Variables de Entorno (.env)**
+### **Gestión del Mapa (mapa.js)**
+```javascript
+class MapManager {
+    init() { /* Inicializar mapa Leaflet */ }
+    loadPoints() { /* Cargar puntos desde API */ }
+    addMarker(point) { /* Agregar marcador */ }
+    removeMarker(markerId) { /* Remover marcador */ }
+    centerOnLocation(lat, lng) { /* Centrar mapa */ }
+}
+```
+
+### **Autenticación (autenticacion.js)**
+```javascript
+class Auth {
+    async login(email, password) { /* Login de usuario */ }
+    logout() { /* Cerrar sesión */ }
+    updateProfile(data) { /* Actualizar perfil */ }
+    isAuthenticated() { /* Verificar autenticación */ }
+    isAdmin() { /* Verificar si es admin */ }
+}
+```
+
+### **Alertas (alertas.js)**
+```javascript
+class AlertasManager {
+    iniciarProcesoEmergencia() { /* Iniciar creación de alerta */ }
+    enviarAlerta() { /* Enviar alerta al servidor */ }
+    crearMarcadorAlertaActiva(alerta) { /* Crear marcador de alerta */ }
+    darDeBajaAlerta(alertaId) { /* Dar de baja alerta */ }
+}
+```
+
+---
+
+## 🚀 **DEPLOYMENT**
+
+### **Railway Configuration**
+```json
+// railway.json
+{
+  "build": {
+    "builder": "nixpacks"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "on_failure"
+  }
+}
+```
+
+### **Variables de Entorno**
 ```env
-PUERTO=8080
 DATABASE_URL=postgresql://...
-JWT_SECRET=...
-CLOUDINARY_URL=...
+JWT_SECRET=your-secret-key
+CLOUDINARY_URL=cloudinary://...
+PORT=3000
+NODE_ENV=production
 ```
-
-### **Deployment**
-- **Plataforma:** Railway
-- **Base de datos:** PostgreSQL (Railway)
-- **Archivos:** Cloudinary
 
 ---
 
-*Última actualización: [Fecha actual]*
-*Versión del proyecto: 2.0.0*
+## 📊 **ESTADÍSTICAS**
+
+- **Total de archivos:** 25+ archivos principales
+- **Líneas de código:** ~8,000 líneas
+- **APIs:** 8 controladores principales
+- **Rutas:** 8 archivos de rutas
+- **Base de datos:** 6 tablas principales
+- **WebSocket:** 4 eventos principales
+
+---
+
+*Referencia del código del Sistema de Mapeo de Emergencias*
+*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
 
 

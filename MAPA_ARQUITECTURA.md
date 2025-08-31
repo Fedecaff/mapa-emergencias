@@ -115,101 +115,131 @@ src/
 │   ├── perfilController.js (178 líneas)
 │   └── historialController.js (166 líneas)
 ├── 🗄️ modelos/
-│   ├── baseDeDatosPostgres.js
-│   └── [scripts de migración]
+│   └── baseDeDatosPostgres.js - Conexión PostgreSQL
 └── 🔄 servicios/
-    └── websocketService.js
+    └── websocketService.js - WebSocket en tiempo real
 ```
 
 ---
 
-## 🔌 **CONEXIONES Y DEPENDENCIAS**
+## 🔔 **SISTEMA DE NOTIFICACIONES**
 
-### **Frontend Dependencies (CDN)**
+### **Arquitectura de Notificaciones**
 ```
-📜 index.html
-├── 🗺️ Leaflet.js (Mapa)
-├── 🔄 Socket.IO Client (WebSocket)
-├── 🎨 Font Awesome (Iconos)
-└── 📱 Bootstrap (UI)
-```
-
-### **Backend Dependencies (npm)**
-```
-package.json
-├── 🚀 express (Servidor)
-├── 🔄 socket.io (WebSocket)
-├── 🗄️ pg (PostgreSQL)
-├── 🔐 bcrypt (Encriptación)
-├── 🎫 jsonwebtoken (JWT)
-├── 📁 multer (Archivos)
-├── ☁️ cloudinary (Imágenes)
-├── 🛡️ helmet (Seguridad)
-└── 📍 proj4 (Geografía)
+┌─────────────────────────────────────────────────────────────────┐
+│                    SISTEMA DE NOTIFICACIONES                   │
+├─────────────────────────────────────────────────────────────────┤
+│  📱 Frontend (utilidades.js)                                   │
+│  ├── 🔔 Notifications.info() - 2 segundos                      │
+│  ├── ✅ Notifications.success() - 3 segundos                   │
+│  ├── ⚠️ Notifications.warning() - 4 segundos                   │
+│  └── ❌ Notifications.error() - 5 segundos                     │
+├─────────────────────────────────────────────────────────────────┤
+│  🔄 WebSocket (websocketClient.js)                             │
+│  ├── 🚨 Alertas de emergencia - 10 segundos                    │
+│  ├── 🗑️ Notificaciones de eliminación - 3 segundos            │
+│  └── 📢 Otras notificaciones - 5 segundos                      │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
----
-
-## 🎯 **PUNTOS DE ENTRADA**
-
-### **Para Modificar el Mapa:**
+### **Flujo de Notificaciones**
 ```
-🗺️ mapa.js (1281 líneas)
-├── Inicialización del mapa
-├── Gestión de marcadores
-├── Capas y controles
-└── Eventos del mapa
-```
-
-### **Para Modificar Autenticación:**
-```
-🔐 autenticacion.js (1039 líneas)
-├── Login/Registro
-├── Gestión de perfil
-├── Validaciones
-└── Manejo de sesiones
-```
-
-### **Para Modificar Alertas:**
-```
-🚨 alertas.js (545 líneas) + websocketClient.js (410 líneas)
-├── Creación de alertas
-├── Notificaciones en tiempo real
-├── Gestión de estado
-└── Comunicación WebSocket
+Evento → Frontend → Notifications.show() → UI → Auto-remover (tiempo configurado)
 ```
 
 ---
 
-## 🔧 **CONFIGURACIÓN DE DESARROLLO**
+## 🗄️ **BASE DE DATOS**
 
-### **Variables de Entorno**
-```env
-PUERTO=8080
-DATABASE_URL=postgresql://...
-JWT_SECRET=...
-CLOUDINARY_URL=...
+### **Tablas Principales**
+```sql
+-- Usuarios del sistema
+usuarios (
+    id, nombre, email, password_hash, rol, 
+    foto_perfil, disponible, ultima_ubicacion, 
+    fecha_creacion, fecha_actualizacion
+)
+
+-- Alertas de emergencia
+alertas (
+    id, titulo, descripcion, tipo, prioridad,
+    latitud, longitud, direccion, estado,
+    usuario_id, fecha_creacion
+)
+
+-- Puntos en el mapa
+puntos (
+    id, nombre, descripcion, categoria_id,
+    latitud, longitud, direccion, fecha_creacion
+)
+
+-- Categorías de puntos
+categorias (
+    id, nombre, descripcion, icono, color
+)
+
+-- Fotos de puntos
+fotos (
+    id, punto_id, url, descripcion, fecha_subida
+)
+
+-- Historial de actividades
+historial (
+    id, usuario_id, accion, detalles, fecha
+)
 ```
 
-### **Scripts de Desarrollo**
-```bash
-npm start          # Producción
-npm run dev        # Desarrollo
-npm run init-db    # Base de datos
+---
+
+## 🔄 **WEBSOCKET**
+
+### **Eventos WebSocket**
+```javascript
+// Cliente → Servidor
+'authenticate'     // Autenticación del usuario
+'markNotificationRead' // Marcar notificación como leída
+
+// Servidor → Cliente
+'newAlert'         // Nueva alerta de emergencia
+'alertDeleted'     // Alerta eliminada
+'notification'     // Notificación general
+'authenticated'    // Confirmación de autenticación
+```
+
+### **Flujo WebSocket**
+```
+Cliente → Conectar → Autenticar → Escuchar eventos → Procesar notificaciones
 ```
 
 ---
 
 ## 🚀 **DEPLOYMENT**
 
-### **Plataforma:** Railway
-### **Base de Datos:** PostgreSQL (Railway)
-### **Archivos:** Cloudinary
-### **Dominio:** Automático (Railway)
+### **Railway Deployment**
+```
+GitHub → Railway → PostgreSQL → Aplicación desplegada
+```
+
+### **Variables de Entorno**
+```
+DATABASE_URL=postgresql://...
+JWT_SECRET=...
+PORT=3000
+```
 
 ---
 
-*Diagrama de arquitectura del Sistema de Mapeo de Emergencias*
-*Versión: 2.0.0*
+## 📊 **ESTADÍSTICAS DEL PROYECTO**
+
+- **Total de archivos:** 25+ archivos principales
+- **Líneas de código:** ~8,000 líneas
+- **Tecnologías:** Node.js, Express, PostgreSQL, Socket.io
+- **Frontend:** HTML5, CSS3, JavaScript ES6+
+- **Deployment:** Railway (automático)
+
+---
+
+*Mapa de arquitectura del Sistema de Mapeo de Emergencias*
+*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
 
 
