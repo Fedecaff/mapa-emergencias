@@ -3,28 +3,17 @@
   "builds": [
     {
       "src": "src/configuracion/servidor.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "src/configuracion/servidor.js"
+      "dest": "/src/configuracion/servidor.js"
     },
     {
       "src": "/(.*)",
-      "dest": "src/configuracion/servidor.js"
+      "dest": "/src/configuracion/servidor.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "functions": {
-    "src/configuracion/servidor.js": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
