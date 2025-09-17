@@ -39,10 +39,10 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │                    BASE DE DATOS (PostgreSQL)                  │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐              │
-│  │   usuarios  │ │   alertas   │ │   puntos    │              │
+│  │   usuarios  │ │alertas_emerg│ │   puntos    │              │
 │  └─────────────┘ └─────────────┘ └─────────────┘              │
 │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐              │
-│  │ categorias  │ │    fotos    │ │  historial  │              │
+│  │ categorias  │ │fotos_puntos │ │historial_cam│              │
 │  └─────────────┘ └─────────────┘ └─────────────┘              │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -73,21 +73,21 @@ Usuario → Frontend (mapa.js) → API (/api/puntos) → Backend (puntosControll
 ### **FRONTEND (public/)**
 ```
 public/
-├── 📄 index.html (749 líneas)
+├── 📄 index.html
 ├── 🎨 css/
 │   └── estilos.css
 ├── 📜 js/
-│   ├── 🗺️ mapa.js (1281 líneas) - Mapa principal
-│   ├── 🔐 autenticacion.js (1039 líneas) - Login/Registro
-│   ├── 🚨 alertas.js (545 líneas) - Alertas
-│   ├── 🔄 websocketClient.js (410 líneas) - WebSocket
-│   ├── 👥 administracion.js (559 líneas) - Admin
-│   ├── 🛠️ utilidades.js (434 líneas) - APIs
-│   ├── 👤 usuarios.js (367 líneas) - Usuarios
-│   ├── 📸 fotos.js (303 líneas) - Fotos
-│   ├── 📍 geolocalizacion.js (235 líneas) - GPS
-│   ├── 🚀 app.js (309 líneas) - Inicialización
-│   └── ⚙️ config.js (25 líneas) - Configuración
+│   ├── 🗺️ mapa.js (1361 líneas) - Mapa principal
+│   ├── 🔐 autenticacion.js (1028 líneas) - Login/Registro
+│   ├── 🚨 alertas.js (588 líneas) - Alertas
+│   ├── 👥 administracion.js (554 líneas) - Admin
+│   ├── 🛠️ utilidades.js (441 líneas) - APIs
+│   ├── 🚀 app.js (301 líneas) - Inicialización
+│   ├── 👤 usuarios.js (332 líneas) - Usuarios
+│   ├── 📸 fotos.js (270 líneas) - Fotos
+│   ├── 📍 geolocalizacion.js (232 líneas) - GPS
+│   ├── 📍 direcciones.js (227 líneas) - Direcciones
+│   └── ⚙️ config.js (23 líneas) - Configuración
 └── 🖼️ favicon.ico
 ```
 
@@ -95,25 +95,25 @@ public/
 ```
 src/
 ├── ⚙️ configuracion/
-│   └── servidor.js (164 líneas) - Servidor principal
+│   └── servidor.js - Servidor principal
 ├── 🔌 rutas/
-│   ├── usuarios.js (87 líneas)
-│   ├── alertas.js (19 líneas)
-│   ├── puntos.js (19 líneas)
-│   ├── fotos.js (47 líneas)
-│   ├── categorias.js (17 líneas)
-│   ├── historial.js (24 líneas)
-│   ├── perfil.js (15 líneas)
-│   └── autenticacion.js (18 líneas)
+│   ├── usuarios.js (75 líneas)
+│   ├── fotos.js (40 líneas)
+│   ├── alertas.js (17 líneas)
+│   ├── puntos.js (14 líneas)
+│   ├── historial.js (13 líneas)
+│   ├── categorias.js (12 líneas)
+│   ├── autenticacion.js (12 líneas)
+│   └── perfil.js (10 líneas)
 ├── 🎮 controladores/
-│   ├── usuariosController.js (681 líneas)
-│   ├── alertasController.js (318 líneas)
-│   ├── puntosController.js (387 líneas)
-│   ├── fotosController.js (267 líneas)
-│   ├── categoriasController.js (251 líneas)
-│   ├── autenticacionController.js (208 líneas)
-│   ├── perfilController.js (178 líneas)
-│   └── historialController.js (166 líneas)
+│   ├── puntosController.js (332 líneas)
+│   ├── alertasController.js (236 líneas)
+│   ├── fotosController.js (233 líneas)
+│   ├── categoriasController.js (210 líneas)
+│   ├── autenticacionController.js (175 líneas)
+│   ├── perfilController.js (151 líneas)
+│   ├── historialController.js (135 líneas)
+│   └── usuariosController.js - Gestión de usuarios
 ├── 🗄️ modelos/
 │   └── baseDeDatosPostgres.js - Conexión PostgreSQL
 └── 🔄 servicios/
@@ -155,37 +155,43 @@ Evento → Frontend → Notifications.show() → UI → Auto-remover (tiempo con
 ```sql
 -- Usuarios del sistema
 usuarios (
-    id, nombre, email, password_hash, rol, 
-    foto_perfil, disponible, ultima_ubicacion, 
-    fecha_creacion, fecha_actualizacion
+    id, nombre, email, password, rol, telefono,
+    disponible, foto_perfil, institucion, rol_institucion,
+    latitud, longitud, ultima_actualizacion_ubicacion, created_at
 )
 
 -- Alertas de emergencia
-alertas (
-    id, titulo, descripcion, tipo, prioridad,
-    latitud, longitud, direccion, estado,
-    usuario_id, fecha_creacion
+alertas_emergencia (
+    id, tipo, prioridad, titulo, descripcion,
+    latitud, longitud, direccion, personas_afectadas,
+    riesgos_especificos, concurrencia_solicitada, estado,
+    usuario_id, fecha_creacion, fecha_actualizacion
 )
 
 -- Puntos en el mapa
 puntos (
-    id, nombre, descripcion, categoria_id,
-    latitud, longitud, direccion, fecha_creacion
+    id, nombre, descripcion, latitud, longitud,
+    categoria_id, datos_personalizados, estado,
+    fecha_creacion, fecha_actualizacion
 )
 
 -- Categorías de puntos
 categorias (
-    id, nombre, descripcion, icono, color
+    id, nombre, descripcion, icono, color,
+    campos_personalizados, estado, fecha_creacion
 )
 
 -- Fotos de puntos
-fotos (
-    id, punto_id, url, descripcion, fecha_subida
+fotos_puntos (
+    id, punto_id, nombre_archivo, ruta_archivo, ruta_miniatura,
+    descripcion, tamaño_bytes, tipo_mime, usuario_id,
+    public_id, fecha_subida
 )
 
--- Historial de actividades
-historial (
-    id, usuario_id, accion, detalles, fecha
+-- Historial de cambios
+historial_cambios (
+    id, tabla, registro_id, accion, datos_anteriores,
+    datos_nuevos, usuario_id, fecha_cambio
 )
 ```
 
@@ -213,6 +219,7 @@ Cliente → Conectar → Autenticar → Escuchar eventos → Procesar notificaci
 
 ---
 
+
 ## 🚀 **DEPLOYMENT**
 
 ### **Railway Deployment**
@@ -231,15 +238,16 @@ PORT=3000
 
 ## 📊 **ESTADÍSTICAS DEL PROYECTO**
 
-- **Total de archivos:** 25+ archivos principales
-- **Líneas de código:** ~8,000 líneas
+- **Total de archivos:** 59 archivos principales
+- **Líneas de código:** 13,580 líneas
 - **Tecnologías:** Node.js, Express, PostgreSQL, Socket.io
 - **Frontend:** HTML5, CSS3, JavaScript ES6+
 - **Deployment:** Railway (automático)
+- **Base de datos:** 6 tablas principales con 13 índices
 
 ---
 
 *Mapa de arquitectura del Sistema de Mapeo de Emergencias*
-*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
+*Versión: 2.2.0 - Actualizada con estructura de base de datos corregida*
 
 

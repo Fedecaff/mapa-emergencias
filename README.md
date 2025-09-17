@@ -84,44 +84,55 @@ bombero/
 │   ├── css/
 │   │   └── estilos.css          # Estilos principales
 │   ├── js/
-│   │   ├── app.js              # Aplicación principal
-│   │   ├── autenticacion.js    # Gestión de usuarios
-│   │   ├── mapa.js             # Funcionalidad del mapa
-│   │   ├── alertas.js          # Sistema de emergencias
-│   │   ├── fotos.js            # Gestión de imágenes
-│   │   ├── usuarios.js         # Panel de administración
-│   │   ├── utilidades.js       # Funciones auxiliares
-│   │   ├── geolocalizacion.js  # Geolocalización
-│   │   └── websocketClient.js  # Cliente WebSocket
+│   │   ├── app.js              # Aplicación principal (301 líneas)
+│   │   ├── autenticacion.js    # Gestión de usuarios (1028 líneas)
+│   │   ├── mapa.js             # Funcionalidad del mapa (1361 líneas)
+│   │   ├── alertas.js          # Sistema de emergencias (588 líneas)
+│   │   ├── administracion.js   # Panel de administración (554 líneas)
+│   │   ├── fotos.js            # Gestión de imágenes (270 líneas)
+│   │   ├── usuarios.js         # Gestión de usuarios (332 líneas)
+│   │   ├── utilidades.js       # Funciones auxiliares (441 líneas)
+│   │   ├── geolocalizacion.js  # Geolocalización (232 líneas)
+│   │   ├── direcciones.js      # Gestión de direcciones (227 líneas)
+│   │   └── config.js           # Configuración (23 líneas)
 │   └── index.html              # Página principal
 ├── src/
 │   ├── configuracion/
 │   │   └── servidor.js         # Configuración del servidor
 │   ├── controladores/
-│   │   ├── autenticacionController.js
+│   │   ├── autenticacionController.js (175 líneas)
 │   │   ├── usuariosController.js
-│   │   ├── puntosController.js
-│   │   ├── categoriasController.js
-│   │   ├── alertasController.js
-│   │   └── fotosController.js
+│   │   ├── puntosController.js (332 líneas)
+│   │   ├── categoriasController.js (210 líneas)
+│   │   ├── alertasController.js (236 líneas)
+│   │   ├── fotosController.js (233 líneas)
+│   │   ├── perfilController.js (151 líneas)
+│   │   └── historialController.js (135 líneas)
 │   ├── modelos/
 │   │   ├── baseDeDatosPostgres.js
 │   │   ├── actualizarPerfilOperadores.js
 │   │   ├── actualizarGeolocalizacion.js
 │   │   ├── actualizarCampoFoto.js
 │   │   ├── actualizarCampoEmail.js
+│   │   ├── actualizarUsuarios.js
+│   │   ├── actualizarTablaAlertas.js
+│   │   ├── actualizarTablaFotos.js
 │   │   └── corregirEstructuraUsuarios.js
 │   ├── rutas/
-│   │   ├── autenticacion.js
-│   │   ├── usuarios.js
-│   │   ├── puntos.js
-│   │   ├── categorias.js
-│   │   ├── alertas.js
-│   │   └── fotos.js
+│   │   ├── autenticacion.js (12 líneas)
+│   │   ├── usuarios.js (75 líneas)
+│   │   ├── puntos.js (14 líneas)
+│   │   ├── categorias.js (12 líneas)
+│   │   ├── alertas.js (17 líneas)
+│   │   ├── fotos.js (40 líneas)
+│   │   ├── perfil.js (10 líneas)
+│   │   └── historial.js (13 líneas)
 │   ├── servicios/
 │   │   └── websocketService.js  # Servidor WebSocket
 │   └── middleware/
 │       └── autenticacion.js
+├── scripts/                    # Scripts de utilidad
+├── datos/                      # Datos de hidrantes
 ├── package.json
 └── README.md
 ```
@@ -179,12 +190,32 @@ bombero/
 - `password`: Contraseña encriptada
 - `nombre`: Nombre completo
 - `rol`: 'administrador' o 'operador'
-- `foto_perfil`: Foto de perfil (Base64)
-- `institucion`: Institución del operador
-- `rol_institucion`: Rol dentro de la institución
 - `telefono`: Número de teléfono
 - `disponible`: Estado de disponibilidad
-- `fecha_creacion`: Fecha de registro
+- `foto_perfil`: URL de la foto de perfil (Cloudinary)
+- `institucion`: Institución del operador
+- `rol_institucion`: Rol dentro de la institución
+- `latitud`: Coordenada de latitud GPS
+- `longitud`: Coordenada de longitud GPS
+- `ultima_actualizacion_ubicacion`: Última actualización de ubicación
+- `created_at`: Fecha de registro
+
+#### `alertas_emergencia`
+- `id`: Identificador único
+- `tipo`: Tipo de emergencia
+- `prioridad`: Nivel de urgencia (alta, media, baja)
+- `titulo`: Título de la emergencia
+- `descripcion`: Descripción detallada
+- `latitud`: Coordenada latitud
+- `longitud`: Coordenada longitud
+- `direccion`: Dirección de la emergencia
+- `personas_afectadas`: Número de personas afectadas
+- `riesgos_especificos`: Riesgos específicos
+- `concurrencia_solicitada`: Unidades solicitadas
+- `estado`: Estado de la alerta (activa, inactiva)
+- `usuario_id`: ID del usuario que creó la alerta
+- `fecha_creacion`: Fecha de creación
+- `fecha_actualizacion`: Fecha de actualización
 
 #### `puntos`
 - `id`: Identificador único
@@ -193,36 +224,43 @@ bombero/
 - `latitud`: Coordenada latitud
 - `longitud`: Coordenada longitud
 - `categoria_id`: ID de la categoría
+- `datos_personalizados`: Datos adicionales en formato JSONB
+- `estado`: Estado del punto (activo, eliminado)
 - `fecha_creacion`: Fecha de creación
+- `fecha_actualizacion`: Fecha de actualización
 
 #### `categorias`
 - `id`: Identificador único
 - `nombre`: Nombre de la categoría
-- `color`: Color del marcador
+- `descripcion`: Descripción de la categoría
 - `icono`: Icono de Font Awesome
-
-#### `alertas`
-- `id`: Identificador único
-- `titulo`: Título de la emergencia
-- `descripcion`: Descripción detallada
-- `latitud`: Coordenada latitud
-- `longitud`: Coordenada longitud
-- `estado`: Estado de la alerta
-- `tipo`: Tipo de emergencia
-- `prioridad`: Prioridad de la alerta
-- `direccion`: Dirección de la emergencia
-- `personas_afectadas`: Número de personas afectadas
-- `riesgos_especificos`: Riesgos específicos
-- `concurrencia_solicitada`: Unidades solicitadas
-- `usuario_id`: ID del usuario que creó la alerta
+- `color`: Color del marcador
+- `campos_personalizados`: Campos adicionales en formato JSONB
+- `estado`: Estado de la categoría (activo, inactivo)
 - `fecha_creacion`: Fecha de creación
 
-#### `geolocalizacion`
+#### `fotos_puntos`
 - `id`: Identificador único
-- `usuario_id`: ID del usuario
-- `latitud`: Coordenada latitud
-- `longitud`: Coordenada longitud
-- `fecha_actualizacion`: Fecha de actualización
+- `punto_id`: ID del punto (referencia a puntos)
+- `nombre_archivo`: Nombre original del archivo
+- `ruta_archivo`: Ruta completa del archivo
+- `ruta_miniatura`: Ruta de la miniatura
+- `descripcion`: Descripción de la foto
+- `tamaño_bytes`: Tamaño del archivo en bytes
+- `tipo_mime`: Tipo MIME del archivo
+- `usuario_id`: Usuario que subió la foto
+- `public_id`: ID público en Cloudinary
+- `fecha_subida`: Fecha de subida
+
+#### `historial_cambios`
+- `id`: Identificador único
+- `tabla`: Nombre de la tabla modificada
+- `registro_id`: ID del registro modificado
+- `accion`: Tipo de acción (INSERT, UPDATE, DELETE)
+- `datos_anteriores`: Datos anteriores en formato JSONB
+- `datos_nuevos`: Datos nuevos en formato JSONB
+- `usuario_id`: Usuario que realizó la acción
+- `fecha_cambio`: Fecha del cambio
 
 ## 🔧 Funcionalidades Detalladas
 
@@ -411,36 +449,34 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 👨‍💻 Autor
 
 **Federico Caffettaro**
-- Email: fedecaff@gmail.com
+- Email: federico.gomez.sc@gmail.com
 - GitHub: [@Fedecaff](https://github.com/Fedecaff)
 
-## 🙏 Agradecimientos
 
-- **Bomberos de Catamarca** por su colaboración
-- **Railway** por el hosting gratuito
-- **Leaflet.js** por la librería de mapas
-- **Font Awesome** por los iconos
-- **Socket.IO** por la comunicación en tiempo real
 
----
-
-**Versión**: 2.0.0  
+**Versión**: 2.2.0  
 **Última actualización**: Enero 2025  
 **Estado**: Sistema completo y funcional
 
-### 🚨 Notas de la Versión 2.0.0
+### 📊 Estadísticas del Proyecto
+- **Total de archivos**: 59 archivos principales
+- **Líneas de código**: 13,580 líneas
+- **Base de datos**: 6 tablas principales con 13 índices
+- **Tecnologías**: Node.js, Express, PostgreSQL, Socket.io
 
-**Nuevas Funcionalidades:**
+### 🚨 Notas de la Versión 2.2.0
+
+**Correcciones de Documentación:**
+- ✅ Nombres de tablas corregidos (alertas_emergencia, fotos_puntos, historial_cambios)
+- ✅ Estructura de base de datos actualizada con columnas reales
+- ✅ Estadísticas de líneas de código actualizadas
+- ✅ Estructura de archivos corregida
+- ✅ Información de controladores y rutas actualizada
+
+**Funcionalidades Implementadas:**
 - ✅ Sistema de notificaciones en tiempo real
 - ✅ Gestión completa de usuarios para administradores
 - ✅ Sincronización automática de alertas en mapas
 - ✅ Panel de notificaciones con historial
-- ✅ Corrección de problemas de persistencia de datos
-- ✅ Mejoras en la interfaz de usuario
-
-**Correcciones:**
-- ✅ Problema de doble ventana en subida de fotos
-- ✅ Visualización de fotos de perfil
-- ✅ Persistencia de datos después de reinicios
-- ✅ Sincronización de eliminación de alertas
-- ✅ Validación de tipos en WebSocket
+- ✅ Geolocalización automática de operadores
+- ✅ Sistema de fotos con Cloudinary

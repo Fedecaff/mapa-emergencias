@@ -9,27 +9,27 @@
 ### **Paso 1: Identificar el Tipo de Funcionalidad**
 
 #### **🗺️ Funcionalidades del Mapa**
-- **Archivo principal:** `public/js/mapa.js` (1281 líneas)
-- **APIs:** `src/controladores/puntosController.js`
-- **Rutas:** `src/rutas/puntos.js`
+- **Archivo principal:** `public/js/mapa.js` (1361 líneas)
+- **APIs:** `src/controladores/puntosController.js` (332 líneas)
+- **Rutas:** `src/rutas/puntos.js` (14 líneas)
 - **Ejemplos:** Marcadores, capas, controles
 
 #### **🔐 Funcionalidades de Autenticación**
-- **Frontend:** `public/js/autenticacion.js` (1039 líneas)
-- **Backend:** `src/controladores/autenticacionController.js`
-- **Rutas:** `src/rutas/autenticacion.js`
+- **Frontend:** `public/js/autenticacion.js` (1028 líneas)
+- **Backend:** `src/controladores/autenticacionController.js` (175 líneas)
+- **Rutas:** `src/rutas/autenticacion.js` (12 líneas)
 - **Ejemplos:** Login, registro, perfil
 
 #### **🚨 Funcionalidades de Alertas**
-- **Frontend:** `public/js/alertas.js` (545 líneas) + `websocketClient.js` (410 líneas)
-- **Backend:** `src/controladores/alertasController.js`
+- **Frontend:** `public/js/alertas.js` (588 líneas)
+- **Backend:** `src/controladores/alertasController.js` (236 líneas)
 - **WebSocket:** `src/servicios/websocketService.js`
 - **Ejemplos:** Crear alertas, notificaciones en tiempo real
 
 #### **👥 Funcionalidades de Usuarios**
-- **Frontend:** `public/js/usuarios.js` (367 líneas) + `administracion.js` (559 líneas)
-- **Backend:** `src/controladores/usuariosController.js` (681 líneas)
-- **Rutas:** `src/rutas/usuarios.js`
+- **Frontend:** `public/js/usuarios.js` (332 líneas) + `administracion.js` (554 líneas)
+- **Backend:** `src/controladores/usuariosController.js`
+- **Rutas:** `src/rutas/usuarios.js` (75 líneas)
 - **Ejemplos:** CRUD usuarios, gestión de roles
 
 ---
@@ -389,6 +389,6 @@ console.error()          # Logs de error
 ---
 
 *Guía de desarrollo para el Sistema de Mapeo de Emergencias*
-*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
+*Versión: 2.2.0 - Actualizada con información correcta de líneas de código*
 
 

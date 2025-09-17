@@ -1,0 +1,62 @@
+Sistema de Mapeo de Emergencias - Catamarca (Taller Final)
+Una App web para gestionar emergencias y coordinar operadores de bomberos en Catamarca. Permitirá llevar un registro de Operadores, Puntos de Interés y las Alertas de Emergencia que se generen. El proyecto cuenta con 2 partes: Un FrontEnd (Interfaz que ve el usuario) y un BackEnd (Manejo de los datos).
+
+Destinatario: El programa está pensado para ser usado por operadores de bomberos y administradores del sistema, es decir, los ciudadanos no van a interactuar directamente con la página.
+
+Funcionalidades Principales
+La App permite realizar lo siguiente a través de la Interfaz:
+
+Gestionar Operadores:
+•	Registrar nuevos operadores con su información (Nombre, Email, Institución, Rol)
+•	Ver la lista de todos los operadores registrados
+•	Modificar los datos de un operador existente
+•	Eliminar un operador
+•	Gestionar disponibilidad (disponible/no disponible)
+•	Geolocalización automática cada 30 segundos
+
+Gestionar Puntos de Interés:
+•	Registrar nuevos puntos (Hidrantes, Hospitales, Comisarías, Escuelas)
+•	Ver la lista de todos los puntos en el mapa
+•	Modificar los datos de un punto existente
+•	Eliminar un punto
+•	Subir fotos a los puntos
+•	Filtrar por categorías
+
+Gestionar Alertas de Emergencia:
+•	Crear nuevas alertas de emergencia, asignando ubicación y prioridad
+•	Ver las alertas activas en el mapa
+•	Modificar o eliminar una alerta
+•	Notificaciones en tiempo real a todos los operadores
+•	Alertas push del navegador
+
+Modelo Relacional de la BDD
+La Base de Datos tiene 6 tablas principales:
+
+•	Usuarios: Almacena la información de cada operador, como su nombre, email, institución, rol, teléfono, disponibilidad y ubicación GPS.
+
+•	Alertas_Emergencia: Almacena las emergencias reportadas, como tipo, prioridad, descripción, ubicación GPS y quién la creó.
+
+•	Puntos: Almacena los puntos de interés (hidrantes, hospitales, etc.) con su ubicación GPS y descripción.
+
+•	Categorias: Define los tipos de puntos (Bomberos, Hospitales, Policía, etc.) con iconos y colores.
+
+•	Fotos_Puntos: Almacena las fotos subidas a cada punto de interés.
+
+•	Historial_Cambios: Registra todos los cambios realizados en el sistema para auditoría.
+
+Utilice
+•	FrontEnd: Realizado con HTML5, CSS3 y JavaScript ES6+, el cual se encarga de todo lo que el usuario ve.
+•	BackEnd: Realizado con Node.js con Express, que es el servidor que se comunica con la BDD.
+•	Base de Datos: Se utiliza PostgreSQL, almacena toda la información del sistema.
+•	Mapas: Leaflet.js para mostrar el mapa interactivo de Catamarca.
+•	Comunicación: Socket.IO para notificaciones en tiempo real.
+•	Hosting: Railway para el despliegue automático del sistema.
+
+Características Técnicas
+•	Sistema de autenticación con JWT
+•	Roles diferenciados (Administrador y Operador)
+•	Geolocalización automática de operadores
+•	Notificaciones en tiempo real via WebSocket
+•	Subida de fotos con Cloudinary
+•	Diseño responsive para móviles y desktop
+•	API REST completa para todas las funcionalidades

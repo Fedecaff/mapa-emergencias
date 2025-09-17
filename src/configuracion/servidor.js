@@ -40,7 +40,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const server = createServer(app);
-const PUERTO = process.env.PUERTO || 8080;
+const PUERTO = process.env.PORT || process.env.PUERTO || 3000;
 
 // Configuración de seguridad
 app.use(helmet({

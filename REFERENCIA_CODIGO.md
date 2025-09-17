@@ -32,17 +32,17 @@
 ### **JavaScript (public/js/)**
 | Archivo | Tamaño | Líneas | Función Principal |
 |---------|--------|--------|-------------------|
-| `app.js` | 10KB | 309 | Inicialización de la aplicación |
-| `mapa.js` | 47KB | 1281 | **Gestión del mapa principal** |
-| `autenticacion.js` | 38KB | 1039 | **Login, registro, perfil** |
-| `alertas.js` | 21KB | 545 | **Gestión de alertas de emergencia** |
-| `websocketClient.js` | 16KB | 410 | **Comunicación en tiempo real** |
-| `administracion.js` | 19KB | 559 | **Panel de administración** |
-| `usuarios.js` | 13KB | 367 | Gestión de usuarios |
-| `utilidades.js` | 13KB | 434 | **Funciones de utilidad y API** |
-| `fotos.js` | 10KB | 303 | Gestión de fotos |
-| `geolocalizacion.js` | 8KB | 235 | **Geolocalización del usuario** |
-| `config.js` | 652B | 25 | Configuración |
+| `mapa.js` | 47KB | 1361 | **Gestión del mapa principal** |
+| `autenticacion.js` | 38KB | 1028 | **Login, registro, perfil** |
+| `alertas.js` | 21KB | 588 | **Gestión de alertas de emergencia** |
+| `administracion.js` | 19KB | 554 | **Panel de administración** |
+| `utilidades.js` | 13KB | 441 | **Funciones de utilidad y API** |
+| `app.js` | 10KB | 301 | Inicialización de la aplicación |
+| `usuarios.js` | 13KB | 332 | Gestión de usuarios |
+| `fotos.js` | 10KB | 270 | Gestión de fotos |
+| `geolocalizacion.js` | 8KB | 232 | **Geolocalización del usuario** |
+| `direcciones.js` | 8KB | 227 | Gestión de direcciones |
+| `config.js` | 652B | 23 | Configuración |
 
 ### **CSS (public/css/)**
 - **`estilos.css`** - Estilos principales de la aplicación
@@ -61,26 +61,26 @@
 ### **Controladores (src/controladores/)**
 | Archivo | Tamaño | Líneas | Función |
 |---------|--------|--------|---------|
-| `usuariosController.js` | 25KB | 681 | **Gestión completa de usuarios** |
-| `alertasController.js` | 12KB | 318 | **Gestión de alertas** |
-| `puntosController.js` | 14KB | 387 | Gestión de puntos en el mapa |
-| `fotosController.js` | 9.4KB | 267 | Gestión de fotos |
-| `categoriasController.js` | 8.8KB | 251 | Gestión de categorías |
-| `autenticacionController.js` | 6.5KB | 208 | **Autenticación y login** |
-| `perfilController.js` | 6.2KB | 178 | Gestión de perfiles |
-| `historialController.js` | 5.7KB | 166 | Historial de actividades |
+| `puntosController.js` | 14KB | 332 | Gestión de puntos en el mapa |
+| `alertasController.js` | 12KB | 236 | **Gestión de alertas** |
+| `fotosController.js` | 9.4KB | 233 | Gestión de fotos |
+| `categoriasController.js` | 8.8KB | 210 | Gestión de categorías |
+| `autenticacionController.js` | 6.5KB | 175 | **Autenticación y login** |
+| `perfilController.js` | 6.2KB | 151 | Gestión de perfiles |
+| `historialController.js` | 5.7KB | 135 | Historial de actividades |
+| `usuariosController.js` | 25KB | - | **Gestión completa de usuarios** |
 
 ### **Rutas (src/rutas/)**
 | Archivo | Tamaño | Líneas | Endpoints |
 |---------|--------|--------|-----------|
-| `usuarios.js` | 3.6KB | 87 | `/api/usuarios/*` |
-| `alertas.js` | 721B | 19 | `/api/alertas/*` |
-| `puntos.js` | 874B | 19 | `/api/puntos/*` |
-| `fotos.js` | 1.6KB | 47 | `/api/fotos/*` |
-| `categorias.js` | 749B | 17 | `/api/categorias/*` |
-| `historial.js` | 717B | 24 | `/api/historial/*` |
-| `perfil.js` | 653B | 15 | `/api/perfil/*` |
-| `autenticacion.js` | 618B | 18 | `/api/autenticacion/*` |
+| `usuarios.js` | 3.6KB | 75 | `/api/usuarios/*` |
+| `fotos.js` | 1.6KB | 40 | `/api/fotos/*` |
+| `alertas.js` | 721B | 17 | `/api/alertas/*` |
+| `puntos.js` | 874B | 14 | `/api/puntos/*` |
+| `historial.js` | 717B | 13 | `/api/historial/*` |
+| `categorias.js` | 749B | 12 | `/api/categorias/*` |
+| `autenticacion.js` | 618B | 12 | `/api/autenticacion/*` |
+| `perfil.js` | 653B | 10 | `/api/perfil/*` |
 
 ### **Modelos (src/modelos/)**
 - **`baseDeDatosPostgres.js`** - Conexión a PostgreSQL
@@ -171,30 +171,38 @@ showInAppNotification(notification) {
 -- Usuarios del sistema
 CREATE TABLE usuarios (
     id SERIAL PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
     rol VARCHAR(50) DEFAULT 'operador',
-    foto_perfil TEXT,
+    telefono VARCHAR(20),
     disponible BOOLEAN DEFAULT true,
-    ultima_ubicacion JSONB,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    foto_perfil VARCHAR(500),
+    institucion VARCHAR(100),
+    rol_institucion VARCHAR(50),
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
+    ultima_actualizacion_ubicacion TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Alertas de emergencia
-CREATE TABLE alertas (
+CREATE TABLE alertas_emergencia (
     id SERIAL PRIMARY KEY,
+    tipo VARCHAR(50) NOT NULL,
+    prioridad VARCHAR(20) DEFAULT 'media',
     titulo VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    tipo VARCHAR(100),
-    prioridad VARCHAR(50) DEFAULT 'media',
-    latitud DECIMAL(10, 8),
-    longitud DECIMAL(11, 8),
+    latitud DECIMAL(10, 8) NOT NULL,
+    longitud DECIMAL(11, 8) NOT NULL,
     direccion TEXT,
-    estado VARCHAR(50) DEFAULT 'activa',
-    usuario_id INTEGER REFERENCES usuarios(id),
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    personas_afectadas INTEGER DEFAULT 0,
+    riesgos_especificos TEXT,
+    concurrencia_solicitada VARCHAR(10) DEFAULT '1',
+    estado VARCHAR(20) DEFAULT 'activa',
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Puntos en el mapa
@@ -202,11 +210,40 @@ CREATE TABLE puntos (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    categoria_id INTEGER REFERENCES categorias(id),
     latitud DECIMAL(10, 8) NOT NULL,
     longitud DECIMAL(11, 8) NOT NULL,
-    direccion TEXT,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    categoria_id INTEGER NOT NULL REFERENCES categorias(id),
+    datos_personalizados JSONB,
+    estado VARCHAR(50) DEFAULT 'activo',
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Fotos de puntos
+CREATE TABLE fotos_puntos (
+    id SERIAL PRIMARY KEY,
+    punto_id INTEGER NOT NULL REFERENCES puntos(id) ON DELETE CASCADE,
+    nombre_archivo VARCHAR(255) NOT NULL,
+    ruta_archivo TEXT NOT NULL,
+    ruta_miniatura TEXT,
+    descripcion TEXT,
+    tamaño_bytes INTEGER,
+    tipo_mime VARCHAR(100),
+    usuario_id INTEGER REFERENCES usuarios(id),
+    public_id VARCHAR(255),
+    fecha_subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Historial de cambios
+CREATE TABLE historial_cambios (
+    id SERIAL PRIMARY KEY,
+    tabla VARCHAR(100) NOT NULL,
+    registro_id INTEGER NOT NULL,
+    accion VARCHAR(50) NOT NULL,
+    datos_anteriores JSONB,
+    datos_nuevos JSONB,
+    usuario_id INTEGER REFERENCES usuarios(id),
+    fecha_cambio TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
@@ -312,16 +349,18 @@ NODE_ENV=production
 
 ## 📊 **ESTADÍSTICAS**
 
-- **Total de archivos:** 25+ archivos principales
-- **Líneas de código:** ~8,000 líneas
+- **Total de archivos:** 59 archivos principales
+- **Líneas de código:** 13,580 líneas
 - **APIs:** 8 controladores principales
 - **Rutas:** 8 archivos de rutas
-- **Base de datos:** 6 tablas principales
+- **Base de datos:** 6 tablas principales con 13 índices
 - **WebSocket:** 4 eventos principales
+- **Frontend:** 11 archivos JavaScript
+- **Backend:** 8 controladores + 8 rutas
 
 ---
 
 *Referencia del código del Sistema de Mapeo de Emergencias*
-*Versión: 2.1.0 - Actualizada con optimizaciones de notificaciones*
+*Versión: 2.2.0 - Actualizada con estructura de base de datos corregida*
 
 

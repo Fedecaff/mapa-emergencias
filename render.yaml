@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: mapa-emergencias
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+  - type: pserv
+    name: mapa-emergencias-db
+    env: postgresql
+    plan: free
+    ipAllowList: []
